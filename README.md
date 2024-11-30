@@ -5,7 +5,7 @@
 ![Visitors](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/SiwaneXYZ/cdn-siwane)  
 ![GitHub Stars](https://img.shields.io/github/stars/SiwaneXYZ/cdn-siwane?style=flat-square)  
 ![GitHub Forks](https://img.shields.io/github/forks/SiwaneXYZ/cdn-siwane?style=flat-square)  
-![License](![License](https://img.shields.io/github/license/SiwaneXYZ/cdn-siwane?style=flat-square))  
+![License](https://img.shields.io/github/license/SiwaneXYZ/cdn-siwane?style=flat-square)  
 
 ---
 
