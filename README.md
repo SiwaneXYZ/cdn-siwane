@@ -2,10 +2,10 @@
 
 📦 **CDN-Siwane** هو المستودع الرسمي لاستضافة وإدارة الملفات الثابتة الخاصة بموقع [Siwane.xyz](https://siwane.xyz). يوفر أداءً عاليًا وسرعة تحميل مثالية باستخدام GitHub Pages و Cloudflare.
 
-![Visitors](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/username/cdn-siwane)  
-![GitHub Stars](https://img.shields.io/github/stars/username/cdn-siwane?style=flat-square)  
-![GitHub Forks](https://img.shields.io/github/forks/username/cdn-siwane?style=flat-square)  
-![License](https://img.shields.io/github/license/username/cdn-siwane?style=flat-square)  
+![Visitors](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/SiwaneXYZ/cdn-siwane)  
+![GitHub Stars](https://img.shields.io/github/stars/SiwaneXYZ/cdn-siwane?style=flat-square)  
+![GitHub Forks](https://img.shields.io/github/forks/SiwaneXYZ/cdn-siwane?style=flat-square)  
+![License](https://img.shields.io/github/license/SiwaneXYZ/cdn-siwane?style=flat-square)  
 
 ---
 
@@ -17,8 +17,8 @@
 ---
 
 ## 📊 إحصائيات المستودع
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=username&repo=cdn-siwane&show_icons=true&theme=radical)  
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=username&layout=compact&theme=radical)
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=SiwaneXYZ&repo=cdn-siwane&show_icons=true&theme=radical)  
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=SiwaneXYZ&layout=compact&theme=radical)
 
 ---
 
@@ -39,7 +39,7 @@
 
 ## 🤝 المساهمة
 إذا كنت ترغب في تحسين المستودع أو الإبلاغ عن مشكلة:
-- افتح **Issue** جديد على صفحة [Issues](https://github.com/username/cdn-siwane/issues).  
+- افتح **Issue** جديد على صفحة [Issues](https://github.com/SiwaneXYZ/cdn-siwane/issues).  
 - أو قدم طلب **Pull Request**.
 
 > 🚀 **معًا، لنرتقي بأداء موقع Siwane.xyz إلى المستوى التالي!**
