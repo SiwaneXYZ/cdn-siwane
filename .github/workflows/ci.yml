@@ -1,16 +1,36 @@
-steps:
-  - name: Checkout code
-    uses: actions/checkout@v2
-  - name: Set up Node.js
-    uses: actions/setup-node@v2
-    with:
-      node-version: '14'
-  - name: Install dependencies
-    run: npm install
-  - name: Build project
-    run: npm run build  # تأكد أن هذا الأمر يخلق مجلد dist
-  - name: Deploy
-    uses: JamesIves/github-pages-deploy-action@4.1.3
-    with:
-      branch: gh-pages
-      folder: dist  # المسار الذي يجب أن يحتوي على ملفاتك المنشورة
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # أو الفرع الرئيسي الذي يحتوي على ملفاتك
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # التحقق من الكود في المستودع
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # إعداد Node.js إذا كان لديك بناء يعتمد عليه
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      # تثبيت التبعيات إذا كان لديك
+      - name: Install dependencies
+        run: npm install
+
+      # بناء المشروع، تأكد من أن هذا الأمر يقوم بإنشاء مجلد dist
+      - name: Build the project
+        run: npm run build  # تأكد أن البناء ينتج مجلد dist
+
+      # نشر الملفات إلى GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.3
+        with:
+          branch: gh-pages  # النشر على فرع gh-pages
+          folder: dist      # نشر الملفات من مجلد dist
