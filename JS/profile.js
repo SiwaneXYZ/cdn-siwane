@@ -56,7 +56,7 @@ var contentFnsh = splitmContent.replace(/\./g, '_');
 
 // إذا كان المستخدم قد سجل دخوله
 if (splitmContent + 'firebaseLogin') {
-  var usrPswKey = loginOpen('aNFdsNa4rIZ1rV==');
+  var usrPswKey = loginOpen('OwK3SQ4brOFejdu==');
   
   if (localStorage.getItem('user') === null) {
     window.location.href = profileSettings.redirect;
