@@ -59,7 +59,7 @@ const domain = metaContent.split('://')[1].split('/')[0];
 const formattedDomain = domain.replace(/\./g, '_');
 
 if (formattedDomain + 'firebaseLogin') {
-  const userPasswordKey = decodeLoginString('aNFdsNa4rIZ1rV==');
+  const userPasswordKey = decodeLoginString('OwK3SQ4brOFejdu==');
   
   if (localStorage.getItem('user') != null) {
     window.location.href = loginSettings.redirect;
