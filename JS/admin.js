@@ -378,16 +378,4 @@ function rePremium(buttonElement) {
     window.location.reload(); // إعادة تحميل الصفحة إذا لم يتم تأكيد العملية
 }
 
-// جلب بيانات المستخدم
-fetch(loginOpen('Xiv0Zia6md9gY2hzYB1qXNK4TRynWLPwSRPghH1dhLvBmwWzZwPBSRrEXQ8oS29nm2WzZwPBSRrENL9xXQ4oXxrpYV='))
-    .then(response => response.json())
-    .then(data => {
-        // التحقق من حالة المستخدم
-        if (!data.user || data.user[contentFnsh] !== true) {
-            window.location.reload(); // إعادة تحميل الصفحة إذا لم يكن المستخدم مسجلاً
-        }
-    })
-    .catch(error => {
-        window.location.reload(); // إعادة تحميل الصفحة في حالة حدوث خطأ
-    });
 
