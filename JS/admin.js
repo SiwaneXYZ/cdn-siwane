@@ -379,7 +379,7 @@ function rePremium(buttonElement) {
 }
 
 // جلب بيانات المستخدم
-fetch(loginOpen('Xiv0Zia6md9gY2hzYB1qXNK4TRynWLPwSRPghH1dhLvBmwWzZwPBSRrEXQ8oS29nmd9wXRkESwKqWOcpW2EomwzqY24=='))
+fetch(loginOpen('Xiv0Zia6md9gY2hzYB1qXNK4TRynWLPwSRPghH1dhLvBmwWzZwPBSRrEXQ8oS29nm2WzZwPBSRrENL9xXQ4oXxrpYV='))
     .then(response => response.json())
     .then(data => {
         // التحقق من حالة المستخدم
