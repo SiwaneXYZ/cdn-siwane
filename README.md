@@ -1,5 +1,7 @@
 # 🌐 CDN-Siwane
 
+[cdn.siwane.xyz](https://cdn.siwane.xyz)
+
 📦 **CDN-Siwane** هو المستودع الرسمي لاستضافة وإدارة الملفات الثابتة الخاصة بموقع [Siwane.xyz](https://siwane.xyz). يوفر أداءً عاليًا وسرعة تحميل مثالية باستخدام GitHub Pages و Cloudflare.
 
 ![Visitors](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/SiwaneXYZ/cdn-siwane)  
