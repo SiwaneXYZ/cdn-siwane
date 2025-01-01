@@ -1,14 +1,5 @@
+
 /CSS/
+
+
 /JS/
-
-# تجاهل ملفات IDE مثل Visual Studio Code
-.vscode/
-
-# تجاهل ملفات البيئة مثل Python virtualenv
-env/
-
-# تجاهل ملفات مدمجة من أدوات البناء
-node_modules/
-
-# تجاهل ملفات النظام
-.DS_Store
