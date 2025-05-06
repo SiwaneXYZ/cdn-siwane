@@ -189,6 +189,14 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutElement.addEventListener('click', logOut);
     }
 
+    // إضافة مستمع النقر لعنصر الأدمن
+    if (adminElement) {
+        adminElement.style.cursor = 'pointer'; // تغيير شكل المؤشر للإشارة إلى أنه قابل للنقر
+        adminElement.addEventListener('click', () => {
+            window.location.href = '/p/admin.html'; // إعادة التوجيه عند النقر
+        });
+    }
+
     if (userIconLabel && loginCheckbox) {
         userIconLabel.addEventListener('click', (event) => {
             event.preventDefault();
