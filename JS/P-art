@@ -1,6 +1,6 @@
 
   const articleAppConfig = {
-    pointsPageUrl: '/p/points-4.html', // !!! عنوان URL الفعلي لصفحة النقاط الخاصة بك !!!
+    pointsPageUrl: '/p/points-5.html', // !!! عنوان URL الفعلي لصفحة النقاط الخاصة بك !!!
     requiredDurationMillis: 60 * 1000, // المدة المطلوبة بالمللي ثانية لقراءة المقال (1 دقيقة)
     localStorageKeys: {
         flowStarted: 'articlePointsFlow', // يجب أن يطابق المفتاح في سكربت صفحة النقاط
