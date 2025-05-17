@@ -1,0 +1,310 @@
+
+  const articleAppConfig = {
+    pointsPageUrl: '/p/points-5.html', // !!! عنوان URL الفعلي لصفحة النقاط الخاصة بك !!!
+    requiredDurationMillis: 60 * 1000, // المدة المطلوبة بالمللي ثانية لقراءة المقال (1 دقيقة)
+    localStorageKeys: {
+        flowStarted: 'articlePointsFlow', // يجب أن يطابق المفتاح في سكربت صفحة النقاط
+        startTime: 'articleStartTime',   // يجب أن يطابق المفتاح في سكربت صفحة النقاط
+        completed: 'articleCompleted'    // يجب أن يطابق المفتاح في سكربت صفحة النقاط
+    },
+    // نحدد الـ IDs التي سنستخدمها لإنشاء العناصر ديناميكياً
+    notificationId: 'articlePointsNotification',
+    notificationMessageId: 'notificationMessage'
+  };
+
+  let redirectTimeout; // متغير للاحتفاظ بمرجع المؤقت
+  let notificationElement = null; // سيتم تعيينه عند إنشاء العنصر ديناميكياً
+  let notificationMessageElement = null; // سيتم تعيينه عند إنشاء العنصر ديناميكياً
+  let durationCheckInterval; // متغير لتتبع المدة وعرضها
+
+
+  // Helper function to clear only the start flags
+  function clearArticleStartLocalStorageFlags() {
+       console.log("Article Script: Clearing article START localStorage flags (flowStarted, startTime).");
+      try {
+          localStorage.removeItem(articleAppConfig.localStorageKeys.flowStarted);
+          localStorage.removeItem(articleAppConfig.localStorageKeys.startTime);
+           console.log("Article Script: Article START localStorage flags cleared.");
+      } catch(e) {
+          console.error("Article Script: Error clearing article START localStorage flags:", e);
+      }
+  }
+
+  // Helper function to clear ALL article flags (Used only if flow didn't start correctly)
+   function clearAllArticleLocalStorageFlags() {
+       console.log("Article Script: Clearing ALL article localStorage flags.");
+        try {
+            localStorage.removeItem(articleAppConfig.localStorageKeys.flowStarted);
+            localStorage.removeItem(articleAppConfig.localStorageKeys.startTime);
+            localStorage.removeItem(articleAppConfig.localStorageKeys.completed); // Clear the completed flag as well
+             console.log("Article Script: ALL article localStorage flags cleared.");
+        } catch(e) {
+            console.error("Article Script: Error clearing ALL article localStorage flags:", e);
+        }
+    }
+
+    // Helper function to format milliseconds to M:SS format
+    function formatMillisToMinutesSeconds(millis) {
+        const totalSeconds = Math.ceil(millis / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+   // Function to create and append the notification element dynamically
+   function createAndAppendNotification() {
+       console.log("Article Script: Creating and appending notification element.");
+       // Create the main notification div
+       notificationElement = document.createElement('div');
+       notificationElement.id = articleAppConfig.notificationId;
+       // Apply necessary inline styles OR rely completely on CSS file based on ID
+       // Relying on CSS file is cleaner:
+       // notificationElement.style.position = 'fixed';
+       // notificationElement.style.bottom = '0'; ... etc.
+       // We only NEED to set display and maybe opacity/pointer-events here initially
+
+        // Initial state (hidden) - CSS will handle fixed position and other styling
+        // Using a class for visibility is better with CSS transitions
+        notificationElement.style.display = 'flex'; // Use flexbox layout
+        notificationElement.classList.remove('is-visible'); // Ensure it's hidden visually initially
+
+       // Create the message paragraph
+       notificationMessageElement = document.createElement('p');
+       notificationMessageElement.id = articleAppConfig.notificationMessageId;
+
+       // Append elements
+       notificationElement.appendChild(notificationMessageElement);
+       document.body.appendChild(notificationElement);
+
+        console.log("Article Script: Notification element created and appended.");
+   }
+
+   // Function to show the notification with a fade-in effect
+   function showNotification() {
+       if (notificationElement) {
+            notificationElement.classList.add('is-visible'); // Trigger CSS transition
+            console.log("Article Script: Showing notification.");
+       }
+   }
+
+   // Function to hide the notification with a fade-out effect and then remove from DOM
+   function hideAndRemoveNotification() {
+        if (notificationElement) {
+            notificationElement.classList.remove('is-visible'); // Start fade out
+             console.log("Article Script: Hiding notification.");
+            // Wait for the transition to finish before removing
+            notificationElement.addEventListener('transitionend', function handler() {
+                if (notificationElement && notificationElement.parentNode) {
+                     notificationElement.parentNode.removeChild(notificationElement);
+                     console.log("Article Script: Notification element removed from DOM.");
+                }
+                // Remove the event listener itself after it runs once
+                notificationElement.removeEventListener('transitionend', handler);
+                 notificationElement = null; // Clear the global reference
+                 notificationMessageElement = null; // Clear the global reference
+            });
+            // Fallback removal in case transitionend doesn't fire (e.g., element was already display:none)
+            setTimeout(() => {
+                 if (notificationElement && notificationElement.parentNode) {
+                    // Check if it's still attached and not already fading/removed
+                     if (!notificationElement.classList.contains('is-visible')) {
+                          notificationElement.parentNode.removeChild(notificationElement);
+                           console.log("Article Script: Notification element fallback removed from DOM.");
+                           notificationElement = null;
+                           notificationMessageElement = null;
+                     }
+                 }
+            }, 500); // A bit longer than the CSS transition duration
+        }
+   }
+
+
+  // When the DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+      console.log("Article Page: DOMContentLoaded fired.");
+
+      // Check localStorage to see if user came from the points flow
+      const flowStarted = localStorage.getItem(articleAppConfig.localStorageKeys.flowStarted);
+      const startTimeString = localStorage.getItem(articleAppConfig.localStorageKeys.startTime);
+
+
+      console.log("Article Page: Checking localStorage for flow flags:", {
+          flowStarted: flowStarted,
+          startTime: startTimeString
+      });
+
+      if (flowStarted === 'true' && startTimeString) {
+          console.log("Article Page: Article points flow detected. Creating notification and initializing tracking.");
+
+          const startTime = parseInt(startTimeString);
+          if (isNaN(startTime)) {
+              console.error("Article Page: startTime from localStorage is not a valid number. Clearing flags and exiting flow.");
+               clearAllArticleLocalStorageFlags();
+              return; // Exit if start time is invalid
+          }
+
+           // *** Create and append the notification element dynamically ***
+           createAndAppendNotification();
+           showNotification(); // Make it visible
+
+
+           // Initial message in the notification
+           notificationMessageElement.textContent = `اقرأ لمدة دقيقة واحدة لكسب نقطة. ستتم إعادة التوجيه تلقائياً بعد قضاء الوقت المطلوب.`;
+
+           // Start a periodic check to update the timer message and check duration
+           durationCheckInterval = setInterval(() => {
+               const currentTime = Date.now();
+               const timeSpent = currentTime - startTime;
+               const timeRemainingMillis = Math.max(0, articleAppConfig.requiredDurationMillis - timeSpent);
+               const formattedTimeRemaining = formatMillisToMinutesSeconds(timeRemainingMillis);
+
+                // Update the notification message with remaining time
+                notificationMessageElement.textContent = `اقرأ لمدة دقيقة واحدة لكسب نقطة. الوقت المتبقي: ${formattedTimeRemaining}. ستتم إعادة التوجيه تلقائياً.`;
+
+
+               if (timeSpent >= articleAppConfig.requiredDurationMillis) {
+                   console.log("Article Script: Required duration met!");
+
+                   // Set the completion flag in localStorage if not already set
+                   if (localStorage.getItem(articleAppConfig.localStorageKeys.completed) !== 'true') {
+                       try {
+                           localStorage.setItem(articleAppConfig.localStorageKeys.completed, 'true');
+                            console.log(`Article Script: localStorage flag '${articleAppConfig.localStorageKeys.completed}' set to 'true'.`);
+
+                           // Update message to indicate completion met
+                            notificationMessageElement.textContent = `تهانينا! لقد قضيت الوقت المطلوب. سيتم إعادة توجيهك قريباً لكسب النقطة.`;
+
+                       } catch(e) {
+                           console.error("Article Script: Error setting completion flag in localStorage:", e);
+                            notificationMessageElement.textContent = `حدث خطأ في تسجيل الإكمال. يرجى العودة لصفحة النقاط يدوياً.`; // Inform user
+                       }
+                   }
+
+                   // Stop the periodic timer check
+                   clearInterval(durationCheckInterval);
+                   console.log("Article Script: Duration check interval cleared.");
+
+                   // Set the automatic redirect timer after a small delay to show the completion message
+                   const totalTimeSinceStart = Date.now() - startTime;
+                   const delayUntilRedirect = Math.max(0, articleAppConfig.requiredDurationMillis - totalTimeSinceStart);
+                   const finalRedirectDelay = Math.max(1000, delayUntilRedirect + 500);
+
+
+                   console.log(`Article Script: Setting final automatic redirect timer for ${finalRedirectDelay}ms.`);
+                   redirectTimeout = setTimeout(() => {
+                        console.log("Article Script: Automatic redirect timer expired.");
+
+                       // Hide the notification before redirecting
+                       // We don't need hideAndRemoveNotification here as page is changing
+                       if(notificationElement) {
+                           notificationElement.style.display = 'none'; // Quick hide
+                       }
+
+                       // Clear the start flags before redirecting
+                        clearArticleStartLocalStorageFlags();
+                        console.log("Article Script: Article start localStorage flags cleared before automatic redirect.");
+
+                       // Perform the automatic redirect back to the points page
+                       console.log("Article Script: Performing automatic redirect to points page.");
+                       window.location.href = articleAppConfig.pointsPageUrl;
+
+                   }, finalRedirectDelay);
+
+
+               } // End if duration >= requiredDuration
+
+           }, 1000); // Check and update message every 1 second
+
+
+           // Add a beforeunload listener to try and save completion state
+            window.addEventListener('beforeunload', handleBeforeUnload);
+
+
+       } else {
+           console.log("Article Page: Not in article points flow. No tracking or dynamic notification set.");
+           // Ensure no stale flags are left if the user didn't come through the flow
+           clearAllArticleLocalStorageFlags();
+       }
+    });
+
+    /**
+     * Attempts to save completion state on beforeunload if duration is met.
+     * Clears start flags regardless.
+     */
+    function handleBeforeUnload() {
+        console.log("Article Script: window.onbeforeunload fired. Checking duration for potential completion save and clearing start flags.");
+
+        // Clear timers if they are running on beforeunload
+        if (durationCheckInterval) {
+            clearInterval(durationCheckInterval);
+            console.log("Article Script: Duration check interval cleared on beforeunload.");
+        }
+         if (redirectTimeout) {
+             clearTimeout(redirectTimeout);
+              console.log("Article Script: Redirect timeout cleared on beforeunload.");
+         }
+
+         // Hide the notification before leaving
+         if(notificationElement) {
+            // Use quick hide, as page is unloading anyway
+             notificationElement.style.display = 'none';
+             console.log("Article Script: Hiding notification on beforeunload.");
+         }
+
+
+        const flowStarted = localStorage.getItem(articleAppConfig.localStorageKeys.flowStarted);
+        const startTimeString = localStorage.getItem(articleAppConfig.localStorageKeys.startTime);
+        const completed = localStorage.getItem(articleAppConfig.localStorageKeys.completed);
+
+        if (flowStarted === 'true' && startTimeString && completed !== 'true') {
+            const startTime = parseInt(startTimeString);
+            const currentTime = Date.now();
+            const duration = currentTime - startTime;
+            const requiredDuration = articleAppConfig.requiredDurationMillis;
+
+            console.log(`Article Script: onbeforeunload duration check - ${duration}ms spent, Required: ${requiredDuration}ms`);
+
+            if (!isNaN(startTime) && duration >= requiredDuration) {
+                console.log("Article Script: Required duration met on beforeunload. Attempting to set completion flag.");
+                try {
+                    localStorage.setItem(articleAppConfig.localStorageKeys.completed, 'true');
+                     console.log(`Article Script: localStorage flag '${articleAppConfig.localStorageKeys.completed}' set to 'true' on beforeunload.`);
+                } catch(e) {
+                    console.error("Article Script: Error setting completion flag on beforeunload:", e);
+                }
+            } else {
+                console.log("Article Script: Required duration NOT met on beforeunload.");
+            }
+        } else {
+            console.log("Article Script: Not in active article flow or already completed. No special action on beforeunload.");
+        }
+
+         clearArticleStartLocalStorageFlags();
+         console.log("Article Script: Article start localStorage flags cleared on beforeunload.");
+
+    }
+
+
+    // Clear intervals, timeouts, and remove event listener on page unload for cleanup
+    window.addEventListener('unload', () => {
+      console.log("Article Script: window.unload fired. Cleaning up timers and listeners.");
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+         console.log("Article Script: Redirect timeout cleared on unload.");
+      }
+      if (durationCheckInterval) {
+          clearInterval(durationCheckInterval);
+           console.log("Article Script: Duration check interval cleared on unload.");
+      }
+       window.removeEventListener('beforeunload', handleBeforeUnload);
+        console.log("Article Script: Beforeunload listener removed on unload.");
+
+        // No need to remove the notification element here, page is unloading.
+        // The beforeunload handler already hides it.
+
+    });
+
+
+    console.log("Article page script loaded.");
+
+
