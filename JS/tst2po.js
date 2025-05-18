@@ -1,4 +1,3 @@
-
   const articleAppConfig = {
     pointsPageUrl: '/p/points-5.html', // !!! عنوان URL الفعلي لصفحة النقاط الخاصة بك !!!
     requiredDurationMillis: 60 * 1000, // المدة المطلوبة بالمللي ثانية لقراءة المقال (1 دقيقة)
@@ -28,15 +27,17 @@
       }
   }
 
+   // تم تعديل هذه الدالة لمنع حذف مفتاح 'completed'
    function clearAllArticleLocalStorageFlags() {
-       console.log("Article Script: Clearing ALL article localStorage flags.");
+       console.log("Article Script: Clearing specific article localStorage flags (excluding completed)."); // تعديل رسالة التسجيل
         try {
             localStorage.removeItem(articleAppConfig.localStorageKeys.flowStarted);
             localStorage.removeItem(articleAppConfig.localStorageKeys.startTime);
-            localStorage.removeItem(articleAppConfig.localStorageKeys.completed);
-             console.log("Article Script: ALL article localStorage flags cleared.");
+            // تم حذف السطر التالي لمنع حذف articleCompleted
+            // localStorage.removeItem(articleAppConfig.localStorageKeys.completed);
+             console.log("Article Script: Specified article localStorage flags cleared."); // تعديل رسالة التسجيل
         } catch(e) {
-            console.error("Article Script: Error clearing ALL article localStorage flags:", e);
+            console.error("Article Script: Error clearing specified article localStorage flags:", e); // تعديل رسالة التسجيل
         }
     }
 
@@ -113,6 +114,18 @@
           startTime: startTimeString
       });
 
+      // قم بالتحقق من حالة الإكمال هنا إذا كنت تريد منع تشغيل التدفق مرة أخرى بعد الإكمال
+      const completed = localStorage.getItem(articleAppConfig.localStorageKeys.completed);
+      if (completed === 'true') {
+          console.log("Article Page: Article already completed. Skipping flow initialization.");
+          // يمكنك عرض رسالة للمستخدم هنا أو إخفاء الإشعار إذا كان موجوداً
+          if (notificationElement) notificationElement.style.display = 'none';
+          // يمكنك أيضاً عدم مسح البيانات هنا إذا كنت تريد الاحتفاظ بها
+          // clearAllArticleLocalStorageFlags(); // تعليق هذا السطر إذا كنت لا تريد مسح بيانات البداية أيضاً
+          return; // الخروج من الدالة لأن المقال مكتمل بالفعل
+      }
+
+
       if (flowStarted === 'true' && startTimeString) {
           console.log("Article Page: Article points flow detected. Initializing tracking and notification.");
 
@@ -120,6 +133,7 @@
           // !!! إضافة فحص إضافي لقيمة startTime بعد التحويل !!!
           if (isNaN(startTime) || startTime <= 0) {
               console.error("Article Script: startTime from localStorage is invalid or zero. Clearing flags and exiting flow.", startTime);
+               // نستخدم الدالة التي لا تحذف 'completed'
                clearAllArticleLocalStorageFlags();
                if (notificationElement) notificationElement.style.display = 'none';
               return;
@@ -182,6 +196,7 @@
 
                    const totalTimeSinceStart = Date.now() - startTime;
                    const delayUntilRedirect = Math.max(0, articleAppConfig.requiredDurationMillis - totalTimeSinceStart);
+                   // إضافة بعض الوقت للتأكد من تحديث الواجهة قبل الانتقال
                    const finalRedirectDelay = Math.max(1000, delayUntilRedirect + 500);
 
 
@@ -197,7 +212,8 @@
                            notificationElement.style.display = 'none';
                        }
 
-                       clearArticleStartLocalStorageFlags();
+                       // نستخدم الدالة التي لا تحذف 'completed'
+                       clearArticleStartLocalStorageFlags(); // هذه الدالة لا تحذف 'completed' بالفعل
                        console.log("Article Script: Article start localStorage flags cleared.");
 
                        console.log("Article Script: Performing automatic redirect to points page.");
@@ -215,8 +231,9 @@
 
 
        } else {
-           console.log("Article Page: Not in article points flow. No tracking or dynamic notification set.");
+           console.log("Article Page: Not in article points flow or invalid start data. Clearing relevant flags.");
            if (notificationElement) notificationElement.style.display = 'none';
+           // نستخدم الدالة التي لا تحذف 'completed'
            clearAllArticleLocalStorageFlags();
        }
     });
@@ -247,6 +264,7 @@
         console.log(`Article Script: onbeforeunload state check: flowStarted=${flowStarted}, startTime=${startTimeString}, completed=${completed}`);
 
 
+        // فقط نحاول الحفظ إذا لم يكن المقال قد اكتمل بالفعل
         if (flowStarted === 'true' && startTimeString && completed !== 'true') {
             const startTime = parseInt(startTimeString);
             const currentTime = Date.now();
@@ -255,7 +273,7 @@
 
             console.log(`Article Script: onbeforeunload duration check - ${duration}ms spent, Required: ${requiredDuration}ms`);
 
-            if (!isNaN(startTime) && duration >= requiredDuration) {
+            if (!isNaN(startTime) && startTime > 0 && duration >= requiredDuration) { // إضافة فحص startTime > 0
                 console.log("Article Script: Required duration met on beforeunload. Attempting to set completion flag.");
                 try {
                     localStorage.setItem(articleAppConfig.localStorageKeys.completed, 'true');
@@ -264,7 +282,7 @@
                     console.error("Article Script: ❌ (onbeforeunload) Error setting completion flag in localStorage:", e);
                 }
             } else {
-                console.log("Article Script: Required duration NOT met on beforeunload.");
+                console.log("Article Script: Required duration NOT met on beforeunload or invalid start time.");
             }
         } else {
             console.log("Article Script: Not in active article flow, already completed, or invalid start time. No special action on beforeunload save.");
@@ -272,8 +290,8 @@
 
          console.log(`Article Script: localStorage state BEFORE clearing start flags in beforeunload:`, { ...localStorage });
 
-
-         clearArticleStartLocalStorageFlags();
+         // نستخدم الدالة التي لا تحذف 'completed'
+         clearArticleStartLocalStorageFlags(); // هذه الدالة لا تحذف 'completed' بالفعل
          console.log("Article Script: Article start localStorage flags cleared on beforeunload.");
 
     }
@@ -296,5 +314,3 @@
 
 
     console.log("Article page script loaded.");
-
-
