@@ -3,7 +3,7 @@
     // CONFIGURATION (يجب أن تتطابق مع سكربت صفحة النقاط)
     // ==============================================================
     const APP_CONFIG_ARTICLE_PAGE = {
-        pointsPageUrl: "/p/points-5.html", // !!! غيّر هذا إلى رابط صفحة النقاط الفعلية !!!
+        pointsPageUrl: "https://plusui32.blogspot.com/p/points-5.html", // !!! غيّر هذا إلى رابط صفحة النقاط الفعلية !!!
         articleReading: {
             requiredDurationMillis: 60 * 1000, 
         },
@@ -116,7 +116,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         console.log("Article Page: DOMContentLoaded.");
 
-        if (pointsPageUrl === "/p/points-5.html") {
+        if (pointsPageUrl === "https://plusui32.blogspot.com/p/points-5.html") {
             console.error("Article Page: !!! يرجى تعديل 'pointsPageUrl' في السكربت !!!");
             // لا يمكن عرض رسالة الخطأ في اللافتة إذا لم تكن قد أنشئت بعد،
             // لذا سننشئها إذا لزم الأمر لعرض الخطأ.
