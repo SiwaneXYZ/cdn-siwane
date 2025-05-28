@@ -1,2 +1,1073 @@
-// ===== Login.js اصدار 1.0 بتاريخ 28 مايو 205 ===== //
-const _0x14f1cf=_0x4d12;(function(_0x4dfc7d,_0x41d4f2){const _0x449382=_0x4d12,_0x584749=_0x4dfc7d();while(!![]){try{const _0x4290dc=parseInt(_0x449382(0x2b2))/0x1+-parseInt(_0x449382(0x342))/0x2*(parseInt(_0x449382(0x201))/0x3)+parseInt(_0x449382(0x35b))/0x4*(parseInt(_0x449382(0x2ed))/0x5)+parseInt(_0x449382(0x29c))/0x6+parseInt(_0x449382(0x29d))/0x7*(parseInt(_0x449382(0x2c7))/0x8)+parseInt(_0x449382(0x2a5))/0x9*(-parseInt(_0x449382(0x25e))/0xa)+parseInt(_0x449382(0x311))/0xb*(-parseInt(_0x449382(0x325))/0xc);if(_0x4290dc===_0x41d4f2)break;else _0x584749['push'](_0x584749['shift']());}catch(_0x1b5660){_0x584749['push'](_0x584749['shift']());}}}(_0x169b,0x91547));import{initializeApp}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';import{getAuth,onAuthStateChanged,signOut,sendEmailVerification,GoogleAuthProvider}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';function _0x4d12(_0xcc3688,_0x4b6d9e){const _0x169bdb=_0x169b();return _0x4d12=function(_0x4d124e,_0x5369d4){_0x4d124e=_0x4d124e-0x1d7;let _0x531e9a=_0x169bdb[_0x4d124e];return _0x531e9a;},_0x4d12(_0xcc3688,_0x4b6d9e);}import{getFirestore,doc,getDoc,setDoc,updateDoc,serverTimestamp,collection,query,where,limit,getDocs,Timestamp}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';const obfuscatedSecretKeyBase64=_0x14f1cf(0x2d2),getObfuscatedKey=()=>atob(obfuscatedSecretKeyBase64);function decryptText(_0x35cd29,_0x44ab81){const _0x5b2ca3=_0x14f1cf;try{const _0x147dda=atob(_0x35cd29);return CryptoJS['AES'][_0x5b2ca3(0x228)](_0x147dda,_0x44ab81)[_0x5b2ca3(0x24b)](CryptoJS[_0x5b2ca3(0x242)]['Utf8']);}catch(_0x101405){return null;}}function verifyDomain(){const _0x20d820=_0x14f1cf,_0x197114=getObfuscatedKey(),_0xba7d61=decryptText(encryptedBase64[_0x20d820(0x34b)],_0x197114);if(_0xba7d61){const _0x25fe89=window['location'][_0x20d820(0x2b0)];_0x25fe89['replace'](/^www\./,'')===_0xba7d61['replace'](/^www\./,'')?protectedCode(encryptedBase64[_0x20d820(0x336)]):showErrorNotification('naming');}else showErrorNotification('key');}function protectedCode(_0x463c37){const _0x227fb4=_0x14f1cf;console['log'](_0x227fb4(0x34c),_0x463c37);const _0x6bf3de=initializeApp(_0x463c37[_0x227fb4(0x358)]),_0x56600f=getAuth(_0x6bf3de),_0x56ba7f=getFirestore(_0x6bf3de),_0x5cd54a=_0x463c37['ownerAdminEmail'],_0x3db8c7=document[_0x227fb4(0x2d9)](_0x227fb4(0x20f)),_0x5ad2af=document['getElementById'](_0x227fb4(0x346)),_0x1167aa=document[_0x227fb4(0x27b)](_0x227fb4(0x27c)),_0x294f01=document[_0x227fb4(0x27b)](_0x227fb4(0x279)),_0x16590f=document[_0x227fb4(0x27b)](_0x227fb4(0x2c0)),_0x6b314d=document[_0x227fb4(0x27b)](_0x227fb4(0x237)),_0x37ab48=document[_0x227fb4(0x27b)](_0x227fb4(0x230)),_0x25c9c1=document[_0x227fb4(0x27b)]('cebtn'),_0x5a1cf8=document[_0x227fb4(0x27b)](_0x227fb4(0x254)),_0x35e6a6=document['getElementById'](_0x227fb4(0x231)),_0x811b61=document[_0x227fb4(0x27b)](_0x227fb4(0x1f7)),_0x187038=document[_0x227fb4(0x2d9)](_0x227fb4(0x357)),_0x53afc2=document[_0x227fb4(0x2d9)]('#msg\x20.suc'),_0x3948c0=document[_0x227fb4(0x27b)]('profile-fullname'),_0x2fb5f9=document[_0x227fb4(0x27b)](_0x227fb4(0x2d6)),_0x47bf6f=document[_0x227fb4(0x27b)](_0x227fb4(0x271)),_0x335eff=document[_0x227fb4(0x27b)](_0x227fb4(0x204)),_0xe562f9=document[_0x227fb4(0x27b)](_0x227fb4(0x35e)),_0x4acb8a=document['getElementById'](_0x227fb4(0x33e)),_0x237d24=document['getElementById'](_0x227fb4(0x28b)),_0x431804=document[_0x227fb4(0x27b)](_0x227fb4(0x263)),_0x2467e5=document[_0x227fb4(0x27b)](_0x227fb4(0x2b5)),_0x142008=document[_0x227fb4(0x27b)]('profile-current-points-item'),_0x1fcf68=document[_0x227fb4(0x27b)](_0x227fb4(0x302)),_0x342415=document[_0x227fb4(0x27b)](_0x227fb4(0x22c)),_0x9d4eec=document[_0x227fb4(0x27b)](_0x227fb4(0x286)),_0x18d49c=document['getElementById'](_0x227fb4(0x360)),_0x111451=document[_0x227fb4(0x27b)](_0x227fb4(0x251)),_0x247fb6=document['getElementById'](_0x227fb4(0x25f)),_0x329aa0=document[_0x227fb4(0x27b)]('edit-phone'),_0x20d8ac=document['getElementById'](_0x227fb4(0x2e3)),_0x57deb7=document[_0x227fb4(0x27b)](_0x227fb4(0x248)),_0x160f97=document['getElementById']('pge-p');function _0x2d4298(_0x14423f){const _0x588a2c=_0x227fb4;console[_0x588a2c(0x31f)]('Profile\x20Error:',_0x14423f);_0x187038&&(_0x187038['textContent']=_0x14423f,_0x187038[_0x588a2c(0x235)][_0x588a2c(0x24d)]=_0x588a2c(0x33c));if(_0x53afc2)_0x53afc2[_0x588a2c(0x235)][_0x588a2c(0x24d)]='none';}function _0x24166a(_0x3634fd){const _0x1764e8=_0x227fb4;console[_0x1764e8(0x2ae)](_0x1764e8(0x220),_0x3634fd);_0x53afc2&&(_0x53afc2[_0x1764e8(0x2ca)]=_0x3634fd,_0x53afc2[_0x1764e8(0x235)][_0x1764e8(0x24d)]=_0x1764e8(0x33c));if(_0x187038)_0x187038['style']['display']=_0x1764e8(0x31e);}function _0x4ac9ef(){const _0x2d55d8=_0x227fb4;console[_0x2d55d8(0x2ae)](_0x2d55d8(0x2af)),_0x187038&&(_0x187038[_0x2d55d8(0x2ca)]='',_0x187038[_0x2d55d8(0x235)][_0x2d55d8(0x24d)]='none'),_0x53afc2&&(_0x53afc2[_0x2d55d8(0x2ca)]='',_0x53afc2[_0x2d55d8(0x235)][_0x2d55d8(0x24d)]=_0x2d55d8(0x31e)),console[_0x2d55d8(0x2ae)](_0x2d55d8(0x22e));}function _0x527061(_0x2c6ac4){const _0x20fae1=_0x227fb4;console[_0x20fae1(0x2ae)](_0x20fae1(0x23f),_0x2c6ac4);if(!navigator[_0x20fae1(0x208)]){console[_0x20fae1(0x2c5)]('navigator.clipboard\x20not\x20available,\x20using\x20fallback\x20method.');const _0x28e624=document[_0x20fae1(0x356)]('textarea');_0x28e624['value']=_0x2c6ac4,_0x28e624['style'][_0x20fae1(0x308)]=_0x20fae1(0x216),_0x28e624[_0x20fae1(0x235)][_0x20fae1(0x1e8)]='0',_0x28e624[_0x20fae1(0x235)][_0x20fae1(0x1ef)]='0',_0x28e624[_0x20fae1(0x235)]['opacity']='0',document[_0x20fae1(0x2be)][_0x20fae1(0x34d)](_0x28e624),_0x28e624[_0x20fae1(0x351)](),_0x28e624[_0x20fae1(0x29a)]();try{console[_0x20fae1(0x2ae)](_0x20fae1(0x26e));const _0x4079c9=document[_0x20fae1(0x1e5)](_0x20fae1(0x2ee));console[_0x20fae1(0x2ae)](_0x20fae1(0x297),_0x4079c9),_0x4079c9?_0x24166a(_0x20fae1(0x246)):_0x2d4298(_0x20fae1(0x26b));}catch(_0x1b36fb){console[_0x20fae1(0x31f)](_0x20fae1(0x355),_0x1b36fb),_0x2d4298(_0x20fae1(0x249));}finally{document[_0x20fae1(0x2be)][_0x20fae1(0x2bb)](_0x28e624),console['log']('Textarea\x20fallback\x20element\x20removed.');}return;}console['log']('Using\x20navigator.clipboard\x20API.'),navigator['clipboard'][_0x20fae1(0x1f6)](_0x2c6ac4)[_0x20fae1(0x359)](function(){const _0x487607=_0x20fae1;_0x24166a(_0x487607(0x246)),console[_0x487607(0x2ae)](_0x487607(0x1da));},function(_0x5629b2){const _0x2630dc=_0x20fae1;console[_0x2630dc(0x31f)](_0x2630dc(0x34e),_0x5629b2),_0x2d4298(_0x2630dc(0x26b));}),console['log']('navigator.clipboard.writeText\x20Promise\x20initiated.');}async function _0x3326f8(){const _0x516b42=_0x227fb4;console['log'](_0x516b42(0x30e)),_0x4ac9ef();try{await signOut(_0x56600f),console['log'](_0x516b42(0x292));}catch(_0x4b17be){console['error']('signoutUser\x20-\x20Error\x20signing\x20out:',_0x4b17be),_0x2d4298(_0x516b42(0x2f2)+_0x4b17be['message']);}}async function _0xf2c369(_0x481003,_0xb113b3=null){const _0x4edcc8=_0x227fb4;console['log']('isUsernameAvailable\x20-\x20checking\x20username:\x20\x22'+_0x481003+_0x4edcc8(0x21e)+_0xb113b3+')');if(!_0x481003||_0x481003[_0x4edcc8(0x304)]()==='')return console[_0x4edcc8(0x2c5)](_0x4edcc8(0x2c2)),![];const _0x1d1278=_0x481003[_0x4edcc8(0x304)]()[_0x4edcc8(0x30f)]();try{const _0x56bae1=collection(_0x56ba7f,_0x4edcc8(0x1f2)),_0x16522d=query(_0x56bae1,where('username','==',_0x1d1278),limit(0x1)),_0x49a357=await getDocs(_0x16522d);if(_0x49a357[_0x4edcc8(0x340)])return console['log'](_0x4edcc8(0x1fa)+_0x1d1278+_0x4edcc8(0x217)),!![];const _0x4fd001=_0x49a357[_0x4edcc8(0x241)][0x0];return _0xb113b3&&_0x4fd001['id']===_0xb113b3?(console[_0x4edcc8(0x2ae)](_0x4edcc8(0x1fa)+_0x1d1278+'\x22\x20belongs\x20to\x20the\x20current\x20user.'),!![]):(console[_0x4edcc8(0x2ae)](_0x4edcc8(0x1fa)+_0x1d1278+_0x4edcc8(0x2a1)+_0x4fd001['id']+').'),![]);}catch(_0x4966fa){return console['error'](_0x4edcc8(0x209),_0x4966fa),_0x2d4298(_0x4edcc8(0x323)),![];}}async function _0xf1cb91(){const _0x5358f2=_0x227fb4;console[_0x5358f2(0x2ae)](_0x5358f2(0x2cc));const _0x3b41a7=_0x56600f[_0x5358f2(0x288)];if(!_0x3b41a7){_0x2d4298(_0x5358f2(0x232)),console[_0x5358f2(0x2c5)](_0x5358f2(0x265));return;}if(_0x3b41a7[_0x5358f2(0x2a3)]){_0x24166a(_0x5358f2(0x205)),console[_0x5358f2(0x2ae)](_0x5358f2(0x28a));if(_0x35e6a6)_0x35e6a6['style']['display']=_0x5358f2(0x31e);_0x811b61&&(_0x811b61[_0x5358f2(0x2bc)]=_0x5358f2(0x27e),_0x811b61[_0x5358f2(0x235)][_0x5358f2(0x21f)]=_0x5358f2(0x266));return;}_0x35e6a6&&(_0x35e6a6[_0x5358f2(0x225)]=!![],_0x35e6a6[_0x5358f2(0x2ca)]=_0x5358f2(0x31d));_0x4ac9ef();try{console[_0x5358f2(0x2ae)](_0x5358f2(0x1f1)),await sendEmailVerification(_0x3b41a7),console['log'](_0x5358f2(0x214)),_0x24166a(_0x5358f2(0x347)),_0x35e6a6&&(_0x35e6a6[_0x5358f2(0x2ca)]='تم\x20الإرسال');}catch(_0x3274fd){console[_0x5358f2(0x31f)](_0x5358f2(0x207),_0x3274fd),_0x2d4298(_0x5358f2(0x261)+_0x3274fd[_0x5358f2(0x22a)]),_0x35e6a6&&(_0x35e6a6[_0x5358f2(0x225)]=![],_0x35e6a6['textContent']=_0x5358f2(0x2f7));}console[_0x5358f2(0x2ae)](_0x5358f2(0x202));}async function _0x556e58(_0x4f1c10){const _0x25ce10=_0x227fb4;console[_0x25ce10(0x2ae)](_0x25ce10(0x223),_0x4f1c10[_0x25ce10(0x29b)]);if(_0x3db8c7)_0x3db8c7['textContent']=_0x25ce10(0x24c);_0x24166a(_0x25ce10(0x2d5));try{let _0x293828=_0x25ce10(0x2ce);if(_0x4f1c10[_0x25ce10(0x1de)]&&_0x4f1c10[_0x25ce10(0x1de)][_0x25ce10(0x1fd)]>0x0){const _0x103f3c=_0x4f1c10[_0x25ce10(0x1de)][0x0][_0x25ce10(0x2e4)];switch(_0x103f3c){case _0x25ce10(0x2aa):_0x293828='google';break;case'facebook.com':_0x293828=_0x25ce10(0x332);break;case _0x25ce10(0x2dd):_0x293828='github';break;case _0x25ce10(0x2e9):_0x293828=_0x25ce10(0x22d);break;case'apple.com':_0x293828='apple';break;case _0x25ce10(0x1ea):_0x293828=_0x25ce10(0x31a);break;case _0x25ce10(0x238):_0x293828='x';break;case _0x25ce10(0x301):_0x293828=_0x25ce10(0x256);break;case _0x25ce10(0x276):_0x293828=_0x25ce10(0x2ce);break;default:_0x293828=_0x103f3c;}}else _0x4f1c10[_0x25ce10(0x2ce)]&&_0x4f1c10[_0x25ce10(0x2ce)][_0x25ce10(0x2a6)](_0x25ce10(0x215))&&(_0x293828=_0x25ce10(0x2d8));console[_0x25ce10(0x2ae)](_0x25ce10(0x284)+_0x293828);let _0x951655=_0x4f1c10['displayName'];!_0x951655||_0x951655[_0x25ce10(0x304)]()===''?(_0x951655=_0x4f1c10['email']?_0x4f1c10[_0x25ce10(0x2ce)]['split']('@')[0x0]:'مستخدم\x20جديد',console[_0x25ce10(0x2ae)](_0x25ce10(0x2b6)+_0x951655+'\x22')):console['log']('createUserProfile\x20-\x20Using\x20display\x20name:\x20\x22'+_0x951655+'\x22');let _0x351ec6=_0x4f1c10[_0x25ce10(0x1e2)]||'';console[_0x25ce10(0x2ae)](_0x25ce10(0x23e)+_0x351ec6+'\x22');let _0x21735b=_0x4f1c10[_0x25ce10(0x2ce)]?_0x4f1c10[_0x25ce10(0x2ce)]['split']('@')[0x0][_0x25ce10(0x30f)]()[_0x25ce10(0x2c4)](/[^a-z0-9_.-]/g,''):_0x25ce10(0x2cf);if(!_0x21735b)_0x21735b=_0x25ce10(0x2f5);console['log'](_0x25ce10(0x1ee)+_0x21735b+'\x22');let _0x50c43f=_0x21735b,_0x2c458a=await _0xf2c369(_0x50c43f,_0x4f1c10[_0x25ce10(0x29b)]),_0x44d661=0x0;const _0x414d7d=0xa;while(!_0x2c458a&&_0x44d661<_0x414d7d){_0x44d661++;const _0x3fedfa=Math[_0x25ce10(0x2fb)](0x64+Math[_0x25ce10(0x2e2)]()*0x384);_0x50c43f=''+_0x21735b+_0x3fedfa,console[_0x25ce10(0x2ae)](_0x25ce10(0x2df)+_0x50c43f+'\x22\x20not\x20available.\x20Trying\x20\x22'+_0x50c43f+_0x3fedfa+_0x25ce10(0x2b9)+_0x44d661+'/'+_0x414d7d),_0x2c458a=await _0xf2c369(_0x50c43f,_0x4f1c10[_0x25ce10(0x29b)]);}if(!_0x2c458a){_0x50c43f=_0x25ce10(0x318)+_0x4f1c10['uid'][_0x25ce10(0x25c)](0x0,0x8),console[_0x25ce10(0x2c5)](_0x25ce10(0x334)+_0x414d7d+_0x25ce10(0x309)+_0x50c43f+'\x22.');let _0x4fffb8=await _0xf2c369(_0x50c43f,_0x4f1c10[_0x25ce10(0x29b)]);!_0x4fffb8&&(_0x50c43f='id-'+_0x4f1c10[_0x25ce10(0x29b)]['substring'](0x0,0xc),console[_0x25ce10(0x2c5)](_0x25ce10(0x281)+_0x50c43f+'\x22\x20also\x20not\x20available.\x20Falling\x20back\x20to\x20longer\x20UID-based:\x20\x22'+_0x50c43f+'\x22.'));}_0x21735b=_0x50c43f,console[_0x25ce10(0x2ae)]('createUserProfile\x20-\x20Final\x20determined\x20username:\x20\x22'+_0x21735b+'\x22');const _0x5343c7={'fullName':_0x951655['trim'](),'username':_0x21735b,'email':_0x4f1c10[_0x25ce10(0x2ce)]?_0x4f1c10['email'][_0x25ce10(0x30f)]():null,'phoneNumber':_0x351ec6,'accountType':_0x25ce10(0x329),'createdAt':serverTimestamp(),'provider':_0x293828,'isAdmin':![],'premiumExpiry':null,'emailVerified':_0x4f1c10[_0x25ce10(0x2a3)],'points':0x0,'lastPointEarnedTimestamp':null,'totalPointsEarned':0x0,'totalExchanges':0x0},_0x11ab2b=doc(_0x56ba7f,'users',_0x4f1c10['uid']);console[_0x25ce10(0x2ae)](_0x25ce10(0x317),_0x4f1c10[_0x25ce10(0x29b)],_0x5343c7),await setDoc(_0x11ab2b,_0x5343c7),console[_0x25ce10(0x2ae)](_0x25ce10(0x2e5)),_0x24166a('تم\x20إعداد\x20ملفك\x20الشخصي\x20بنجاح!'),console['log'](_0x25ce10(0x24a),_0x4f1c10[_0x25ce10(0x29b)]),await _0x2c5cc2(_0x4f1c10),console[_0x25ce10(0x2ae)]('createUserProfile\x20-\x20Finished\x20calling\x20fetchAndDisplayUserProfile.');return;}catch(_0x3cac0d){console[_0x25ce10(0x31f)](_0x25ce10(0x277),_0x3cac0d),_0x2d4298('حدث\x20خطأ\x20فادح\x20أثناء\x20إعداد\x20ملفك\x20الشخصي.\x20يرجى\x20المحاولة\x20مرة\x20أخرى\x20أو\x20الاتصال\x20بالدعم.\x20الخطأ:\x20'+_0x3cac0d[_0x25ce10(0x22a)]);if(_0x3db8c7)_0x3db8c7[_0x25ce10(0x2ca)]='خطأ\x20في\x20الإعداد.';if(_0x35e6a6)_0x35e6a6[_0x25ce10(0x235)]['display']='none';}console[_0x25ce10(0x2ae)](_0x25ce10(0x252));}async function _0x2c5cc2(_0x2b463b){const _0xbee5e1=_0x227fb4;console[_0xbee5e1(0x2ae)](_0xbee5e1(0x1df),_0x2b463b?_0x2b463b[_0xbee5e1(0x29b)]:'null');if(!_0x2b463b){console[_0xbee5e1(0x2ae)](_0xbee5e1(0x28e)),localStorage[_0xbee5e1(0x26c)](_0xbee5e1(0x310)),_0x2abb02(),console[_0xbee5e1(0x2ae)](_0xbee5e1(0x272));return;}console[_0xbee5e1(0x2ae)](_0xbee5e1(0x224)+_0x2b463b[_0xbee5e1(0x29b)]);if(_0x3db8c7)_0x3db8c7['textContent']=_0xbee5e1(0x2e6);try{_0x5ad2af?(_0x2b463b[_0xbee5e1(0x1eb)]?_0x5ad2af[_0xbee5e1(0x1e0)]=_0x2b463b[_0xbee5e1(0x1eb)]:_0x5ad2af[_0xbee5e1(0x1e0)]=_0xbee5e1(0x31b),_0x5ad2af[_0xbee5e1(0x235)]['display']=_0xbee5e1(0x33c),console[_0xbee5e1(0x2ae)](_0xbee5e1(0x210))):console[_0xbee5e1(0x2c5)]('fetchAndDisplayUserProfile\x20-\x20profilePictureImg\x20(#pic)\x20element\x20not\x20found.');const _0x571b70=doc(_0x56ba7f,_0xbee5e1(0x1f2),_0x2b463b[_0xbee5e1(0x29b)]);console[_0xbee5e1(0x2ae)](_0xbee5e1(0x2dc)+_0x2b463b['uid']);const _0x2be247=await getDoc(_0x571b70);console[_0xbee5e1(0x2ae)](_0xbee5e1(0x1e9)+_0x2be247[_0xbee5e1(0x349)]());if(!_0x2be247[_0xbee5e1(0x349)]()){console[_0xbee5e1(0x2c5)](_0xbee5e1(0x298)),await _0x556e58(_0x2b463b),console[_0xbee5e1(0x2ae)](_0xbee5e1(0x280));return;}const _0x516a2e=_0x2be247[_0xbee5e1(0x293)]();console[_0xbee5e1(0x2ae)]('fetchAndDisplayUserProfile\x20-\x20User\x20data\x20fetched\x20from\x20Firestore:',_0x516a2e);const _0x4b5d09=_0x516a2e['emailVerified']===!![];if(_0x2b463b[_0xbee5e1(0x2a3)]===!![]&&!_0x4b5d09){console['log'](_0xbee5e1(0x1e3));try{await updateDoc(_0x571b70,{'emailVerified':!![]}),console[_0xbee5e1(0x2ae)]('fetchAndDisplayUserProfile\x20-\x20Firestore\x20emailVerified\x20updated\x20to\x20true.'),_0x516a2e[_0xbee5e1(0x2a3)]=!![];}catch(_0xbcc130){console[_0xbee5e1(0x31f)](_0xbee5e1(0x330),_0xbcc130);}}const _0x317488={'uid':_0x2b463b[_0xbee5e1(0x29b)],'accountType':_0x516a2e[_0xbee5e1(0x211)]||_0xbee5e1(0x329),'emailVerified':_0x2b463b[_0xbee5e1(0x2a3)]===!![],'fullName':_0x516a2e[_0xbee5e1(0x257)]||_0x2b463b[_0xbee5e1(0x247)]||(_0x2b463b[_0xbee5e1(0x2ce)]?_0x2b463b[_0xbee5e1(0x2ce)][_0xbee5e1(0x1fb)]('@')[0x0]:'مستخدم\x20غير\x20معروف'),'username':_0x516a2e[_0xbee5e1(0x2f3)]||_0xbee5e1(0x318)+_0x2b463b[_0xbee5e1(0x29b)][_0xbee5e1(0x25c)](0x0,0x8),'phoneNumber':_0x516a2e['phoneNumber']||'','email':_0x2b463b[_0xbee5e1(0x2ce)]||_0x516a2e[_0xbee5e1(0x2ce)]||null,'isAdmin':_0x516a2e[_0xbee5e1(0x321)]===!![],'photoURL':_0x2b463b['photoURL'],'createdAt':_0x516a2e[_0xbee5e1(0x21d)]&&typeof _0x516a2e[_0xbee5e1(0x21d)]['toDate']===_0xbee5e1(0x218)?{'seconds':_0x516a2e['createdAt'][_0xbee5e1(0x2db)],'nanoseconds':_0x516a2e[_0xbee5e1(0x21d)][_0xbee5e1(0x200)]}:null,'provider':_0x516a2e[_0xbee5e1(0x203)]||_0xbee5e1(0x260),'points':_0x516a2e['points']!=null?_0x516a2e['points']:0x0,'lastPointEarnedTimestamp':_0x516a2e[_0xbee5e1(0x21b)]||null,'totalPointsEarned':_0x516a2e['totalPointsEarned']!=null?_0x516a2e['totalPointsEarned']:0x0,'totalExchanges':_0x516a2e[_0xbee5e1(0x30d)]!=null?_0x516a2e['totalExchanges']:0x0,'premiumExpiry':_0x516a2e[_0xbee5e1(0x333)]&&typeof _0x516a2e[_0xbee5e1(0x333)][_0xbee5e1(0x319)]===_0xbee5e1(0x218)?{'seconds':_0x516a2e['premiumExpiry'][_0xbee5e1(0x2db)],'nanoseconds':_0x516a2e[_0xbee5e1(0x333)][_0xbee5e1(0x200)]||0x0}:null};console[_0xbee5e1(0x2ae)](_0xbee5e1(0x2c3),_0x317488);try{const _0x1f7004=JSON['stringify'](_0x317488);localStorage['setItem'](_0xbee5e1(0x310),_0x1f7004),console[_0xbee5e1(0x2ae)](_0xbee5e1(0x258));}catch(_0x2fdd20){console[_0xbee5e1(0x31f)]('fetchAndDisplayUserProfile\x20-\x20Error\x20saving\x20user\x20profile\x20data\x20to\x20localStorage:',_0x2fdd20),_0x2d4298('حدث\x20خطأ\x20أثناء\x20حفظ\x20بيانات\x20المستخدم\x20محليا.');}console[_0xbee5e1(0x2ae)](_0xbee5e1(0x2c1)),_0x2abb02(_0x317488);}catch(_0x4aadfc){console[_0xbee5e1(0x31f)]('fetchAndDisplayUserProfile\x20-\x20Error\x20fetching\x20user\x20profile:',_0x4aadfc),_0x2d4298('حدث\x20خطأ\x20أثناء\x20جلب\x20بيانات\x20الملف\x20الشخصي:\x20'+_0x4aadfc['message']);if(_0x3db8c7)_0x3db8c7[_0xbee5e1(0x2ca)]=_0xbee5e1(0x250);if(_0x5ad2af)_0x5ad2af[_0xbee5e1(0x235)][_0xbee5e1(0x24d)]=_0xbee5e1(0x31e);if(_0x16590f)_0x16590f[_0xbee5e1(0x235)]['display']='none';if(_0x6b314d)_0x6b314d['style'][_0xbee5e1(0x24d)]=_0xbee5e1(0x31e);if(_0x35e6a6)_0x35e6a6[_0xbee5e1(0x235)][_0xbee5e1(0x24d)]=_0xbee5e1(0x31e);_0x2abb02();}console[_0xbee5e1(0x2ae)](_0xbee5e1(0x2bf));}function _0x2abb02(_0x2c6bca=null){const _0x279eee=_0x227fb4;console['log']('updateUI\x20-\x20start.\x20Data\x20provided:',_0x2c6bca?_0x279eee(0x2d3):'no');let _0x4f6f4f=_0x2c6bca;if(!_0x4f6f4f){const _0x57ce71=localStorage[_0x279eee(0x2fa)](_0x279eee(0x310));if(_0x57ce71)try{_0x4f6f4f=JSON[_0x279eee(0x307)](_0x57ce71),console[_0x279eee(0x2ae)](_0x279eee(0x239),_0x4f6f4f);}catch(_0x3c3918){console['error']('updateUI\x20-\x20Failed\x20to\x20parse\x20user\x20data\x20from\x20localStorage:',_0x3c3918),_0x4f6f4f=null;}else console['log'](_0x279eee(0x312)),_0x4f6f4f=null;}else console[_0x279eee(0x2ae)](_0x279eee(0x2eb));const _0x4203ed=_0x56600f[_0x279eee(0x288)];if(!_0x4203ed||!_0x4f6f4f||typeof _0x4f6f4f!==_0x279eee(0x23c)||!_0x4f6f4f['uid']){console['log'](_0x279eee(0x28d));if(_0x3db8c7)_0x3db8c7[_0x279eee(0x2ca)]='الرجاء\x20تسجيل\x20الدخول.';if(_0x5ad2af)_0x5ad2af['style'][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x1167aa)_0x1167aa[_0x279eee(0x235)]['display']=_0x279eee(0x31e);if(_0x294f01)_0x294f01[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x37ab48)_0x37ab48['style'][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x35e6a6)_0x35e6a6[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x142008)_0x142008['style'][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x342415)_0x342415[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x18d49c)_0x18d49c[_0x279eee(0x235)]['display']=_0x279eee(0x31e);if(_0x57deb7)_0x57deb7[_0x279eee(0x235)]['display']='none';if(_0x4acb8a)_0x4acb8a[_0x279eee(0x235)]['display']=_0x279eee(0x31e);if(_0x160f97)_0x160f97['classList'][_0x279eee(0x1d8)]('act');if(_0x16590f)_0x16590f['style'][_0x279eee(0x24d)]='none';if(_0x6b314d)_0x6b314d[_0x279eee(0x235)]['display']=_0x279eee(0x31e);if(_0x3948c0)_0x3948c0[_0x279eee(0x2ca)]=_0x279eee(0x328);if(_0x2fb5f9)_0x2fb5f9[_0x279eee(0x2ca)]='...';if(_0x47bf6f)_0x47bf6f[_0x279eee(0x2ca)]=_0x279eee(0x328);_0x811b61&&(_0x811b61[_0x279eee(0x2ca)]='...',_0x811b61['style']['color']='');if(_0x335eff)_0x335eff[_0x279eee(0x2ca)]=_0x279eee(0x328);if(_0x2467e5)_0x2467e5[_0x279eee(0x2ca)]=_0x279eee(0x328);_0xe562f9&&(_0xe562f9['textContent']=_0x279eee(0x328),_0xe562f9[_0x279eee(0x235)][_0x279eee(0x21f)]='',_0xe562f9['style'][_0x279eee(0x1f0)]='bold');_0x237d24&&(_0x237d24[_0x279eee(0x2ca)]='',_0x237d24['style'][_0x279eee(0x21f)]='',_0x237d24['style'][_0x279eee(0x1f0)]=_0x279eee(0x329));if(_0x431804)_0x431804[_0x279eee(0x2ca)]='...';if(_0x1fcf68)_0x1fcf68['textContent']='...';if(_0x9d4eec)_0x9d4eec['textContent']=_0x279eee(0x328);if(_0x111451)_0x111451['textContent']='...';_0x4ac9ef(),console[_0x279eee(0x2ae)]('updateUI\x20-\x20end\x20(logged\x20out\x20state)');return;}console[_0x279eee(0x2ae)](_0x279eee(0x1f9));if(_0x3db8c7)_0x3db8c7[_0x279eee(0x2ca)]=_0x279eee(0x2f9)+(_0x4f6f4f[_0x279eee(0x257)]||_0x4203ed[_0x279eee(0x2ce)])+'!';_0x5ad2af&&(_0x5ad2af['src']=_0x4203ed['photoURL']||_0x4f6f4f['photoURL']||'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',_0x5ad2af[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x33c));if(_0x1167aa)_0x1167aa['style'][_0x279eee(0x24d)]=_0x279eee(0x348);if(_0x160f97)_0x160f97[_0x279eee(0x1e1)]['add'](_0x279eee(0x1ec));if(_0x16590f)_0x16590f[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x33c);_0x37ab48?(_0x37ab48[_0x279eee(0x235)]['display']=_0x279eee(0x348),console[_0x279eee(0x2ae)](_0x279eee(0x35a))):console[_0x279eee(0x2c5)](_0x279eee(0x2f1));if(_0x6b314d)_0x6b314d[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x3948c0)_0x3948c0[_0x279eee(0x2ca)]=_0x4f6f4f['fullName']||_0x279eee(0x1f8);if(_0x2fb5f9)_0x2fb5f9[_0x279eee(0x2ca)]=_0x4f6f4f[_0x279eee(0x2f3)]||_0x279eee(0x1f8);if(_0x47bf6f)_0x47bf6f[_0x279eee(0x2ca)]=_0x4203ed[_0x279eee(0x2ce)]||_0x4f6f4f[_0x279eee(0x2ce)]||_0x279eee(0x1f8);if(_0x811b61){const _0x2695e5=_0x4203ed[_0x279eee(0x2a3)]===!![],_0x80205c=_0x4203ed['providerData']&&_0x4203ed[_0x279eee(0x1de)][_0x279eee(0x1fd)]>0x0&&['google.com','facebook.com','github.com',_0x279eee(0x238),'apple.com','yahoo.com',_0x279eee(0x2e9)][_0x279eee(0x306)](_0x4203ed[_0x279eee(0x1de)][0x0][_0x279eee(0x2e4)]),_0xf031da=_0x4203ed[_0x279eee(0x1de)]&&_0x4203ed[_0x279eee(0x1de)][_0x279eee(0x1fd)]>0x0&&_0x4203ed[_0x279eee(0x1de)][0x0]['providerId']===_0x279eee(0x276);console[_0x279eee(0x2ae)]('updateUI\x20-\x20Email\x20Verified\x20(Auth):\x20'+_0x2695e5+_0x279eee(0x32a)+_0x80205c+_0x279eee(0x22f)+_0xf031da);if(_0x2695e5||_0x80205c){_0x811b61['innerHTML']=_0x279eee(0x27e),_0x811b61[_0x279eee(0x235)][_0x279eee(0x21f)]=_0x279eee(0x266);if(_0x35e6a6)_0x35e6a6['style'][_0x279eee(0x24d)]=_0x279eee(0x31e);console[_0x279eee(0x2ae)](_0x279eee(0x31c));}else _0x811b61[_0x279eee(0x2bc)]='غير\x20مؤكد\x20&#9888;',_0x811b61[_0x279eee(0x235)][_0x279eee(0x21f)]=_0x279eee(0x35d),_0x35e6a6?!_0x2695e5&&_0xf031da?(_0x35e6a6[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x348),_0x35e6a6[_0x279eee(0x2ca)]='تحقق\x20من\x20البريد\x20الإلكتروني',_0x35e6a6['disabled']=![],console[_0x279eee(0x2ae)](_0x279eee(0x273))):(_0x35e6a6[_0x279eee(0x235)][_0x279eee(0x24d)]='none',console[_0x279eee(0x2ae)](_0x279eee(0x2d7))):console[_0x279eee(0x2c5)](_0x279eee(0x2c8));}else console[_0x279eee(0x2c5)](_0x279eee(0x33f));if(_0x335eff)_0x335eff[_0x279eee(0x2ca)]=_0x4f6f4f[_0x279eee(0x1e2)]||'غير\x20محدد';if(_0x2467e5){let _0x3b8328=null;const _0x5f07e1=_0x4f6f4f[_0x279eee(0x21d)];if(_0x5f07e1&&typeof _0x5f07e1[_0x279eee(0x2db)]==='number')_0x3b8328=new Timestamp(_0x5f07e1['seconds'],_0x5f07e1['nanoseconds']||0x0)[_0x279eee(0x319)]();else{if(_0x4f6f4f[_0x279eee(0x21d)]instanceof Date&&!isNaN(_0x4f6f4f[_0x279eee(0x21d)][_0x279eee(0x23b)]()))_0x3b8328=_0x4f6f4f['createdAt'];else _0x4203ed&&_0x4203ed['metadata']&&_0x4203ed[_0x279eee(0x313)][_0x279eee(0x2fc)]?(_0x3b8328=new Date(_0x4203ed[_0x279eee(0x313)][_0x279eee(0x2fc)]),console[_0x279eee(0x2ae)]('updateUI\x20-\x20Using\x20Auth\x20metadata\x20creation\x20time.')):console[_0x279eee(0x2c5)](_0x279eee(0x255));}_0x3b8328 instanceof Date&&!isNaN(_0x3b8328[_0x279eee(0x23b)]())?(_0x2467e5[_0x279eee(0x2ca)]=_0x3b8328['toLocaleDateString'](_0x279eee(0x303),{'day':_0x279eee(0x28f),'month':'2-digit','year':'numeric'}),console[_0x279eee(0x2ae)]('updateUI\x20-\x20Creation\x20date\x20displayed:\x20'+_0x2467e5['textContent'])):(_0x2467e5['textContent']=_0x279eee(0x1f8),console[_0x279eee(0x2ae)](_0x279eee(0x339)));}else console['warn'](_0x279eee(0x2fe));if(_0xe562f9){const _0x2500b2=_0x4203ed&&_0x4203ed[_0x279eee(0x2ce)]&&_0x5cd54a&&_0x4203ed[_0x279eee(0x2ce)]['toLowerCase']()===_0x5cd54a[_0x279eee(0x30f)](),_0x4212a3=_0x4f6f4f[_0x279eee(0x211)]||_0x279eee(0x329);let _0x5bccd7='',_0x2fbebd='';_0xe562f9[_0x279eee(0x235)][_0x279eee(0x1f0)]='bold';if(_0x2500b2){_0x5bccd7='حساب\x20مشرف\x20مالك',_0x2fbebd=_0x279eee(0x2ba);if(_0x294f01)_0x294f01[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x348);console[_0x279eee(0x2ae)](_0x279eee(0x33b));}else{if(_0x4f6f4f[_0x279eee(0x321)]===!![]){_0x5bccd7='حساب\x20مشرف',_0x2fbebd='--expiry-red-col';if(_0x294f01)_0x294f01['style'][_0x279eee(0x24d)]=_0x279eee(0x348);console[_0x279eee(0x2ae)](_0x279eee(0x23a));}else{if(_0x4212a3===_0x279eee(0x244)){console['log'](_0x279eee(0x278));let _0x427d8e=null;const _0xdaa4ba=_0x4f6f4f[_0x279eee(0x333)];_0xdaa4ba&&typeof _0xdaa4ba['seconds']===_0x279eee(0x2c6)?_0x427d8e=new Timestamp(_0xdaa4ba[_0x279eee(0x2db)],_0xdaa4ba[_0x279eee(0x200)]||0x0)['toDate']():_0x427d8e=null;console[_0x279eee(0x2ae)]('updateUI\x20-\x20Premium\x20expiry\x20date:',_0x427d8e?_0x427d8e[_0x279eee(0x27d)]():_0x4f6f4f[_0x279eee(0x333)]===null?_0x279eee(0x222):'Missing/Invalid');const _0x1408dd=new Date();if(_0x427d8e&&_0x427d8e<_0x1408dd){_0x5bccd7=_0x279eee(0x2de),_0x2fbebd=_0x279eee(0x2a2);if(_0x294f01)_0x294f01[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);console[_0x279eee(0x2ae)](_0x279eee(0x206));}else{_0x5bccd7=_0x279eee(0x25b),_0x2fbebd=_0x279eee(0x2a2);if(_0x294f01)_0x294f01[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);console[_0x279eee(0x2ae)]('updateUI\x20-\x20Premium\x20active\x20or\x20permanent.\x20Displaying\x20as\x20Premium.');}}else{console['log'](_0x279eee(0x267)),_0x5bccd7=_0x279eee(0x29f),_0x2fbebd='--msg-succ-col';if(_0x294f01)_0x294f01[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);console[_0x279eee(0x2ae)](_0x279eee(0x2a7));}}}_0xe562f9[_0x279eee(0x2ca)]=_0x5bccd7,_0xe562f9[_0x279eee(0x235)]['color']='var('+_0x2fbebd+')',console[_0x279eee(0x2ae)]('updateUI\x20-\x20Account\x20type\x20displayed:\x20\x22'+_0x5bccd7+_0x279eee(0x34f)+_0x2fbebd+'\x22.');}else console[_0x279eee(0x2c5)](_0x279eee(0x2f4));if(_0x431804){let _0x270f67='غير\x20محدد';if(_0x4203ed&&_0x4203ed[_0x279eee(0x1de)]&&_0x4203ed['providerData'][_0x279eee(0x1fd)]>0x0){const _0x477d55=_0x4203ed[_0x279eee(0x1de)][0x0][_0x279eee(0x2e4)];switch(_0x477d55){case _0x279eee(0x2aa):_0x270f67=_0x279eee(0x2a9);break;case _0x279eee(0x294):_0x270f67=_0x279eee(0x24e);break;case _0x279eee(0x2dd):_0x270f67='حساب\x20GitHub';break;case _0x279eee(0x2e9):_0x270f67=_0x279eee(0x27f);break;case _0x279eee(0x300):_0x270f67='حساب\x20آبل';break;case _0x279eee(0x1ea):_0x270f67='حساب\x20ياهو';break;case _0x279eee(0x238):_0x270f67=_0x279eee(0x327);break;case _0x279eee(0x301):_0x270f67=_0x279eee(0x2b4);break;case _0x279eee(0x276):_0x270f67='البريد\x20الإلكتروني';break;default:_0x270f67=_0x4f6f4f[_0x279eee(0x203)]||_0x477d55;}}else{if(_0x4f6f4f[_0x279eee(0x203)])switch(_0x4f6f4f['provider']){case _0x279eee(0x2d8):_0x270f67='حساب\x20Google';break;case _0x279eee(0x332):_0x270f67='حساب\x20فيسبوك';break;case _0x279eee(0x2ef):_0x270f67='حساب\x20GitHub';break;case'microsoft':_0x270f67=_0x279eee(0x344);break;case'apple':_0x270f67=_0x279eee(0x22b);break;case _0x279eee(0x31a):_0x270f67=_0x279eee(0x2d1);break;case'x':_0x270f67='حساب\x20X\x20(Twitter)';break;case _0x279eee(0x256):_0x270f67=_0x279eee(0x2b4);break;case'password':_0x270f67=_0x279eee(0x299);break;default:_0x270f67=_0x4f6f4f[_0x279eee(0x203)];}}_0x431804[_0x279eee(0x2ca)]=_0x270f67,console[_0x279eee(0x2ae)](_0x279eee(0x2cd)+_0x270f67+'\x22.');}else console['warn'](_0x279eee(0x32b));const _0x2af092=_0x4f6f4f[_0x279eee(0x321)],_0x3d065c=_0x4203ed&&_0x4203ed[_0x279eee(0x2ce)]&&_0x5cd54a&&_0x4203ed[_0x279eee(0x2ce)][_0x279eee(0x30f)]()===_0x5cd54a[_0x279eee(0x30f)](),_0x28ea5f=_0x2af092||_0x3d065c;console[_0x279eee(0x2ae)](_0x279eee(0x289)+_0x2af092+',\x20isOwner='+_0x3d065c+'.\x20Should\x20Hide:\x20'+_0x28ea5f);if(_0x28ea5f){if(_0x142008)_0x142008[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x342415)_0x342415[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x18d49c)_0x18d49c['style'][_0x279eee(0x24d)]='none';if(_0x57deb7)_0x57deb7[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x31e);if(_0x4acb8a)_0x4acb8a['style'][_0x279eee(0x24d)]=_0x279eee(0x31e);console[_0x279eee(0x2ae)]('updateUI\x20-\x20Points/exchanges/Premium\x20Expiry\x20fields\x20and\x20My\x20Points\x20button\x20hidden\x20for\x20admin/owner.');}else{if(_0x142008)_0x142008[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x30b);if(_0x342415)_0x342415[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x30b);if(_0x18d49c)_0x18d49c[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x30b);if(_0x57deb7)_0x57deb7[_0x279eee(0x235)][_0x279eee(0x24d)]='inline-block';_0x1fcf68?_0x1fcf68[_0x279eee(0x2ca)]=_0x4f6f4f[_0x279eee(0x1e4)]!=null?_0x4f6f4f['points']:0x0:console[_0x279eee(0x2c5)]('updateUI\x20-\x20Current\x20points\x20span\x20(#profile-current-points)\x20not\x20found.');_0x9d4eec?_0x9d4eec['textContent']=_0x4f6f4f['totalPointsEarned']!=null?_0x4f6f4f[_0x279eee(0x28c)]:0x0:console[_0x279eee(0x2c5)](_0x279eee(0x1f4));_0x111451?_0x111451['textContent']=_0x4f6f4f[_0x279eee(0x30d)]!=null?_0x4f6f4f['totalExchanges']:0x0:console[_0x279eee(0x2c5)]('updateUI\x20-\x20Total\x20exchanges\x20span\x20(#profile-total-exchanges)\x20not\x20found.');const _0x2a084a=_0x4f6f4f[_0x279eee(0x211)]||_0x279eee(0x329);if(_0x4acb8a&&_0x237d24){console[_0x279eee(0x2ae)](_0x279eee(0x236)+_0x2a084a+'\x22.'),_0x4acb8a['style'][_0x279eee(0x24d)]=_0x279eee(0x31e),_0x237d24[_0x279eee(0x2ca)]='',_0x237d24[_0x279eee(0x235)][_0x279eee(0x21f)]=_0x279eee(0x2e8),_0x237d24[_0x279eee(0x235)][_0x279eee(0x1f0)]='normal';if(_0x2a084a===_0x279eee(0x244)){console[_0x279eee(0x2ae)](_0x279eee(0x34a));let _0x54c853;const _0x509354=_0x4f6f4f[_0x279eee(0x333)];_0x509354&&typeof _0x509354[_0x279eee(0x2db)]===_0x279eee(0x2c6)?(_0x54c853=new Timestamp(_0x509354[_0x279eee(0x2db)],_0x509354['nanoseconds']||0x0)['toDate'](),console['log']('updateUI\x20-\x20Parsed\x20premium\x20expiry\x20from\x20timestamp\x20data.')):(_0x54c853=null,console[_0x279eee(0x2ae)]('updateUI\x20-\x20Premium\x20expiry\x20data\x20is\x20not\x20a\x20valid\x20timestamp\x20object.'));if(_0x54c853 instanceof Date&&!isNaN(_0x54c853[_0x279eee(0x23b)]())){console[_0x279eee(0x2ae)]('updateUI\x20-\x20Valid\x20premium\x20expiry\x20date\x20found:\x20'+_0x54c853['toISOString']());const _0x430378=new Date(),_0x10a180=new Date(_0x430378[_0x279eee(0x32f)](),_0x430378['getMonth'](),_0x430378[_0x279eee(0x2fd)]()),_0x16322b=new Date(_0x54c853['getFullYear'](),_0x54c853['getMonth'](),_0x54c853[_0x279eee(0x2fd)]()),_0x2e8afc=_0x16322b['getTime']()-_0x10a180['getTime'](),_0x131ec1=Math[_0x279eee(0x326)](_0x2e8afc/(0x3e8*0x3c*0x3c*0x18));let _0x33b656=_0x54c853[_0x279eee(0x314)](_0x279eee(0x303),{'day':_0x279eee(0x28f),'month':_0x279eee(0x28f),'year':'numeric'}),_0x276577='',_0x311987='',_0x7a774d=_0x279eee(0x329);if(_0x131ec1<0x0)_0x276577=_0x279eee(0x2ba),_0x33b656=_0x279eee(0x262)+_0x33b656,_0x311987=_0x279eee(0x316),_0x7a774d=_0x279eee(0x335),console[_0x279eee(0x2ae)](_0x279eee(0x233));else{if(_0x131ec1===0x0)_0x276577=_0x279eee(0x2a2),_0x311987=_0x279eee(0x2b3),_0x7a774d=_0x279eee(0x335),console[_0x279eee(0x2ae)]('updateUI\x20-\x20Premium\x20expires\x20today.');else _0x131ec1>0x0&&_0x131ec1<=0x3?(_0x276577=_0x279eee(0x2a2),_0x311987=_0x279eee(0x229)+_0x131ec1+_0x279eee(0x1f3),_0x7a774d='bold',console[_0x279eee(0x2ae)](_0x279eee(0x2a0)+_0x131ec1+_0x279eee(0x270))):(_0x276577=_0x279eee(0x2ff),_0x311987=_0x279eee(0x33d)+_0x131ec1+_0x279eee(0x2b7),_0x7a774d=_0x279eee(0x329),console[_0x279eee(0x2ae)](_0x279eee(0x287)+_0x131ec1+_0x279eee(0x2cb)));}_0x237d24['textContent']=_0x33b656+'\x20'+_0x311987,_0x237d24[_0x279eee(0x235)][_0x279eee(0x21f)]=_0x279eee(0x1fe)+_0x276577+')',_0x237d24[_0x279eee(0x235)][_0x279eee(0x1f0)]=_0x7a774d,_0x4acb8a[_0x279eee(0x235)][_0x279eee(0x24d)]=_0x279eee(0x30b);}else _0x4f6f4f['premiumExpiry']===null?_0x237d24?(_0x237d24[_0x279eee(0x2ca)]='دائم',_0x237d24['style'][_0x279eee(0x21f)]=_0x279eee(0x1ff),_0x237d24[_0x279eee(0x235)]['fontWeight']=_0x279eee(0x335),_0x4acb8a[_0x279eee(0x235)]['display']=_0x279eee(0x30b),console['log'](_0x279eee(0x2a4))):console[_0x279eee(0x2c5)](_0x279eee(0x1dd)):(console[_0x279eee(0x2c5)](_0x279eee(0x20c)),_0x237d24?(_0x237d24[_0x279eee(0x2ca)]=_0x279eee(0x2d0),_0x237d24[_0x279eee(0x235)][_0x279eee(0x21f)]=_0x279eee(0x296),_0x237d24[_0x279eee(0x235)][_0x279eee(0x1f0)]=_0x279eee(0x329)):console['warn'](_0x279eee(0x30c)),_0x4acb8a['style'][_0x279eee(0x24d)]=_0x279eee(0x30b));}else console[_0x279eee(0x2ae)](_0x279eee(0x2c9)),_0x4acb8a?_0x4acb8a['style'][_0x279eee(0x24d)]=_0x279eee(0x31e):console[_0x279eee(0x2c5)](_0x279eee(0x30a));}else{console[_0x279eee(0x2c5)]('updateUI\x20-\x20Premium\x20expiry\x20item\x20div\x20(#profile-premium-expiry-item)\x20or\x20span\x20(#profile-premium-expiry)\x20not\x20found.');if(_0x4acb8a)_0x4acb8a[_0x279eee(0x235)]['display']=_0x279eee(0x31e);}console[_0x279eee(0x2ae)](_0x279eee(0x350));}console[_0x279eee(0x2ae)](_0x279eee(0x1e6));}_0x37ab48?(_0x37ab48[_0x227fb4(0x2bd)](_0x227fb4(0x337),()=>{const _0x24602c=_0x227fb4;console[_0x24602c(0x2ae)](_0x24602c(0x315)),_0x4ac9ef();const _0x238b0f=localStorage[_0x24602c(0x2fa)](_0x24602c(0x310));let _0x11c12f=null;if(_0x238b0f)try{_0x11c12f=JSON[_0x24602c(0x307)](_0x238b0f),console[_0x24602c(0x2ae)]('Edit\x20profile\x20-\x20Loaded\x20data\x20from\x20localStorage\x20for\x20editing:',_0x11c12f);}catch(_0x4c4ace){console['error'](_0x24602c(0x354),_0x4c4ace),_0x11c12f=null;}else{console[_0x24602c(0x2c5)]('Edit\x20profile\x20-\x20No\x20user\x20data\x20found\x20in\x20localStorage\x20for\x20editing.'),_0x2d4298(_0x24602c(0x219));return;}if(_0x247fb6)_0x247fb6['value']=_0x11c12f&&_0x11c12f['fullName']||'';else console['warn'](_0x24602c(0x2ab));if(_0x329aa0)_0x329aa0[_0x24602c(0x291)]=_0x11c12f&&_0x11c12f['phoneNumber']||'';else console['warn']('Edit\x20profile\x20-\x20Phone\x20input\x20(#edit-phone)\x20not\x20found.');if(_0x16590f)_0x16590f['style']['display']=_0x24602c(0x31e);if(_0x6b314d)_0x6b314d['style']['display']=_0x24602c(0x33c);console[_0x24602c(0x2ae)](_0x24602c(0x20d));}),console['log'](_0x227fb4(0x322))):console[_0x227fb4(0x2c5)](_0x227fb4(0x2e7)),_0x25c9c1?(_0x25c9c1['addEventListener'](_0x227fb4(0x337),_0x45179e=>{const _0x2387d6=_0x227fb4;console[_0x2387d6(0x2ae)](_0x2387d6(0x352)),_0x45179e[_0x2387d6(0x268)](),_0x4ac9ef();if(_0x6b314d)_0x6b314d[_0x2387d6(0x235)][_0x2387d6(0x24d)]=_0x2387d6(0x31e);if(_0x16590f)_0x16590f[_0x2387d6(0x235)]['display']='block';console['log'](_0x2387d6(0x25d));}),console['log']('Event\x20listener\x20attached\x20to\x20#cebtn')):console['warn'](_0x227fb4(0x305)),_0x5a1cf8?(_0x5a1cf8[_0x227fb4(0x2bd)](_0x227fb4(0x2b1),async _0x4b9e1d=>{const _0x5beb06=_0x227fb4;console['log'](_0x5beb06(0x1d7)),_0x4b9e1d[_0x5beb06(0x268)](),_0x4ac9ef();const _0x5b00fb=_0x56600f[_0x5beb06(0x288)];if(!_0x5b00fb){_0x2d4298(_0x5beb06(0x23d)),console[_0x5beb06(0x2c5)](_0x5beb06(0x253));return;}console[_0x5beb06(0x2ae)]('Profile\x20edit\x20submit\x20-\x20User\x20logged\x20in:\x20'+_0x5b00fb[_0x5beb06(0x29b)]);const _0x14c7c8=_0x247fb6?_0x247fb6[_0x5beb06(0x291)]['trim']():'',_0x40431e=_0x329aa0?_0x329aa0[_0x5beb06(0x291)][_0x5beb06(0x304)]():'';console[_0x5beb06(0x2ae)]('Profile\x20edit\x20submit\x20-\x20New\x20Fullname:\x20\x22'+_0x14c7c8+_0x5beb06(0x320)+_0x40431e+'\x22.');if(!_0x14c7c8){_0x2d4298(_0x5beb06(0x2f6)),console[_0x5beb06(0x2c5)]('Profile\x20edit\x20submit\x20failed:\x20Fullname\x20is\x20empty.');return;}_0x20d8ac?(_0x20d8ac[_0x5beb06(0x225)]=!![],_0x20d8ac[_0x5beb06(0x2ca)]=_0x5beb06(0x213),console[_0x5beb06(0x2ae)](_0x5beb06(0x32c))):console['warn'](_0x5beb06(0x2b8));try{const _0x34b407=doc(_0x56ba7f,_0x5beb06(0x1f2),_0x5b00fb['uid']),_0x59c69d={'fullName':_0x14c7c8,'phoneNumber':_0x40431e};console[_0x5beb06(0x2ae)](_0x5beb06(0x2d4),_0x59c69d),await updateDoc(_0x34b407,_0x59c69d),console[_0x5beb06(0x2ae)]('Profile\x20edit\x20submit\x20-\x20Firestore\x20update\x20successful.'),_0x24166a('تم\x20تحديث\x20الملف\x20الشخصي\x20بنجاح!'),console[_0x5beb06(0x2ae)](_0x5beb06(0x21c)),await _0x2c5cc2(_0x5b00fb),console[_0x5beb06(0x2ae)](_0x5beb06(0x1d9));if(_0x6b314d)_0x6b314d[_0x5beb06(0x235)]['display']=_0x5beb06(0x31e);if(_0x16590f)_0x16590f['style'][_0x5beb06(0x24d)]='block';console['log'](_0x5beb06(0x2ac));}catch(_0x522a6e){console[_0x5beb06(0x31f)](_0x5beb06(0x221),_0x522a6e),_0x2d4298('خطأ\x20في\x20تحديث\x20الملف\x20الشخصي:\x20'+_0x522a6e[_0x5beb06(0x22a)]+'.\x20تأكد\x20من\x20قواعد\x20الأمان\x20للسماح\x20بالتحديثات\x20على\x20هذه\x20الحقول.');}finally{_0x20d8ac&&(_0x20d8ac[_0x5beb06(0x225)]=![],_0x20d8ac[_0x5beb06(0x2ca)]=_0x5beb06(0x1ed),console['log'](_0x5beb06(0x324))),console[_0x5beb06(0x2ae)](_0x5beb06(0x26d));}}),console[_0x227fb4(0x2ae)](_0x227fb4(0x264))):console[_0x227fb4(0x2c5)](_0x227fb4(0x20a)),_0x1167aa?(_0x1167aa[_0x227fb4(0x2bd)](_0x227fb4(0x337),_0x3326f8),console['log'](_0x227fb4(0x240))):console[_0x227fb4(0x2c5)](_0x227fb4(0x35f)),_0x35e6a6?(_0x35e6a6[_0x227fb4(0x2bd)](_0x227fb4(0x337),_0xf1cb91),console[_0x227fb4(0x2ae)](_0x227fb4(0x226))):console[_0x227fb4(0x2c5)](_0x227fb4(0x20e)),_0x57deb7?(console[_0x227fb4(0x2ae)](_0x227fb4(0x212)),_0x57deb7[_0x227fb4(0x2bd)](_0x227fb4(0x337),()=>{const _0x5c0fbe=_0x227fb4;console[_0x5c0fbe(0x2ae)](_0x5c0fbe(0x27a)),window[_0x5c0fbe(0x2ad)][_0x5c0fbe(0x285)]=_0x5c0fbe(0x274);}),console[_0x227fb4(0x2ae)](_0x227fb4(0x21a))):console[_0x227fb4(0x2c5)]('Element\x20#mypbtn\x20(My\x20Points\x20button)\x20not\x20found.'),_0x2fb5f9?(console[_0x227fb4(0x2ae)](_0x227fb4(0x32d)),_0x2fb5f9[_0x227fb4(0x2bd)](_0x227fb4(0x337),function(){const _0x12b8ca=_0x227fb4;console[_0x12b8ca(0x2ae)]('Click\x20event\x20fired\x20on\x20#profile-username.');const _0x10c6d9=this['textContent'];console[_0x12b8ca(0x2ae)](_0x12b8ca(0x227),_0x10c6d9),_0x10c6d9&&_0x10c6d9!==_0x12b8ca(0x1f8)&&_0x10c6d9!==_0x12b8ca(0x328)?(console[_0x12b8ca(0x2ae)](_0x12b8ca(0x1dc)),_0x527061(_0x10c6d9)):(console[_0x12b8ca(0x2c5)]('Username\x20text\x20condition\x20failed.\x20Not\x20calling\x20copyToClipboard.\x20Text:',_0x10c6d9),_0x2d4298(_0x12b8ca(0x1f5)));}),console['log'](_0x227fb4(0x331))):console[_0x227fb4(0x2c5)]('Element\x20#profile-username\x20not\x20found.'),console[_0x227fb4(0x2ae)](_0x227fb4(0x282)),_0x2abb02(),onAuthStateChanged(_0x56600f,async _0x495056=>{const _0x561aba=_0x227fb4;console['log'](_0x561aba(0x234),_0x495056?_0x495056[_0x561aba(0x29b)]:_0x561aba(0x2ec));_0x5ad2af?(_0x495056&&_0x495056[_0x561aba(0x1eb)]?(_0x5ad2af[_0x561aba(0x1e0)]=_0x495056[_0x561aba(0x1eb)],_0x5ad2af['style'][_0x561aba(0x24d)]=_0x561aba(0x33c)):(_0x5ad2af[_0x561aba(0x1e0)]=_0x561aba(0x31b),_0x5ad2af[_0x561aba(0x235)][_0x561aba(0x24d)]=_0x561aba(0x33c)),console[_0x561aba(0x2ae)]('onAuthStateChanged\x20-\x20profile\x20picture\x20updated.')):console[_0x561aba(0x2c5)]('onAuthStateChanged\x20-\x20profilePictureImg\x20(#pic)\x20not\x20found.');_0x3db8c7?(_0x495056?_0x3db8c7['textContent']=_0x561aba(0x24f)+_0x495056[_0x561aba(0x2ce)]:_0x3db8c7[_0x561aba(0x2ca)]=_0x561aba(0x35c),console[_0x561aba(0x2ae)](_0x561aba(0x29e)+_0x3db8c7[_0x561aba(0x2ca)]+'\x22')):console['warn'](_0x561aba(0x2e0));_0x1167aa?(_0x1167aa[_0x561aba(0x235)][_0x561aba(0x24d)]=_0x495056?'inline-block':_0x561aba(0x31e),console['log'](_0x561aba(0x26a)+_0x1167aa[_0x561aba(0x235)][_0x561aba(0x24d)]+'\x22')):console[_0x561aba(0x2c5)](_0x561aba(0x343));if(_0x495056)console[_0x561aba(0x2ae)]('onAuthStateChanged\x20-\x20User\x20'+_0x495056['email']+_0x561aba(0x259)),await _0x2c5cc2(_0x495056),console[_0x561aba(0x2ae)](_0x561aba(0x2da));else{console[_0x561aba(0x2ae)](_0x561aba(0x2a8)),localStorage[_0x561aba(0x26c)](_0x561aba(0x310)),console[_0x561aba(0x2ae)]('onAuthStateChanged\x20-\x20User\x20profile\x20data\x20cleared\x20from\x20localStorage.'),_0x2abb02(),console['log'](_0x561aba(0x20b));const _0x59a029=_0x561aba(0x345),_0x2f2e48=window[_0x561aba(0x2ad)]['pathname'];!_0x2f2e48[_0x561aba(0x306)](_0x59a029)?(console[_0x561aba(0x2ae)](_0x561aba(0x2f8)),setTimeout(()=>{const _0x136439=_0x561aba;window[_0x136439(0x2ad)]['href']=_0x59a029;},0x5dc)):console[_0x561aba(0x2ae)](_0x561aba(0x269));}console[_0x561aba(0x2ae)](_0x561aba(0x2f0));}),console[_0x227fb4(0x2ae)](_0x227fb4(0x290));}const blockCopyActions=()=>{const _0xb9747d=_0x14f1cf;document[_0xb9747d(0x2bd)]('contextmenu',_0x31f91c=>{const _0x651688=_0xb9747d;return _0x31f91c[_0x651688(0x268)](),showCopyWarning(),![];}),document[_0xb9747d(0x2bd)](_0xb9747d(0x2ee),_0x1475a6=>{const _0x3a5ef1=_0xb9747d;return _0x1475a6[_0x3a5ef1(0x268)](),showCopyWarning(),![];}),document[_0xb9747d(0x2bd)](_0xb9747d(0x25a),_0x44ee10=>{const _0x386982=_0xb9747d;return _0x44ee10[_0x386982(0x268)](),showCopyWarning(),![];}),document[_0xb9747d(0x2bd)]('dragstart',_0x5eba47=>{return _0x5eba47['preventDefault'](),showCopyWarning(),![];}),document['addEventListener']('selectstart',_0x134e88=>{const _0x37fdfa=_0xb9747d;return _0x134e88[_0x37fdfa(0x268)](),showCopyWarning(),![];}),document[_0xb9747d(0x2bd)](_0xb9747d(0x1e7),_0x13d061=>{const _0x4cf9e0=_0xb9747d;if(_0x13d061['ctrlKey']&&_0x13d061['shiftKey']&&['I','J','C'][_0x4cf9e0(0x306)](_0x13d061[_0x4cf9e0(0x245)]))return _0x13d061[_0x4cf9e0(0x268)](),showCopyWarning(),![];if(_0x13d061[_0x4cf9e0(0x1fc)]&&_0x13d061['key']==='u')return _0x13d061[_0x4cf9e0(0x268)](),showCopyWarning(),![];});};function showCopyWarning(){const _0x2edd11=_0x14f1cf,_0x10de0b=document[_0x2edd11(0x2d9)](_0x2edd11(0x275));if(_0x10de0b)return;const _0x278e8d=document[_0x2edd11(0x356)]('div');_0x278e8d['className']=_0x2edd11(0x341),_0x278e8d[_0x2edd11(0x2bc)]=_0x2edd11(0x2e1),document[_0x2edd11(0x2be)][_0x2edd11(0x34d)](_0x278e8d),setTimeout(()=>{const _0x1eb829=_0x2edd11;_0x278e8d[_0x1eb829(0x1d8)]();},0xbb8);}window['self']!==window[_0x14f1cf(0x1e8)]&&(window[_0x14f1cf(0x1e8)][_0x14f1cf(0x2ad)][_0x14f1cf(0x285)]=window[_0x14f1cf(0x295)][_0x14f1cf(0x2ad)][_0x14f1cf(0x285)]);const addProtectionStyles=()=>{const _0x35d942=_0x14f1cf,_0x555c2b=_0x35d942(0x338),_0x4f9c10=document[_0x35d942(0x356)](_0x35d942(0x235));_0x4f9c10[_0x35d942(0x2ca)]=_0x555c2b,document[_0x35d942(0x283)][_0x35d942(0x34d)](_0x4f9c10);};addProtectionStyles(),blockCopyActions();function showErrorNotification(_0x5441c5){const _0x553c1e=_0x14f1cf,_0x360698=document[_0x553c1e(0x356)](_0x553c1e(0x2ea));_0x360698[_0x553c1e(0x353)]=_0x553c1e(0x1db);const _0x50e3e8=document[_0x553c1e(0x356)]('div');_0x50e3e8['className']=_0x553c1e(0x32e);if(_0x5441c5==='key')_0x50e3e8[_0x553c1e(0x2bc)]=_0x553c1e(0x26f);else _0x5441c5===_0x553c1e(0x243)&&(_0x50e3e8[_0x553c1e(0x2bc)]=_0x553c1e(0x33a));document[_0x553c1e(0x2be)][_0x553c1e(0x34d)](_0x360698),document[_0x553c1e(0x2be)][_0x553c1e(0x34d)](_0x50e3e8);}function _0x169b(){const _0x54ca4c=['isUsernameAvailable\x20-\x20username\x20\x22','split','ctrlKey','length','var(','var(--expiry-green-col)','nanoseconds','132lHmQWl','sendVerificationEmail\x20-\x20end.','provider','profile-phone','بريدك\x20الإلكتروني\x20تم\x20التحقق\x20منه\x20بالفعل!','updateUI\x20-\x20Premium\x20expired.\x20Displaying\x20as\x20Normal.','sendVerificationEmail\x20-\x20Error\x20sending\x20verification\x20email:','clipboard','isUsernameAvailable\x20-\x20Error\x20checking\x20username\x20availability:','Element\x20#profile-edit-form\x20not\x20found.','onAuthStateChanged\x20-\x20Called\x20updateUI\x20for\x20logged\x20out\x20state.','updateUI\x20-\x20User\x20is\x20premium\x20but\x20expiry\x20data\x20is\x20missing\x20or\x20invalid.','Switched\x20to\x20profile\x20edit\x20view.','Element\x20#vebtn\x20(Verify\x20Email\x20button)\x20not\x20found.','#astat\x20p','fetchAndDisplayUserProfile\x20-\x20Profile\x20picture\x20updated.','accountType','Attempting\x20to\x20attach\x20click\x20listener\x20to\x20#mypbtn\x20(My\x20Points\x20button).','جار\x20الحفظ...','sendVerificationEmail\x20-\x20Verification\x20email\x20sent\x20successfully.','@gmail.com','fixed','\x22\x20is\x20available.','function','تعذر\x20تحميل\x20بيانات\x20المستخدم\x20للتعديل.','Event\x20listener\x20attached\x20to\x20#mypbtn\x20successfully.','lastPointEarnedTimestamp','Profile\x20edit\x20submit\x20-\x20Fetching\x20and\x20displaying\x20updated\x20profile...','createdAt','\x22\x20(current\x20user:\x20','color','Profile\x20Success:','Profile\x20edit\x20submit\x20-\x20Error\x20updating\x20user\x20profile:','Permanent','createUserProfile\x20-\x20start\x20for\x20user:','WorkspaceAndDisplayUserProfile\x20-\x20User\x20ID:\x20','disabled','Event\x20listener\x20attached\x20to\x20#vebtn\x20(Verify\x20Email\x20button).','Username\x20text\x20read:','decrypt','(ينتهي\x20خلال\x20','message','حساب\x20آبل','profile-total-points-earned-item','microsoft','Profile\x20messages\x20hidden.',',\x20Is\x20Password\x20Provider:\x20','epbtn','vebtn','لا\x20يوجد\x20مستخدم\x20مسجل\x20الدخول\x20لإرسال\x20البريد.','updateUI\x20-\x20Premium\x20is\x20expired.','onAuthStateChanged\x20triggered.\x20User:','style','updateUI\x20-\x20Checking\x20premium\x20expiry\x20display\x20for\x20account\x20type:\x20\x22','pedt-p','twitter.com','updateUI\x20-\x20Loaded\x20data\x20from\x20localStorage:','updateUI\x20-\x20User\x20is\x20Admin.\x20Admin\x20link\x20shown.','getTime','object','يجب\x20تسجيل\x20الدخول\x20أولا\x20لتحديث\x20الملف\x20الشخصي.','createUserProfile\x20-\x20Initial\x20phone\x20number:\x20\x22','copyToClipboard\x20called\x20with\x20text:','Event\x20listener\x20attached\x20to\x20#lbtn\x20(Logout\x20button).','docs','enc','naming','premium','key','تم\x20نسخ\x20اسم\x20المستخدم!','displayName','mypbtn','فشل\x20نسخ\x20اسم\x20المستخدم\x20(fallback).','createUserProfile\x20-\x20Profile\x20created\x20successfully\x20for\x20user:','toString','يبدو\x20أن\x20هذا\x20هو\x20تسجيل\x20دخولك\x20الأول،\x20جارٍ\x20إعداد\x20ملفك\x20الشخصي...','display','حساب\x20فيسبوك','مسجل\x20كـ:\x20','خطأ\x20في\x20تحميل\x20البيانات.','profile-total-exchanges','createUserProfile\x20-\x20end\x20(error\x20or\x20successful\x20creation)','Profile\x20edit\x20submit\x20failed:\x20No\x20user\x20logged\x20in.','profile-edit-form','updateUI\x20-\x20Could\x20not\x20determine\x20creation\x20date\x20from\x20data\x20or\x20auth\x20metadata.','linkedin','fullName','fetchAndDisplayUserProfile\x20-\x20User\x20profile\x20data\x20saved\x20to\x20localStorage.','\x20is\x20logged\x20in.\x20Fetching/displaying\x20data...','cut','حساب\x20مميز','substring','Switched\x20back\x20to\x20profile\x20view.','790mYXMkR','edit-fullname','unknown','فشل\x20إرسال\x20بريد\x20التحقق:\x20','انتهت\x20في:\x20','profile-provider','Event\x20listener\x20attached\x20to\x20#profile-edit-form\x20submit','sendVerificationEmail\x20-\x20No\x20user\x20logged\x20in.','var(--msg-succ-col)','updateUI\x20-\x20User\x20account\x20type\x20is\x20normal.','preventDefault','onAuthStateChanged\x20-\x20Already\x20on\x20login\x20page.','onAuthStateChanged\x20-\x20logout\x20button\x20display\x20set\x20to:\x20\x22','فشل\x20نسخ\x20اسم\x20المستخدم.','removeItem','Profile\x20edit\x20submit\x20-\x20process\x20finished.','Attempting\x20execCommand(\x27copy\x27).','\x0a\x20\x20\x20\x20\x20\x20<p>خطأ:\x20رمز\x20التفعيل\x20غير\x20صحيح!</p>\x0a\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@example.com?subject=مشكلة\x20في\x20رمز\x20التفعيل\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20','\x20days\x20(soon).','profile-email','fetchAndDisplayUserProfile\x20-\x20end\x20(no\x20user)','updateUI\x20-\x20Email\x20status:\x20Not\x20verified,\x20Password\x20provider.\x20Verify\x20button\x20shown.','/p/points.html','.copy-warning','password','createUserProfile\x20-\x20Error\x20creating\x20user\x20profile:','updateUI\x20-\x20User\x20account\x20type\x20is\x20premium.','admin-link','My\x20Points\x20button\x20clicked,\x20redirecting\x20to\x20/p/points.html','getElementById','lbtn','toISOString','تم\x20التحقق\x20&#10003;','حساب\x20مايكروسوفت','fetchAndDisplayUserProfile\x20-\x20Returning\x20after\x20calling\x20createUserProfile.','createUserProfile\x20-\x20UID-based\x20username\x20\x22','Calling\x20initial\x20updateUI.','head','createUserProfile\x20-\x20Determined\x20provider:\x20','href','profile-total-points-earned','updateUI\x20-\x20Premium\x20is\x20active\x20for\x20','currentUser','updateUI\x20-\x20Checking\x20visibility\x20for\x20Points/Exchanges/Premium\x20Expiry/Button:\x20isAdmin=','sendVerificationEmail\x20-\x20Email\x20already\x20verified.','profile-premium-expiry','totalPointsEarned','updateUI\x20-\x20No\x20user\x20or\x20valid\x20data\x20available.\x20Setting\x20UI\x20to\x20logged-out\x20state.','fetchAndDisplayUserProfile\x20-\x20No\x20user.\x20Clearing\x20localStorage\x20and\x20updating\x20UI\x20to\x20logged-out\x20state.','2-digit','Profile\x20script\x20loaded\x20and\x20initialized.','value','signoutUser\x20-\x20signOut\x20successful.\x20Redirecting\x20to\x20login.','data','facebook.com','self','gray','execCommand(\x27copy\x27)\x20result:','fetchAndDisplayUserProfile\x20-\x20User\x20document\x20does\x20not\x20exist.\x20Calling\x20createUserProfile.','البريد\x20الإلكتروني','select','uid','4174830HgCOjX','4879826yhvIrS','onAuthStateChanged\x20-\x20auth\x20status\x20text\x20updated:\x20\x22','حساب\x20عادي','updateUI\x20-\x20Premium\x20expires\x20in\x20','\x22\x20is\x20taken\x20by\x20another\x20user\x20(','--cooldown-col','emailVerified','updateUI\x20-\x20User\x20has\x20permanent\x20premium.','51237TCkYCr','endsWith','updateUI\x20-\x20User\x20account\x20type\x20is\x20normal.\x20Admin\x20link\x20hidden.','onAuthStateChanged\x20-\x20User\x20logged\x20out.','حساب\x20Google','google.com','Edit\x20profile\x20-\x20Fullname\x20input\x20(#edit-fullname)\x20not\x20found.','Profile\x20edit\x20submit\x20-\x20Switched\x20back\x20to\x20profile\x20view\x20after\x20saving.','location','log','hideMessages\x20called\x20(Profile).','hostname','submit','1083349IUQAbp','(ينتهي\x20اليوم!)','حساب\x20لينكدإن','profile-created-at','createUserProfile\x20-\x20Display\x20name\x20missing,\x20using\x20email\x20part\x20or\x20default:\x20\x22','\x20أيام\x20أخرى)','Profile\x20edit\x20submit\x20-\x20Save\x20changes\x20button\x20(#scbtn)\x20not\x20found.','\x22.\x20Attempt\x20','--expiry-red-col','removeChild','innerHTML','addEventListener','body','fetchAndDisplayUserProfile\x20-\x20end.','pvw-p','fetchAndDisplayUserProfile\x20-\x20Calling\x20updateUI\x20with\x20fetched\x20data.','isUsernameAvailable\x20-\x20empty\x20username\x20provided.','fetchAndDisplayUserProfile\x20-\x20Data\x20prepared\x20for\x20UI/localStorage:','replace','warn','number','8ZPebsG','updateUI\x20-\x20Verify\x20email\x20button\x20(#vebtn)\x20not\x20found.','updateUI\x20-\x20User\x20is\x20not\x20premium,\x20hiding\x20premium\x20expiry\x20item.','textContent','\x20more\x20days.','sendVerificationEmail\x20-\x20called.','updateUI\x20-\x20Provider\x20displayed:\x20\x22','email','newuser','بيانات\x20انتهاء\x20غير\x20متوفرة','حساب\x20ياهو','UmF3YW4wNUAqIyQ=','yes','Profile\x20edit\x20submit\x20-\x20Updating\x20Firestore\x20document\x20with\x20data:','جار\x20إعداد\x20ملفك\x20الشخصي...','profile-username','updateUI\x20-\x20Email\x20status:\x20Not\x20verified,\x20Non-password\x20provider.\x20Verify\x20button\x20hidden.','google','querySelector','onAuthStateChanged\x20-\x20Finished\x20calling\x20fetchAndDisplayUserProfile.','seconds','WorkspaceAndDisplayUserProfile\x20-\x20Attempting\x20to\x20fetch\x20user\x20document\x20for\x20UID:\x20','github.com','حساب\x20عادي\x20(انتهت\x20صلاحية\x20البريميوم)','createUserProfile\x20-\x20Username\x20\x22','onAuthStateChanged\x20-\x20authStatusP\x20(#astat\x20p)\x20not\x20found.','\x0a\x20\x20\x20\x20<div\x20class=\x22warning-overlay\x22></div>\x0a\x20\x20\x20\x20<div\x20class=\x22warning-content\x22>\x0a\x20\x20\x20\x20\x20\x20<h3>غير\x20مسموح\x20بنسخ\x20المحتوى!</h3>\x0a\x20\x20\x20\x20\x20\x20<p>جميع\x20حقوق\x20النشر\x20محفوظة</p>\x0a\x20\x20\x20\x20</div>\x0a\x20\x20','random','scbtn','providerId','createUserProfile\x20-\x20Profile\x20document\x20created\x20successfully.','جاري\x20تحميل\x20بيانات...','Element\x20#epbtn\x20not\x20found.','inherit','microsoft.com','div','updateUI\x20-\x20Using\x20data\x20passed\x20directly.','null','145LWQKCy','copy','github','onAuthStateChanged\x20-\x20end.','Element\x20#epbtn\x20(Edit\x20Profile\x20button)\x20not\x20found\x20when\x20trying\x20to\x20show\x20it.','حدث\x20خطأ\x20أثناء\x20تسجيل\x20الخروج:\x20','username','updateUI\x20-\x20Account\x20type\x20span\x20(#profile-account-type)\x20not\x20found.','user','الرجاء\x20إدخال\x20الاسم\x20الكامل.','تحقق\x20من\x20البريد\x20الإلكتروني','onAuthStateChanged\x20-\x20Not\x20on\x20login\x20page,\x20redirecting...','مرحبا\x20بك\x20يا\x20:\x20','getItem','floor','creationTime','getDate','updateUI\x20-\x20Created\x20at\x20span\x20(#profile-created-at)\x20not\x20found.','--expiry-green-col','apple.com','linkedin.com','profile-current-points','ar-MA','trim','Element\x20#cebtn\x20not\x20found.','includes','parse','position','\x20attempts.\x20Falling\x20back\x20to\x20UID-based:\x20\x22','updateUI\x20-\x20Premium\x20expiry\x20item\x20div\x20(#profile-premium-expiry-item)\x20not\x20found\x20when\x20hiding\x20for\x20non-premium.','flex','updateUI\x20-\x20Premium\x20expiry\x20span\x20(#profile-premium-expiry)\x20not\x20found\x20when\x20data\x20is\x20missing.','totalExchanges','signoutUser\x20-\x20called.','toLowerCase','firebaseUserProfileData','32263IuBQek','updateUI\x20-\x20No\x20data\x20found\x20in\x20localStorage.','metadata','toLocaleDateString','Edit\x20profile\x20button\x20clicked.','(منتهي\x20الصلاحية)','createUserProfile\x20-\x20Setting\x20document\x20in\x20Firestore:','user-','toDate','yahoo','https://cdn-icons-png.flaticon.com/512/3135/3135715.png','updateUI\x20-\x20Email\x20status:\x20Verified/Social.\x20Verify\x20button\x20hidden.','جار\x20الإرسال...','none','error','\x22,\x20New\x20Phone:\x20\x22','isAdmin','Event\x20listener\x20attached\x20to\x20#epbtn','حدث\x20خطأ\x20أثناء\x20التحقق\x20من\x20اسم\x20المستخدم.','Profile\x20edit\x20submit\x20-\x20Save\x20button\x20re-enabled.','2076LQRByY','ceil','حساب\x20X\x20(Twitter)','...','normal',',\x20Is\x20Social/Google:\x20','updateUI\x20-\x20Provider\x20span\x20(#profile-provider)\x20not\x20found.','Profile\x20edit\x20submit\x20-\x20Save\x20button\x20disabled.','Attempting\x20to\x20attach\x20click\x20listener\x20to\x20#profile-username.','notification-error','getFullYear','fetchAndDisplayUserProfile\x20-\x20Error\x20syncing\x20emailVerified\x20to\x20Firestore:','Event\x20listener\x20attached\x20to\x20#profile-username\x20successfully.','facebook','premiumExpiry','createUserProfile\x20-\x20Failed\x20to\x20find\x20available\x20username\x20after\x20','bold','customSettings','click','\x0a\x20\x20\x20\x20/*\x20منع\x20اختيار\x20النص\x20*/\x0a\x20\x20\x20\x20*\x20{\x0a\x20\x20\x20\x20\x20\x20-webkit-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20-moz-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20-ms-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20/*\x20تحذير\x20النسخ\x20*/\x0a\x20\x20\x20\x20.copy-warning\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20z-index:\x209999;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-overlay\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20background:\x20rgba(0,0,0,0.7);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-content\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20top:\x2050%;\x0a\x20\x20\x20\x20\x20\x20left:\x2050%;\x0a\x20\x20\x20\x20\x20\x20transform:\x20translate(-50%,\x20-50%);\x0a\x20\x20\x20\x20\x20\x20background:\x20#f8d7da;\x0a\x20\x20\x20\x20\x20\x20padding:\x2030px;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20max-width:\x2080%;\x0a\x20\x20\x20\x20\x20\x20box-shadow:\x200\x200\x2020px\x20rgba(0,0,0,0.5);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-content\x20h3\x20{\x0a\x20\x20\x20\x20\x20\x20color:\x20#721c24;\x0a\x20\x20\x20\x20\x20\x20margin-bottom:\x2015px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20\x0a\x20\x20\x20\x20/*\x20أنماط\x20الخطأ\x20الأصلية\x20*/\x0a\x20\x20\x20\x20.overlay\x20{\x20\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x20top:\x200;\x20left:\x200;\x20\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x20height:\x20100%;\x20\x0a\x20\x20\x20\x20\x20\x20background:\x20rgba(255,\x20255,\x20255,\x200.7);\x20\x0a\x20\x20\x20\x20\x20\x20z-index:\x20999;\x20backdrop-filter:\x20blur(5px);\x20\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.notification-error\x20{\x20\x0a\x20\x20\x20\x20\x20\x20background-color:\x20#f8d7da;\x20\x0a\x20\x20\x20\x20\x20\x20color:\x20#721c24;\x20padding:\x2020px;\x20\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x20border-radius:\x2010px;\x20\x0a\x20\x20\x20\x20\x20\x20box-shadow:\x200\x200\x2015px\x20rgba(0,\x200,\x200,\x200.2);\x20\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x20font-size:\x2018px;\x20\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x20top:\x2050%;\x20left:\x2050%;\x20\x0a\x20\x20\x20\x20\x20\x20transform:\x20translate(-50%,\x20-50%);\x20\x0a\x20\x20\x20\x20\x20\x20animation:\x20slideIn\x200.5s\x20ease-in-out;\x20\x0a\x20\x20\x20\x20\x20\x20z-index:\x201000;\x20width:\x2080%;\x20max-width:\x20500px;\x20\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link\x20{\x20\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x20margin-top:\x2015px;\x20\x0a\x20\x20\x20\x20\x20\x20padding:\x2010px;\x20background-color:\x20#25d366;\x20\x0a\x20\x20\x20\x20\x20\x20color:\x20white;\x20text-decoration:\x20none;\x20\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x20border-radius:\x205px;\x20\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x20\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link:hover\x20{\x20background-color:\x20#128c7e;\x20}\x0a\x20\x20\x20\x20@keyframes\x20slideIn\x20{\x0a\x20\x20\x20\x20\x20\x20from\x20{\x20opacity:\x200;\x20transform:\x20translate(-50%,\x20-60%);\x20}\x0a\x20\x20\x20\x20\x20\x20to\x20{\x20opacity:\x201;\x20transform:\x20translate(-50%,\x20-50%);\x20}\x0a\x20\x20\x20\x20}\x0a\x20\x20','updateUI\x20-\x20Creation\x20date\x20displayed\x20as\x20\x27غير\x20محدد\x27.','\x0a\x20\x20\x20\x20\x20\x20<p>خطأ:\x20النطاق\x20الحالي\x20غير\x20مدعوم!</p>\x0a\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@example.com?subject=مشكلة\x20في\x20النطاق\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20','updateUI\x20-\x20User\x20is\x20Owner\x20Admin.\x20Admin\x20link\x20shown.','block','(صالح\x20لـ\x20','profile-premium-expiry-item','updateUI\x20-\x20Email\x20status\x20element\x20(#profile-email-status)\x20not\x20found.','empty','copy-warning','42192dcwQMC','onAuthStateChanged\x20-\x20logoutButton\x20(#lbtn)\x20not\x20found.','حساب\x20مايكروسoft','/p/login.html','pic','تم\x20إرسال\x20رابط\x20التحقق\x20إلى\x20بريدك\x20الإلكتروني.\x20يرجى\x20التحقق\x20من\x20صندوق\x20الوارد\x20(أو\x20مجلد\x20الرسائل\x20غير\x20المرغوب\x20فيها).','inline-block','exists','updateUI\x20-\x20User\x20is\x20premium,\x20processing\x20expiry\x20date.','activationCode','تم\x20التحقق\x20بنجاح!\x20الإعدادات:','appendChild','Async:\x20Could\x20not\x20copy\x20text:\x20','\x22\x20with\x20color\x20variable:\x20\x22','updateUI\x20-\x20Points/exchanges/Premium\x20Expiry\x20fields\x20and\x20My\x20Points\x20button\x20shown\x20for\x20non-admin/non-owner.','focus','Cancel\x20edit\x20button\x20clicked.','className','Edit\x20profile\x20-\x20Failed\x20to\x20parse\x20local\x20user\x20data\x20for\x20editing:','Fallback:\x20Oops,\x20unable\x20to\x20copy','createElement','#msg\x20.err','firebase','then','Edit\x20Profile\x20button\x20display\x20set\x20to\x20\x27inline-block\x27.','604csdMii','الرجاء\x20تسجيل\x20الدخول.','var(--cooldown-col)','profile-account-type','Element\x20#lbtn\x20(Logout\x20button)\x20not\x20found.','profile-total-exchanges-item','Profile\x20edit\x20form\x20submitted.','remove','Profile\x20edit\x20submit\x20-\x20Profile\x20fetched\x20and\x20displayed.','Async:\x20Copying\x20to\x20clipboard\x20was\x20successful!','overlay','Username\x20text\x20condition\x20passed.\x20Calling\x20copyToClipboard.','updateUI\x20-\x20Premium\x20expiry\x20span\x20(#profile-premium-expiry)\x20not\x20found\x20for\x20permanent\x20premium.','providerData','fetchAndDisplayUserProfile\x20-\x20start\x20for\x20user:','src','classList','phoneNumber','fetchAndDisplayUserProfile\x20-\x20Auth\x20emailVerified\x20is\x20true,\x20but\x20Firestore\x20is\x20not.\x20Syncing...','points','execCommand','updateUI\x20-\x20end\x20(logged\x20in\x20state)','keydown','top','WorkspaceAndDisplayUserProfile\x20-\x20User\x20document\x20fetched.\x20Exists:\x20','yahoo.com','photoURL','act','حفظ\x20التعديلات','createUserProfile\x20-\x20Generated\x20initial\x20username:\x20\x22','left','fontWeight','sendVerificationEmail\x20-\x20Attempting\x20to\x20send\x20verification\x20email...','users','\x20أيام)','updateUI\x20-\x20Total\x20points\x20earned\x20span\x20(#profile-total-points-earned)\x20not\x20found.','لا\x20يوجد\x20اسم\x20مستخدم\x20لنسخه.','writeText','profile-email-status','غير\x20محدد','updateUI\x20-\x20User\x20and\x20data\x20available.\x20Updating\x20UI\x20elements.'];_0x169b=function(){return _0x54ca4c;};return _0x169b();}verifyDomain();
+
+
+// استيراد وحدات Firebase الضرورية
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    updateProfile,
+    sendPasswordResetEmail,
+    GoogleAuthProvider,
+    FacebookAuthProvider,
+    GithubAuthProvider,
+    TwitterAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
+} from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+import {
+    getFirestore,
+    collection,
+    doc,
+    getDoc,
+    setDoc,
+    query,
+    where,
+    limit,
+    getDocs,
+    serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+//#################################################################################
+// الخطوة 1: منطق سكربت الحماية
+//#################################################################################
+
+// --- دالة لإضافة أنماط الحماية إلى الصفحة ---
+const addProtectionStyles = () => {
+  const styles = `
+    /* منع اختيار النص */
+    * {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+
+    /* تحذير النسخ (إذا كنت تستخدمه في مكان آخر) */
+    .copy-warning {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .warning-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+    }
+    .warning-content {
+      position: relative;
+      background: #f8d7da;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 80%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 10000;
+    }
+    .warning-content h3 {
+      color: #721c24;
+      margin-bottom: 15px;
+    }
+
+    /* أنماط الـ OVERLAY الذي يغطي الشاشة ويطبق البلور */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.7); /* خلفية شفافة */
+      z-index: 9999; /* يجب أن يكون أقل من رسالة الخطأ وأعلى من محتوى الصفحة */
+      backdrop-filter: blur(5px); /* تأثير البلور */
+      -webkit-backdrop-filter: blur(5px); /* لدعم متصفحات WebKit */
+    }
+
+    /* أنماط إشعارات الخطأ للحماية */
+    .notification-error-protection {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      font-weight: bold;
+      font-size: 18px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: slideIn 0.5s ease-in-out;
+      z-index: 10000; /* يجب أن يكون أعلى من الـ overlay */
+      width: 80%;
+      max-width: 500px;
+    }
+    .support-link-protection {
+      display: block;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #25d366;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .support-link-protection:hover { background-color: #128c7e; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+  `;
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+};
+
+// --- دالة فك تشفير النص المشفر ---
+function decryptText(encryptedText, key) {
+    try {
+        const decodedBase64 = atob(encryptedText);
+        const decrypted = CryptoJS.AES.decrypt(decodedBase64, key).toString(CryptoJS.enc.Utf8);
+        return decrypted;
+    } catch (e) {
+        console.error("Decryption failed:", e);
+        return null;
+    }
+}
+
+// --- المفتاح السري (يجب أن يتطابق مع المستخدم في التشفير) ---
+const encodedSecretKey = "UmF3YW4wNUAqIyQ="; // "Rawan05@*#$" مرمّز بـ Base64
+const secretKey = atob(encodedSecretKey);
+
+// --- دالة عرض إشعارات خطأ الحماية ---
+function showErrorNotification(errorType) {
+    // إزالة أي إشعارات سابقة للحماية (إذا كانت موجودة)
+    const existingNotification = document.getElementById('protection-notification-area');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    // إزالة أي overlay سابق (إذا كان موجودًا)
+    const existingOverlay = document.querySelector('.overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    // إنشاء الـ overlay
+    const overlayDiv = document.createElement('div');
+    overlayDiv.className = 'overlay';
+    document.body.appendChild(overlayDiv); // أضف الـ overlay أولاً ليغطي كل شيء
+
+    const protectionNotificationArea = document.createElement('div');
+    protectionNotificationArea.id = 'protection-notification-area';
+    protectionNotificationArea.className = 'notification-error-protection';
+
+    let messageHtml = "";
+    if (errorType === "key") {
+        messageHtml = `<p>خطأ: رمز التفعيل غير صحيح!</p>
+                       <a href="mailto:support@siwane.xyz?subject=مشكلة في رمز التفعيل" class="support-link-protection">اتصل بالدعم</a>`;
+    } else if (errorType === "naming") {
+        messageHtml = `<p>خطأ: النطاق الحالي غير مدعوم!</p>
+                       <a href="mailto:support@siwane.xyz?subject=مشكلة في النطاق" class="support-link-protection">اتصل بالدعم</a>`;
+    } else if (errorType === "config_html") {
+        messageHtml = `<p>خطأ: إعدادات الحماية الأساسية (\`encryptedBase64\`) مفقودة أو غير كاملة في ملف HTML!</p>
+                       <p style="font-size:0.8em; color: #555;">يرجى مراجعة وحدة السكربت التي تعرف الكائن \`encryptedBase64\`.</p>
+                       <a href="mailto:support@siwane.xyz?subject=مشكلة في إعدادات الحماية HTML" class="support-link-protection">اتصل بالدعم</a>`;
+    } else if (errorType === "firebase_config_missing") {
+        messageHtml = `<p>خطأ حرج: إعدادات Firebase أو مسار إعادة التوجيه مفقودان (لم يتم تعريفهما عالميًا). يرجى التحقق من ملف HTML.</p>
+                       <a href="mailto:support@siwane.xyz?subject=مشكلة في تعريف إعدادات Firebase HTML" class="support-link-protection">اتصل بالدعم</a>`;
+    } else {
+        messageHtml = `<p>خطأ غير معروف في نظام الحماية.</p>
+                       <a href="mailto:support@siwane.xyz?subject=خطأ غير معروف في الحماية" class="support-link-protection">اتصل بالدعم</a>`;
+    }
+
+    protectionNotificationArea.innerHTML = messageHtml;
+    document.body.appendChild(protectionNotificationArea); // أضف الإشعار بعد الـ overlay ليكون فوقه
+    console.error("Protection error:", errorType);
+
+    // تم إزالة مستمع حدث النقر من الـ overlayDiv هنا لضمان عدم إغلاق الإشعار بالنقر على أي مكان
+}
+
+// --- دالة التحقق من النطاق وتنشيط الكود المحمي ---
+function verifyDomain() {
+    addProtectionStyles(); // إضافة الأنماط دائمًا فورًا عند بدء التحقق
+
+    // التحقق من وجود الكائن `encryptedBase64` ورمز التفعيل
+    if (typeof encryptedBase64 === 'undefined' || !encryptedBase64 || !encryptedBase64.activationCode) {
+        console.error("Protection settings (encryptedBase64 object or its activationCode) not found or incomplete in HTML.");
+        showErrorNotification("config_html");
+        return;
+    }
+
+    // التحقق من وجود إعدادات Firebase ومسار إعادة التوجيه كمتغيرات عامة
+    if (typeof window.firebaseConfig === 'undefined' || typeof window.redirectPath === 'undefined') {
+        console.error("Firebase config or redirect path not found globally (window object). Check HTML script order.");
+        showErrorNotification("firebase_config_missing");
+        return;
+    }
+
+    const decryptedText = decryptText(encryptedBase64.activationCode, secretKey);
+
+    if (decryptedText) {
+        const currentDomain = window.location.hostname;
+        const cleanDecryptedText = decryptedText.replace(/^www\./, '');
+        const cleanCurrentDomain = currentDomain.replace(/^www\./, '');
+
+        if (cleanCurrentDomain === cleanDecryptedText) {
+            console.log("Domain verification successful. Initializing protected code.");
+            protectedCode(); // استدعاء الكود المحمي
+        } else {
+            console.warn(`Domain mismatch: Current='${cleanCurrentDomain}', Expected (decrypted)='${cleanDecryptedText}'`);
+            showErrorNotification("naming");
+        }
+    } else {
+        showErrorNotification("key");
+    }
+}
+
+//#################################################################################
+// الخطوة 2: الكود المحمي (نظام تسجيل الدخول بـ Firebase)
+//#################################################################################
+function protectedCode() {
+    console.log("تم التحقق بنجاح! الكود المحمي يعمل الآن.");
+
+    // التحقق النهائي من وجود إعدادات Firebase ومسار إعادة التوجيه (من المتغيرات العالمية)
+    if (!window.firebaseConfig || !window.redirectPath) {
+        console.error("Firebase config or redirect path is missing from global window object inside protectedCode.");
+        showErrorNotification("firebase_config_missing"); // عرض خطأ إذا كانت البيانات مفقودة
+        return;
+    }
+
+    // تهيئة Firebase باستخدام الإعدادات من `window.firebaseConfig`
+    const app = initializeApp(window.firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
+    const githubProvider = new GithubAuthProvider();
+    const twitterProvider = new TwitterAuthProvider();
+
+    // عناصر DOM
+    const container = document.querySelector('.container');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const loginButton = document.getElementById('login-button');
+    const signupButton = document.getElementById('signup-button');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const forgotPasswordSection = document.getElementById('forgot-password-section');
+    const forgotPasswordEmailInput = document.getElementById('forgot-password-email');
+    const sendResetEmailButton = document.getElementById('send-reset-email-button');
+    const backToLoginLink = document.getElementById('back-to-login-link');
+
+    const socialAuthButtons = document.querySelectorAll('.social-auth-button');
+    const googleAuthButtons = document.querySelectorAll('.google-auth-button');
+    const facebookAuthButtons = document.querySelectorAll('.facebook-auth-button');
+    const githubAuthButtons = document.querySelectorAll('.github-auth-button');
+    const twitterAuthButtons = document.querySelectorAll('.twitter-auth-button');
+
+    const registerBtn = document.querySelector('.register-btn');
+    const loginBtn = document.querySelector('.login-btn');
+    const eyeIcons = document.querySelectorAll('.eye-icon');
+
+    const notificationArea = document.getElementById('global-notification-area');
+    const notificationMessage = document.getElementById('global-notification-message');
+
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginPasswordFeedback = document.getElementById('login-password-feedback');
+
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupPasswordFeedback = document.getElementById('signup-password-feedback');
+
+    const USER_PROFILE_CACHE_KEY = 'firebase_user_profile_cache';
+
+    const pages = {
+        login: '/p/login.html',
+        profile: window.redirectPath, // استخدام مسار إعادة التوجيه من المتغيرات العامة
+        admin: '/p/admin.html' // يمكنك تعديل هذا إذا كان لديك صفحة admin
+    };
+
+    // إضافة الخاصية الجديدة targetRedirect هنا
+    let targetRedirect = window.targetRedirect || null;
+
+
+    // --- وظائف مساعدة ---
+    function showMessage(type, message) {
+        if (!message || message.trim() === '') {
+            hideMessages();
+            return;
+        }
+        notificationMessage.textContent = message;
+        notificationArea.classList.remove('notification-success', 'notification-error');
+        if (type === 'error') {
+            notificationArea.classList.add('notification-error');
+        } else if (type === 'success') {
+            notificationArea.classList.add('notification-success');
+        }
+        notificationArea.classList.add('show');
+        setTimeout(hideMessages, 5000);
+    }
+
+    function hideMessages() {
+        notificationArea.classList.remove('show');
+    }
+
+    function validatePhoneNumber(phone) {
+        const re = /^\+?[0-9]{6,}$/;
+        return re.test(String(phone).trim());
+    }
+
+    function validateFullName(name) {
+        return String(name).trim().length >= 2;
+    }
+
+    async function isUsernameAvailable(username) {
+        try {
+            const usersCollection = collection(db, 'users');
+            const q = query(usersCollection, where('username', '==', username.toLowerCase().trim()), limit(1));
+            const snapshot = await getDocs(q);
+            return snapshot.empty;
+        } catch (error) {
+            console.error('Error checking username availability:', error);
+            return false;
+        }
+    }
+
+    async function generateUniqueUsername(emailOrDisplayName, uid) {
+        let baseUsername = (emailOrDisplayName || uid || '').split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'user';
+        if (baseUsername.length === 0) baseUsername = 'user';
+
+        let username = baseUsername;
+        let counter = 1;
+        let isAvailable = await isUsernameAvailable(username);
+
+        while (!isAvailable && counter < 100) {
+            username = `${baseUsername}${counter}`;
+            isAvailable = await isUsernameAvailable(username);
+            counter++;
+        }
+
+        if (!isAvailable) {
+            console.warn('Could not generate a unique username after multiple attempts, falling back to UID based username.');
+            return `user_${uid.substring(0, 8)}`;
+        }
+        return username;
+    }
+
+    async function saveUserProfile(user, providerId, fullNameFromForm, phoneNumberFromForm, additionalUserInfo = {}) {
+        const userRef = doc(db, 'users', user.uid);
+        try {
+            const userDocSnap = await getDoc(userRef);
+            const userDocExists = userDocSnap.exists();
+            const userData = userDocSnap.data() || {};
+            const isNewUser = !userDocExists;
+
+            console.log('saveUserProfile called for user UID:', user.uid, 'Provider:', providerId);
+            console.log('Form Data Received (fullName, phoneNumber):', { fullNameFromForm, phoneNumberFromForm });
+            console.log('Existing Firestore Data (if any):', userData);
+
+            let username = userData.username;
+            if (!username) {
+                console.log('Username not found in Firestore, generating new one.');
+                const sourceIdentifier = (providerId === 'github.com' ? user.displayName : user.email) || user.uid;
+                username = await generateUniqueUsername(sourceIdentifier, user.uid);
+                console.log('Generated Username:', username);
+            }
+
+            const updatedData = {
+                fullName: (isNewUser && fullNameFromForm) ? fullNameFromForm : (userData.fullName || user.displayName || 'مستخدم جديد'),
+                username: username || userData.username || 'user',
+                email: user.email || userData.email || null,
+                phoneNumber: (isNewUser && phoneNumberFromForm) ? phoneNumberFromForm : (userData.phoneNumber || user.phoneNumber || ''),
+                accountType: userData.accountType || 'normal',
+                isAdmin: userData.isAdmin || false,
+                emailVerified: user.emailVerified || userData.emailVerified || (providerId !== 'password' && user.email != null),
+                createdAt: userData.createdAt || serverTimestamp(),
+                lastLogin: serverTimestamp(),
+                provider: providerId || userData.provider || (user.providerData && user.providerData.length > 0 ? user.providerData[0].providerId : 'unknown'),
+                photoURL: user.photoURL || userData.photoURL || null
+            };
+
+            console.log('Final data prepared for Firestore setDoc:', updatedData);
+
+            await setDoc(userRef, updatedData, { merge: true });
+            console.log('User profile successfully saved/updated in Firestore for UID:', user.uid);
+
+            try {
+                localStorage.setItem(USER_PROFILE_CACHE_KEY, JSON.stringify(updatedData));
+                console.log('User profile data cached in localStorage.');
+            } catch (lsError) {
+                console.warn('Failed to cache user profile in localStorage:', lsError);
+            }
+            return updatedData;
+        } catch (error) {
+            console.error('Firestore saveUserProfile failed for UID:', user.uid, error);
+            if (providerId === 'password' && additionalUserInfo?.isNewUser && user && auth.currentUser?.uid === user.uid) {
+                console.log('Attempting to delete newly created Firebase Auth user due to Firestore save failure...');
+                try {
+                    await user.delete();
+                    console.log('Newly created Firebase Auth user successfully deleted after Firestore save failure.');
+                    showMessage('error', 'فشل إكمال إنشاء الحساب بشكل كامل بسبب خطأ داخلي. تم حذف الحساب الجزئي. يرجى المحاولة مرة أخرى بعد قليل.');
+                } catch (delError) {
+                    console.error('Failed to delete user after Firestore save failure:', delError);
+                    showMessage('error', 'حدث خطأ فادح أثناء إنشاء الحساب ولا يمكن إكمال العملية تلقائياً. تم إنشاء جزء من الحساب ولكن حدثت مشكلة ولم يتم حذفه. يرجى الاتصال بالدعم.');
+                }
+            } else {
+                showMessage('error', 'حدث خطأ أثناء حفظ بيانات ملفك الشخصي. يرجى المحاولة لاحقًا.');
+            }
+            throw error;
+        }
+    }
+
+    async function fetchAndCacheUserProfile(user) {
+        const userRef = doc(db, 'users', user.uid);
+        try {
+            console.log('Attempting to fetch and cache user profile for UID:', user.uid);
+            const userDocSnap = await getDoc(userRef);
+            let userData = null;
+
+            if (userDocSnap.exists()) {
+                userData = userDocSnap.data();
+                console.log('User profile found in Firestore:', userData);
+                try {
+                    await setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true });
+                    console.log('Updated lastLogin timestamp in Firestore.');
+                } catch (updateErr) {
+                    console.warn('Failed to update lastLogin timestamp:', updateErr);
+                }
+            } else {
+                console.warn('User profile NOT found in Firestore for UID:', user.uid, '. Creating basic profile.');
+                const basicUserData = {
+                    fullName: user.displayName || 'مستخدم جديد',
+                    username: await generateUniqueUsername(user.email || user.uid, user.uid),
+                    email: user.email,
+                    phoneNumber: user.phoneNumber || '',
+                    accountType: 'normal',
+                    isAdmin: false,
+                    emailVerified: user.emailVerified,
+                    createdAt: serverTimestamp(),
+                    lastLogin: serverTimestamp(),
+                    provider: user.providerData[0]?.providerId || 'unknown',
+                    photoURL: user.photoURL || null
+                };
+                console.log('Saving basic user profile to Firestore:', basicUserData);
+                await setDoc(userRef, basicUserData, { merge: true });
+                userData = basicUserData;
+                console.log('Basic user profile saved successfully.');
+            }
+
+            if (userData) {
+                try {
+                    localStorage.setItem(USER_PROFILE_CACHE_KEY, JSON.stringify(userData));
+                    console.log('User profile successfully cached in localStorage.');
+                    return userData;
+                } catch (lsError) {
+                    console.warn('Failed to cache user profile in localStorage:', lsError);
+                    return userData;
+                }
+            }
+            console.warn('fetchAndCacheUserProfile returning null - no user data found or created.');
+            return null;
+        } catch (error) {
+            console.error('Error fetching or caching user profile:', error);
+            clearUserProfileCache();
+            return null;
+        }
+    }
+
+    function clearUserProfileCache() {
+        try {
+            localStorage.removeItem(USER_PROFILE_CACHE_KEY);
+            console.log('User profile cache cleared from localStorage.');
+        } catch (lsError) {
+            console.warn('Failed to clear user profile cache from localStorage:', lsError);
+        }
+    }
+
+    function redirectToTargetPage() {
+        const currentPath = window.location.pathname;
+        const loginPageName = pages.login.split('/').pop();
+        const isComingFromLogin = currentPath.endsWith(loginPageName) || currentPath === '/' || currentPath.endsWith('index.html');
+
+        let destination = pages.profile; // الوجهة الافتراضية بعد تسجيل الدخول
+
+        // إذا كان هناك targetRedirect معرف و المستخدم لم يأتِ مباشرة إلى صفحة تسجيل الدخول
+        if (targetRedirect && !isComingFromLogin) {
+            destination = targetRedirect;
+            console.log('Redirecting to previous page (targetRedirect):', destination);
+        } else {
+            console.log('Redirecting to default profile page:', destination);
+        }
+
+        // فقط أعد التوجيه إذا لم نكن بالفعل على صفحة الوجهة
+        if (!currentPath.includes(destination.split('/').pop())) {
+            window.location.href = destination;
+        } else {
+            console.log('Already on the destination page. No redirection needed.');
+        }
+    }
+
+
+    function disableSocialButtons() {
+        console.log('Disabling social login buttons.');
+        socialAuthButtons.forEach(button => {
+            button.style.pointerEvents = 'none';
+            button.style.opacity = '0.6';
+        });
+    }
+
+    function enableSocialButtons() {
+        console.log('Enabling social login buttons.');
+        socialAuthButtons.forEach(button => {
+            button.style.pointerEvents = 'auto';
+            button.style.opacity = '1';
+        });
+    }
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    // --- معالجات أحداث أزرار التبديل بين تسجيل الدخول والتسجيل ---
+    registerBtn?.addEventListener('click', () => {
+        console.log('Register button clicked. Switching to signup form.');
+        container.classList.add('active');
+        hideMessages();
+        forgotPasswordSection.style.display = 'none';
+        loginForm.style.display = 'block'; // للتأكد من أنها مرئية قبل التبديل
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+        signupPasswordFeedback.textContent = '';
+        signupPasswordFeedback.className = 'password-feedback';
+    });
+
+    loginBtn?.addEventListener('click', () => {
+        console.log('Login button clicked. Switching to login form.');
+        container.classList.remove('active');
+        hideMessages();
+        forgotPasswordSection.style.display = 'none';
+        loginForm.style.display = 'block'; // للتأكد من أنها مرئية
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+        signupPasswordFeedback.textContent = '';
+        signupPasswordFeedback.className = 'password-feedback';
+    });
+
+    // --- معالج أحداث أيقونات إظهار/إخفاء كلمة المرور ---
+    eyeIcons.forEach(icon => {
+        icon.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const passwordInput = icon.closest('.input-box').querySelector('input');
+            if (passwordInput && (passwordInput.type === 'password' || passwordInput.type === 'text')) {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                icon.classList.toggle('bxs-show', !isPassword);
+                icon.classList.toggle('bxs-hide', isPassword);
+                console.log('Toggled password visibility.');
+            }
+        });
+    });
+
+    // Event listener for signup password input to provide live feedback
+    signupPasswordInput?.addEventListener('input', () => {
+        const password = signupPasswordInput.value;
+        if (password.length === 0) {
+            signupPasswordFeedback.textContent = '';
+            signupPasswordFeedback.className = 'password-feedback';
+            return;
+        }
+        if (password.length < 6) {
+            signupPasswordFeedback.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+            signupPasswordFeedback.className = 'password-feedback error';
+        } else {
+            const hasNumber = /[0-9]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasUpper = /[A-Z]/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+            let strength = 0;
+            if (hasNumber) strength++;
+            if (hasLower) strength++;
+            if (hasUpper) strength++;
+            if (hasSpecial) strength++;
+            if (password.length >= 8) strength++;
+
+            if (strength >= 4) {
+                signupPasswordFeedback.textContent = 'كلمة مرور قوية جدا.';
+                signupPasswordFeedback.className = 'password-feedback success';
+            } else if (strength >= 2) {
+                signupPasswordFeedback.textContent = 'كلمة مرور قوية تحتوي على أرقام حروف ورموز.';
+                signupPasswordFeedback.className = 'password-feedback warning';
+            } else {
+                signupPasswordFeedback.textContent = 'كلمة مرور ضعيفة أضف 6+ أحرف وأرقام.';
+                signupPasswordFeedback.className = 'password-feedback error';
+            }
+        }
+    });
+
+    // --- معالج حدث إرسال نموذج تسجيل الدخول ---
+    loginForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMessages();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+
+        if (!email || !password) {
+            showMessage('error', 'الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+            loginPasswordFeedback.textContent = 'كلمة المرور مطلوبة.';
+            loginPasswordFeedback.className = 'password-feedback error';
+            return;
+        }
+        if (!validateEmail(email)) {
+            showMessage('error', "صيغة البريد الإلكتروني غير صحيحة.");
+            return;
+        }
+        if (password.length < 6) {
+            showMessage('error', 'كلمة المرور يجب أن لا تقل عن 6 أحرف.');
+            loginPasswordFeedback.textContent = 'كلمة المرور غير صحيحة.';
+            loginPasswordFeedback.className = 'password-feedback error';
+            return;
+        }
+
+        loginButton.disabled = true;
+        loginButton.textContent = 'جاري تسجيل الدخول...';
+        console.log('Attempting to sign in with email and password.');
+
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            console.log('Sign in successful:', user);
+            await fetchAndCacheUserProfile(user);
+
+            showMessage('success', 'تم تسجيل الدخول بنجاح!');
+            loginPasswordFeedback.textContent = '';
+            loginPasswordFeedback.className = 'password-feedback';
+            // **** إعادة التوجيه بعد تسجيل الدخول بنجاح ****
+            redirectToTargetPage(); // استخدام دالة إعادة التوجيه الجديدة
+
+        } catch (error) {
+            console.error('Sign in error:', error);
+            let friendlyMessage = "حدث خطأ غير متوقع أثناء تسجيل الدخول.";
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                friendlyMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+                loginPasswordFeedback.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                loginPasswordFeedback.className = 'password-feedback error';
+            } else if (error.code === 'auth/invalid-email') {
+                friendlyMessage = "صيغة البريد الإلكتروني غير صحيحة.";
+            } else if (error.code === 'auth/user-disabled') {
+                friendlyMessage = "تم تعطيل هذا الحساب.";
+            } else if (error.code === 'auth/too-many-requests') {
+                friendlyMessage = "تم حظر الوصول مؤقتًا بسبب كثرة المحاولات. حاول مرة أخرى لاحقًا.";
+            } else {
+                friendlyMessage = error.message || friendlyMessage;
+            }
+            showMessage('error', friendlyMessage);
+        } finally {
+            // قم بتمكين الزر مرة أخرى فقط إذا لم يتم تسجيل دخول المستخدم بنجاح
+            if (!auth.currentUser) {
+                loginButton.disabled = false;
+                loginButton.textContent = 'تسجيل الدخول';
+            }
+        }
+    });
+
+    // --- معالج حدث إرسال نموذج إنشاء حساب ---
+    signupForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideMessages();
+
+        const fullName = document.getElementById('signup-fullname').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const phone = document.getElementById('signup-phone').value.trim();
+        const password = document.getElementById('signup-password').value;
+
+        console.log('Signup Form Submission Attempt.');
+        console.log('Captured Form Values:', { fullName: fullName, email: email, phone: phone }); // لا تسجل كلمة المرور الفعلية
+
+        if (!fullName || !email || !password || !phone) {
+            showMessage('error', "الرجاء تعبئة جميع الحقول المطلوبة.");
+            return;
+        }
+        if (!validateFullName(fullName)) {
+            showMessage('error', "الرجاء إدخال اسم كامل صحيح (حرفان على الأقل).");
+            return;
+        }
+        if (!validateEmail(email)) {
+            showMessage('error', "صيغة البريد الإلكتروني غير صحيحة.");
+            return;
+        }
+        if (password.length < 6) {
+            showMessage('error', "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.");
+            signupPasswordFeedback.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+            signupPasswordFeedback.className = 'password-feedback error';
+            return;
+        }
+        if (!validatePhoneNumber(phone)) {
+            showMessage('error', "الرجاء إدخال رقم هاتف صحيح. يجب أن يحتوي على أرقام فقط وقد يبدأ بـ +، وطوله لا يقل عن 6 أرقام.");
+            return;
+        }
+
+        signupButton.disabled = true;
+        signupButton.textContent = 'جاري إنشاء الحساب...';
+        console.log('Attempting to create user with email and password.');
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            console.log('Firebase Auth user created successfully:', user);
+
+            console.log('Attempting to send email verification.');
+            sendEmailVerification(user).then(() => {
+                console.log('Email verification sent.');
+            }).catch((error) => {
+                console.error('Failed to send email verification:', error);
+            });
+
+            console.log('Attempting to save user profile to Firestore.');
+            await saveUserProfile(user, 'password', fullName, phone, { isNewUser: true });
+            console.log('User profile save to Firestore completed.');
+
+            if (fullName && user.displayName !== fullName) {
+                try {
+                    console.log('Attempting to update Firebase Auth user display name:', fullName);
+                    await updateProfile(user, { displayName: fullName });
+                    console.log('Firebase Auth display name updated successfully.');
+                } catch (updateErr) {
+                    console.warn('Failed to update Firebase Auth profile display name:', updateErr);
+                }
+            }
+
+            showMessage('success', "تم إنشاء الحساب بنجاح! تم إرسال رابط التحقق إلى بريدك الإلكتروني. يرجى التحقق منه لتسجيل الدخول.");
+            signupForm.reset();
+            signupPasswordFeedback.textContent = '';
+            signupPasswordFeedback.className = 'password-feedback';
+            signupButton.textContent = 'انشئ حساب جديد';
+            // **** إعادة التوجيه بعد إنشاء الحساب بنجاح ****
+            redirectToTargetPage(); // استخدام دالة إعادة التوجيه الجديدة
+
+
+        } catch (error) {
+            console.error('Signup process failed:', error);
+            let friendlyMessage = "حدث خطأ أثناء إنشاء الحساب.";
+            if (error.code === 'auth/email-already-in-use') {
+                friendlyMessage = "هذا البريد الإلكتروني مستخدم بالفعل. حاول تسجيل الدخول أو استخدم بريدًا آخر.";
+            } else if (error.code === 'auth/weak-password') {
+                friendlyMessage = "كلمة المرور ضعيفة جدًا. يجب أن تتكون من 6 أحرف على الأقل.";
+                signupPasswordFeedback.textContent = 'كلمة المرور ضعيفة جدًا. يجب أن تتكون من 6 أحرف على الأقل.';
+                signupPasswordFeedback.className = 'password-feedback error';
+            } else if (error.code === 'auth/invalid-email') {
+                friendlyMessage = "صيغة البريد الإلكتروني غير صحيحة.";
+            } else if (error.code === 'auth/operation-not-allowed') {
+                friendlyMessage = "تم تعطيل إنشاء الحساب عبر البريد الإلكتروني/كلمة المرور. يرجى الاتصال بالدعم.";
+            } else if (error.code === 'auth/network-request-failed') {
+                friendlyMessage = "مشكلة في الشبكة. يرجى التحقق من اتصالك بالإنترنت.";
+            } else if (error.message && !friendlyMessage.includes('خطأ حاسم أثناء حفظ')) {
+                friendlyMessage = `خطأ: ${error.message}`;
+            } else if (!error.message && !friendlyMessage.includes('خطأ حاسم أثناء حفظ')) {
+                friendlyMessage = "حدث خطأ غير متوقع أثناء إنشاء الحساب.";
+            }
+
+            showMessage('error', friendlyMessage);
+            // تأكد من تمكين الزر إذا لم يتم إنشاء الحساب بنجاح (ولم يتم تسجيل دخول المستخدم)
+            if (!auth.currentUser) {
+                signupButton.disabled = false;
+                signupButton.textContent = 'انشئ حساب جديد';
+            }
+        }
+    });
+
+    // --- معالج حدث أزرار تسجيل الدخول الاجتماعي ---
+    async function handleSocialAuth(provider, providerId) {
+        hideMessages();
+        disableSocialButtons();
+        console.log('Attempting social sign in with provider:', providerId);
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const additionalUserInfo = result.additionalUserInfo;
+
+            console.log('Social sign in successful:', user);
+            console.log('Additional User Info:', additionalUserInfo);
+
+            await saveUserProfile(user, providerId, null, null, { isNewUser: additionalUserInfo?.isNewUser });
+            console.log('User profile save/update after social login completed.');
+
+            showMessage('success', `مرحباً ${user.displayName || user.email || 'مستخدم جديد'}! تم تسجيل الدخول بنجاح.`);
+            // **** إعادة التوجيه بعد تسجيل الدخول الاجتماعي بنجاح ****
+            redirectToTargetPage(); // استخدام دالة إعادة التوجيه الجديدة
+
+        } catch (error) {
+            console.error('Social sign in error for provider', providerId, ':', error);
+            let friendlyMessage = `حدث خطأ أثناء المصادقة باستخدام ${providerId}.`;
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                const email = error.email;
+                friendlyMessage = `هذا البريد الإلكتروني (${email}) مسجل بالفعل بحساب آخر. الرجاء تسجيل الدخول بالطريقة الأصلية التي استخدمتها (مثل البريد الإلكتروني/كلمة المرور أو مزود اجتماعي آخر).`;
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                friendlyMessage = 'تم إلغاء المصادقة بواسطة المستخدم.';
+            } else if (error.code === 'auth/network-request-failed') {
+                friendlyMessage = 'مشكلة في الشبكة. يرجى التحقق من اتصالك بالإنترنت.';
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                friendlyMessage = 'تم إلغاء طلب المصادقة السابق.';
+            } else if (error.code === 'auth/operation-not-allowed') {
+                friendlyMessage = `تم تعطيل طريقة المصادقة ${providerId}. يرجى الاتصال بالدعم.`
+            } else if (error.code === 'auth/credential-already-in-use') {
+                friendlyMessage = 'تم ربط هذا الحساب الاجتماعي بالفعل بمستخدم آخر.';
+            } else {
+                friendlyMessage = error.message || friendlyMessage;
+            }
+            showMessage('error', friendlyMessage);
+        } finally {
+            enableSocialButtons();
+        }
+    }
+
+    googleAuthButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSocialAuth(googleProvider, 'google.com');
+        });
+    });
+    facebookAuthButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSocialAuth(facebookProvider, 'facebook.com');
+        });
+    });
+    githubAuthButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSocialAuth(githubProvider, 'github.com');
+        });
+    });
+    twitterAuthButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleSocialAuth(twitterProvider, 'twitter.com');
+        });
+    });
+
+    // --- معالجات أحداث قسم نسيان كلمة المرور ---
+    forgotPasswordLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Forgot password link clicked.');
+        loginForm.style.display = 'none';
+        forgotPasswordSection.style.display = 'block';
+        hideMessages();
+        forgotPasswordEmailInput.value = '';
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+    });
+
+    backToLoginLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Back to login link clicked.');
+        forgotPasswordSection.style.display = 'none';
+        loginForm.style.display = 'block';
+        hideMessages();
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+    });
+
+    sendResetEmailButton?.addEventListener('click', async () => {
+        const email = forgotPasswordEmailInput.value.trim();
+        hideMessages();
+
+        if (!email) {
+            showMessage('error', 'الرجاء إدخال بريدك الإلكتروني.');
+            return;
+        }
+        if (!validateEmail(email)) {
+            showMessage('error', "صيغة البريد الإلكتروني غير صحيحة.");
+            return;
+        }
+
+        sendResetEmailButton.disabled = true;
+        sendResetEmailButton.textContent = 'جاري الإرسال...';
+        console.log('Attempting to send password reset email to:', email);
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            console.log('Password reset email sent successfully.');
+            showMessage('success', `تم إرسال رابط إعادة تعيين كلمة المرور إلى ${email}. يرجى التحقق من بريدك الوارد.`);
+            forgotPasswordEmailInput.value = '';
+
+        } catch (error) {
+            console.error('Error sending password reset email:', error);
+            let friendlyMessage = "حدث خطأ أثناء إرسال رابط إعادة التعيين.";
+            if (error.code === 'auth/user-not-found') {
+                friendlyMessage = "لا يوجد مستخدم مسجل بهذا البريد الإلكتروني.";
+            } else if (error.code === 'auth/invalid-email') {
+                friendlyMessage = "صيغة البريد الإلكتروني غير صحيحة.";
+            } else if (error.code === 'auth/too-many-requests') {
+                friendlyMessage = "تم حظر الطلب مؤقتًا بسبب كثرة المحاولات. حاول مرة أخرى لاحقًا.";
+            } else {
+                friendlyMessage = error.message || friendlyMessage;
+            }
+            showMessage('error', friendlyMessage);
+        } finally {
+            sendResetEmailButton.disabled = false;
+            sendResetEmailButton.textContent = 'إرسال رابط إعادة التعيين';
+        }
+    });
+
+    // --- دالة تسجيل الخروج ---
+    async function handleSignOut() {
+        console.log('Attempting to sign out.');
+        try {
+            await signOut(auth);
+            console.log('Sign out successful.');
+            // onAuthStateChanged سيتولى إعادة التوجيه
+        } catch (error) {
+            console.error('Sign out error:', error);
+            showMessage('error', 'حدث خطأ أثناء تسجيل الخروج.');
+        }
+    }
+
+    // --- مستمع لتغيير حالة المصادقة (تسجيل الدخول/الخروج) ---
+    onAuthStateChanged(auth, async (user) => {
+        const currentPage = window.location.pathname;
+        const loginPageName = pages.login.split('/').pop();
+        const isAuthPage = currentPage.endsWith(loginPageName) || currentPage === '/' || currentPage.endsWith('index.html');
+
+        if (user) {
+            console.log('Auth state changed: User is logged in.', user.uid);
+            const cachedData = localStorage.getItem(USER_PROFILE_CACHE_KEY);
+            let userData = null;
+
+            if (cachedData) {
+                try {
+                    userData = JSON.parse(cachedData);
+                    if (userData && userData.email === user.email && userData.username) {
+                        console.log('User profile found in cache.');
+                    } else {
+                        console.log('Cached data is invalid or for a different user. Clearing cache.');
+                        userData = null;
+                        clearUserProfileCache();
+                    }
+                } catch (e) {
+                    console.error('Error parsing cached data:', e);
+                    userData = null;
+                    clearUserProfileCache();
+                }
+            }
+
+            fetchAndCacheUserProfile(user).then(fetchedData => {
+                if (fetchedData) {
+                    console.log('Fetched and cached latest user profile data.');
+                } else {
+                    console.warn('Failed to fetch and cache user profile data.');
+                }
+            }).catch(error => {
+                console.error('Error during fetchAndCacheUserProfile:', error);
+            });
+
+            // إذا كان المستخدم على صفحة تسجيل الدخول وهو مسجل بالفعل، أعد توجيهه
+            if (isAuthPage && !currentPage.includes(pages.profile.split('/').pop())) {
+                console.log('User is on auth page but logged in. Redirecting to profile page.');
+                // تأخير طفيف للسماح لـ fetchAndCacheUserProfile بالبدء قبل إعادة التوجيه
+                setTimeout(() => {
+                    if (auth.currentUser) { // تحقق مرة أخيرة
+                        redirectToTargetPage(); // الآن ستقوم دالة redirectToTargetPage بتحديد الوجهة الصحيحة
+                    }
+                }, 500);
+            }
+
+        } else {
+            console.log('Auth state changed: No user is logged in.');
+            clearUserProfileCache();
+
+            const protectedPageIdentifier = pages.profile.split('/').pop();
+            const adminPageIdentifier = pages.admin.split('/').pop();
+
+            // إذا كان المستخدم غير مسجل الدخول ويحاول الوصول إلى صفحة محمية (غير صفحة المصادقة)،
+            // قم بإعادة توجيهه إلى صفحة تسجيل الدخول.
+            if (!isAuthPage && (currentPage.includes(protectedPageIdentifier) || currentPage.includes(adminPageIdentifier))) {
+                console.log('User is on a protected page but not logged in. Redirecting to login.');
+                window.location.href = pages.login;
+            } else {
+                console.log('User is on an auth page and not logged in. Staying put.');
+            }
+        }
+    });
+
+    // --- عند تحميل الصفحة لأول مرة ---
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded and parsed.');
+        hideMessages();
+        forgotPasswordSection.style.display = 'none';
+        // لا تستدعي container.classList.remove('active') هنا مباشرةً،
+        // المنطق أدناه سيتولى ذلك بناءً على الـ URL
+
+        loginPasswordFeedback.textContent = '';
+        loginPasswordFeedback.className = 'password-feedback';
+        signupPasswordFeedback.textContent = '';
+        signupPasswordFeedback.className = 'password-feedback';
+
+        const cachedData = localStorage.getItem(USER_PROFILE_CACHE_KEY);
+        if (cachedData) {
+            try {
+                const userData = JSON.parse(cachedData);
+                console.log('Found cached user data on load:', userData);
+            } catch (e) {
+                console.error('Error parsing cached data on load:', e);
+                clearUserProfileCache();
+            }
+        }
+
+        // -------------------------------------------------------------
+        // هذا هو الجزء الذي يقرأ معلمة الـ URL ويحدد الواجهة
+        // -------------------------------------------------------------
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode'); // قراءة القيمة 'mode' من "?mode=..."
+
+        if (mode === 'signup') {
+            console.log('URL contains "?mode=signup". Switching to signup form.');
+            container.classList.add('active'); // إضافة الكلاس 'active' لعرض واجهة التسجيل
+            loginForm.style.display = 'block'; // تأكد أن النموذج مرئي
+        } else {
+            console.log('URL does not contain "?mode=signup" or is empty. Defaulting to login form.');
+            container.classList.remove('active'); // إزالة الكلاس 'active' لعرض واجهة تسجيل الدخول
+            loginForm.style.display = 'block'; // تأكد أن النموذج مرئي
+        }
+        // -------------------------------------------------------------
+    });
+
+} // نهاية protectedCode
+
+//#################################################################################
+// الخطوة 3: الاستدعاء الأولي لبدء عملية التحقق
+//#################################################################################
+// تأكد من أن الكائن encryptedBase64 مُعرف (من ملف HTML) قبل استدعاء verifyDomain
+// إذا لم يكن كذلك، انتظر حتى يتم تحميل DOM بالكامل كمحاولة أخيرة.
+if (typeof encryptedBase64 !== 'undefined') {
+    verifyDomain();
+} else {
+    console.warn("`encryptedBase64` is not defined globally when login.js initially runs. Waiting for DOMContentLoaded.");
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof encryptedBase64 !== 'undefined') {
+            verifyDomain();
+        } else {
+            console.error("Protection settings (encryptedBase64) are still not defined after DOMContentLoaded. Cannot verify domain.");
+            addProtectionStyles(); // إضافة الأنماط حتى لو لم يتم تعريف `encryptedBase64`
+            showErrorNotification("config_html"); // للإشارة إلى أن `encryptedBase64` غير موجود
+        }
+    });
+}
+
