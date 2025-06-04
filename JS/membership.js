@@ -1,4 +1,4 @@
-// membership.js
+// membership1.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -37,6 +37,9 @@ const emailVerificationHtmlTemplate = `
         <div class="evMsg evError">حدث خطأ أثناء إرسال بريد التفعيل. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</div>
     </div>
 `;
+
+// متغير لتعقب حالة الإرسال
+let isSendingEmailVerification = false;
 
 /**
  * Initializes the Firebase application and sets up authentication/firestore instances.
@@ -350,6 +353,7 @@ function showRestrictionMessage(reason, userData = null, user = null) {
             messageContainerEmailUnverified.style.display = 'block';
             const emailPlaceholder = messageContainerEmailUnverified.querySelector('.email-placeholder');
             if (emailPlaceholder && user && user.email) emailPlaceholder.textContent = user.email;
+            // عند عرض رسالة "البريد غير مؤكد"، أظهر الحالة الأولية (الطلب)
             showEmailVerificationStatus('prompt');
         }
     } else {
@@ -373,20 +377,49 @@ function showEmailVerificationStatus(status) {
     if(messageContainerEmailUnverified) {
         const prompt = messageContainerEmailUnverified.querySelector('.evPrompt');
         const statusMessages = messageContainerEmailUnverified.querySelectorAll('.evMsg');
+        const resendLink = document.getElementById('resendEmailVerificationLink'); // جلب الرابط
 
         if(prompt) prompt.style.display = 'none';
         statusMessages.forEach(msg => msg.style.display = 'none');
 
         let specificStatusElement = null;
+        let linkText = 'إعادة إرسال بريد التحقق'; // النص الافتراضي للرابط
+
         if (status === 'prompt' && prompt) {
             specificStatusElement = prompt;
+            if (resendLink) {
+                resendLink.textContent = linkText; // إعادة النص الأصلي
+                resendLink.style.pointerEvents = 'auto'; // تمكين النقر
+                resendLink.style.opacity = '1';
+                isSendingEmailVerification = false; // إعادة تعيين حالة الإرسال
+            }
         } else {
             specificStatusElement = messageContainerEmailUnverified.querySelector(`.evMsg.${status}`);
+            // تعديل نص الرابط بناءً على الحالة
+            if (status === 'evSent') {
+                linkText = 'تم إرسال البريد';
+            } else if (status === 'evError') {
+                linkText = 'حدث خطأ. أعد المحاولة';
+            } else if (status === 'evVerified') {
+                linkText = 'تم تأكيد البريد بالفعل';
+            }
+            if (resendLink) {
+                resendLink.textContent = linkText;
+                if (status === 'evSent' || status === 'evVerified') {
+                    resendLink.style.pointerEvents = 'none'; // تعطيل النقر
+                    resendLink.style.opacity = '0.6';
+                } else {
+                    resendLink.style.pointerEvents = 'auto'; // تمكين النقر
+                    resendLink.style.opacity = '1';
+                }
+                isSendingEmailVerification = false; // إعادة تعيين حالة الإرسال بعد الانتهاء
+            }
         }
 
         if(specificStatusElement) {
             specificStatusElement.style.display = 'block';
         } else {
+            // كحل بديل إذا لم يتم العثور على عنصر محدد
             if(prompt) prompt.style.display = 'block';
         }
     }
@@ -432,9 +465,11 @@ async function updateProtectedContentDisplay(user, userDataFromSource) {
         } else if (userData.accountType === 'premium') {
             let needsEmailVerificationCheck = true;
 
+            // استثناء مقدمي الخدمات الاجتماعية من التحقق من البريد الإلكتروني
             if (user.providerData && user.providerData.length > 0) {
                 const providerId = user.providerData[0].providerId;
-                if (providerId !== 'password') {
+                // قائمة بمقدمي الخدمات الذين لا يتطلبون التحقق من البريد الإلكتروني (مثلاً Google, Facebook)
+                if (providerId === 'google.com' || providerId === 'facebook.com') { // أضف هنا أي مقدمي خدمة آخرين لا تحتاج للتحقق
                     needsEmailVerificationCheck = false;
                 }
             }
@@ -577,28 +612,44 @@ function setupAuthStateListener() {
 }
 
 async function sendEmailVerificationHandler() {
+    // منع الإرسال المتعدد إذا كان هناك إرسال قيد التقدم
+    if (isSendingEmailVerification) {
+        console.warn("Email verification already in progress.");
+        return;
+    }
+
     const user = auth ? auth.currentUser : null;
     if (!user) {
         console.warn("sendEmailVerification called but no user is logged in.");
-        showEmailVerificationStatus('error');
-        return;
-    }
-    if (user.emailVerified) {
-        console.warn("sendEmailVerification called for already verified user.");
-        showEmailVerificationStatus('already-verified');
+        showEmailVerificationStatus('evError'); // يمكن تغييرها إلى حالة خطأ مناسبة
         return;
     }
 
-    showEmailVerificationStatus('sending');
-    console.log("Attempting to send email verification to:", user.email);
+    // تحديث حالة إرسال البريد
+    isSendingEmailVerification = true;
+    showEmailVerificationStatus('evSend'); // عرض رسالة "جاري إرسال بريد التفعيل..."
 
     try {
+        // تحديث معلومات المستخدم للتأكد من أحدث حالة "emailVerified"
+        await user.reload();
+        // إعادة جلب المستخدم بعد التحديث
+        const updatedUser = auth.currentUser;
+
+        if (updatedUser && updatedUser.emailVerified) {
+            console.warn("Email is already verified. No need to resend.");
+            showEmailVerificationStatus('evVerified'); // عرض رسالة "بريدك الإلكتروني مؤكد بالفعل."
+            return;
+        }
+
         await sendEmailVerification(user);
         console.log("Email verification link sent successfully.");
-        showEmailVerificationStatus('sent');
+        showEmailVerificationStatus('evSent'); // عرض رسالة "تم إرسال بريد التفعيل."
     } catch (error) {
         console.error("Error sending email verification:", error);
-        showEmailVerificationStatus('error');
+        showEmailVerificationStatus('evError'); // عرض رسالة "حدث خطأ أثناء إرسال بريد التفعيل."
+    } finally {
+        // لا نحتاج لإعادة تعيين isSendingEmailVerification هنا، لأن showEmailVerificationStatus تتكفل بذلك
+        // أو يمكن إعادة تعيينها هنا إذا أردت فصل المسؤوليات، لكن الطريقة الحالية تعمل.
     }
 }
 
@@ -608,11 +659,14 @@ function setupEmailVerificationResendListener() {
     const resendLink = document.getElementById('resendEmailVerificationLink');
     if (resendLink) {
         resendLink.addEventListener('click', (event) => {
-            event.preventDefault();
-            sendEmailVerificationHandler();
+            event.preventDefault(); // منع السلوك الافتراضي للرابط
+            if (!isSendingEmailVerification) { // تأكد من أنه لا يوجد إرسال قيد التقدم
+                sendEmailVerificationHandler();
+            }
         });
         console.log("Email verification resend listener attached.");
     } else {
         console.warn("Email verification resend link not found in DOM.");
     }
 }
+
