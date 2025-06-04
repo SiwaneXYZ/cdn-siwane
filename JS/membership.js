@@ -1,4 +1,4 @@
-// membership1.js
+// membership2.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -20,7 +20,7 @@ let auth;
 let db;
 let globalCustomSettings = {}; // لتخزين الإعدادات المخصصة بعد التحقق من النطاق
 
-// **NEW:** HTML template for email verification messages
+// HTML template for email verification messages
 const emailVerificationHtmlTemplate = `
     <div id="mcE">
         <p class="mBox warn"><b>تنبيه! البريد الإلكتروني غير مؤكد</b><br/>
@@ -31,10 +31,10 @@ const emailVerificationHtmlTemplate = `
                     إعادة إرسال بريد التحقق
                 </a>.</p>
         </div>
-        <div class="evMsg evSend">جاري إرسال بريد التفعيل...</div>
-        <div class="evMsg evSent">تم إرسال بريد التفعيل. يرجى التحقق من صندوق الوارد (وربما مجلد الرسائل غير المرغوب فيها).</div>
-        <div class="evMsg evVerified">بريدك الإلكتروني مؤكد بالفعل.</div>
-        <div class="evMsg evError">حدث خطأ أثناء إرسال بريد التفعيل. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</div>
+        <div class="evMsg evSend" style="display: none;">جاري إرسال بريد التفعيل...</div>
+        <div class="evMsg evSent" style="display: none;">تم إرسال بريد التفعيل. يرجى التحقق من صندوق الوارد (وربما مجلد الرسائل غير المرغوب فيها).</div>
+        <div class="evMsg evVerified" style="display: none;">بريدك الإلكتروني مؤكد بالفعل.</div>
+        <div class="evMsg evError" style="display: none;">حدث خطأ أثناء إرسال بريد التفعيل. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</div>
     </div>
 `;
 
@@ -66,7 +66,7 @@ export function initializeMembership(firebaseConfig, domainProtectionConfig) {
             db = getFirestore(app);
             console.log("Firebase app and services initialized.");
 
-            // **NEW:** Inject the email verification HTML into the page
+            // Inject the email verification HTML into the page
             // Make sure '#membership-messages' is available in your HTML
             const membershipMessagesContainer = document.getElementById('membership-messages');
             if (membershipMessagesContainer) {
@@ -92,8 +92,11 @@ export function initializeMembership(firebaseConfig, domainProtectionConfig) {
     }
 }
 
-// --- وظائف الحماية من النطاق ---
+---
 
+### وظائف الحماية من النطاق
+
+```javascript
 /**
  * Decrypts an encrypted text using AES and a given key.
  * Uses atob to decode Base64 before decryption.
@@ -259,8 +262,11 @@ function showErrorNotification(errorType) {
     }
 }
 
-// --- وظائف Firebase السابقة ---
+---
 
+### وظائف Firebase الرئيسية
+
+```javascript
 function decryptBase64AES(base64Ciphertext, key) {
     if (!window.CryptoJS) {
         console.error("CryptoJS library is not loaded.");
@@ -305,9 +311,9 @@ function formatDate(timestampOrMillis) {
 
 const localStorageUserKey = 'firebaseUserProfileData';
 
-// **IMPORTANT:** These global variables will now be assigned AFTER the HTML is injected
-let messageContainerGeneral; // Will be assigned later
-let messageContainerEmailUnverified; // Will be assigned later
+// These global variables will now be assigned AFTER the HTML is injected
+let messageContainerGeneral;
+let messageContainerEmailUnverified;
 
 const messageHtmlStrings = {
     'not-logged-in': `<p class='mBox info'><b>معلومة!</b><br/> أهلاً بك! للوصول إلى هذا المحتوى الحصري، تحتاج إلى تسجيل الدخول. إذا لم يكن لديك حساب بعد، يمكنك إنشاء واحد بسرعة.<br/>يرجى <a href="/p/login.html">تسجيل الدخول هنا</a> لفحص بيانات حسابك وتحديد إمكانية الوصول.</p>`,
@@ -317,7 +323,7 @@ const messageHtmlStrings = {
     'data-error': `<p class='mBox error'><b>خطأ فني!</b><br/> حدث خطأ أثناء جلب بيانات حسابك أو التحقق منها.<br/>يرجى المحاولة لاحقاً. إذا استمرت المشكلة، يرجى التواصل مع مدير الموقع.<br/>إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع مدير الموقع عبر <a href="https://wa.me/212722464243">[واتسآب]</a>.</p>`
 };
 
-// **NEW:** A function to get the message containers AFTER they are injected
+// A function to get the message containers AFTER they are injected
 function getMessageContainers() {
     // Only assign if they haven't been assigned yet (or if they became null for some reason)
     if (!messageContainerGeneral) {
@@ -373,55 +379,62 @@ function showRestrictionMessage(reason, userData = null, user = null) {
 }
 
 function showEmailVerificationStatus(status) {
-    getMessageContainers(); // Ensure containers are retrieved
-    if(messageContainerEmailUnverified) {
-        const prompt = messageContainerEmailUnverified.querySelector('.evPrompt');
+    getMessageContainers();
+    if (messageContainerEmailUnverified) {
+        const promptContainer = messageContainerEmailUnverified.querySelector('.evPrompt');
+        const resendLink = document.getElementById('resendEmailVerificationLink');
         const statusMessages = messageContainerEmailUnverified.querySelectorAll('.evMsg');
-        const resendLink = document.getElementById('resendEmailVerificationLink'); // جلب الرابط
 
-        if(prompt) prompt.style.display = 'none';
+        // إخفاء جميع رسائل الحالة أولاً
         statusMessages.forEach(msg => msg.style.display = 'none');
 
-        let specificStatusElement = null;
-        let linkText = 'إعادة إرسال بريد التحقق'; // النص الافتراضي للرابط
+        // تحديد ما يجب عرضه وتغيير نص الرابط
+        let linkText = 'إعادة إرسال بريد التحقق';
+        let linkEnabled = true;
+        let showPrompt = true; // افتراضيا عرض prompt
 
-        if (status === 'prompt' && prompt) {
-            specificStatusElement = prompt;
-            if (resendLink) {
-                resendLink.textContent = linkText; // إعادة النص الأصلي
-                resendLink.style.pointerEvents = 'auto'; // تمكين النقر
+        if (status === 'evSend') {
+            linkText = 'جاري الإرسال...';
+            linkEnabled = false; // تعطيل الرابط أثناء الإرسال
+            showPrompt = false; // إخفاء prompt لإظهار رسالة evSend المنفصلة
+            messageContainerEmailUnverified.querySelector('.evMsg.evSend').style.display = 'block';
+        } else if (status === 'evSent') {
+            linkText = 'تم إرسال بريد التفعيل';
+            linkEnabled = false; // تعطيل الرابط بعد الإرسال الناجح
+            showPrompt = false; // إخفاء prompt لإظهار رسالة evSent المنفصلة
+            messageContainerEmailUnverified.querySelector('.evMsg.evSent').style.display = 'block';
+        } else if (status === 'evError') {
+            linkText = 'حدث خطأ. حاول مرة أخرى';
+            linkEnabled = true; // تمكين الرابط للسماح بالمحاولة مجدداً
+            showPrompt = false; // إخفاء prompt لإظهار رسالة evError المنفصلة
+            messageContainerEmailUnverified.querySelector('.evMsg.evError').style.display = 'block';
+        } else if (status === 'evVerified') {
+            linkText = 'البريد مؤكد بالفعل!';
+            linkEnabled = false; // تعطيل الرابط لأن البريد مؤكد
+            showPrompt = false; // إخفاء prompt لإظهار رسالة evVerified المنفصلة
+            messageContainerEmailUnverified.querySelector('.evMsg.evVerified').style.display = 'block';
+        }
+        // إذا كانت الحالة 'prompt' أو أي شيء آخر غير محدد، ستظل القيم الافتراضية
+        // مما يعني أن promptContainer سيبقى مرئياً مع النص الافتراضي للرابط.
+
+        // تطبيق التغييرات على الرابط والعنصر الحاوي
+        if (resendLink) {
+            resendLink.textContent = linkText;
+            if (!linkEnabled) {
+                resendLink.style.pointerEvents = 'none';
+                resendLink.style.opacity = '0.6';
+            } else {
+                resendLink.style.pointerEvents = 'auto';
                 resendLink.style.opacity = '1';
-                isSendingEmailVerification = false; // إعادة تعيين حالة الإرسال
-            }
-        } else {
-            specificStatusElement = messageContainerEmailUnverified.querySelector(`.evMsg.${status}`);
-            // تعديل نص الرابط بناءً على الحالة
-            if (status === 'evSent') {
-                linkText = 'تم إرسال البريد';
-            } else if (status === 'evError') {
-                linkText = 'حدث خطأ. أعد المحاولة';
-            } else if (status === 'evVerified') {
-                linkText = 'تم تأكيد البريد بالفعل';
-            }
-            if (resendLink) {
-                resendLink.textContent = linkText;
-                if (status === 'evSent' || status === 'evVerified') {
-                    resendLink.style.pointerEvents = 'none'; // تعطيل النقر
-                    resendLink.style.opacity = '0.6';
-                } else {
-                    resendLink.style.pointerEvents = 'auto'; // تمكين النقر
-                    resendLink.style.opacity = '1';
-                }
-                isSendingEmailVerification = false; // إعادة تعيين حالة الإرسال بعد الانتهاء
             }
         }
 
-        if(specificStatusElement) {
-            specificStatusElement.style.display = 'block';
-        } else {
-            // كحل بديل إذا لم يتم العثور على عنصر محدد
-            if(prompt) prompt.style.display = 'block';
+        // التحكم في عرض الـ evPrompt
+        if (promptContainer) {
+            promptContainer.style.display = showPrompt ? 'block' : 'none';
         }
+
+        isSendingEmailVerification = (status === 'evSend'); // فقط 'evSend' يعني أن الإرسال قيد التقدم
     }
 }
 
@@ -440,7 +453,7 @@ async function updateProtectedContentDisplay(user, userDataFromSource) {
         return;
     }
 
-    // **IMPORTANT:** Ensure containers are retrieved before using them
+    // IMPORTANT: Ensure containers are retrieved before using them
     getMessageContainers();
     if (!messageContainerGeneral || !messageContainerEmailUnverified) {
         console.error("Message containers (mcG or mcE) not found in the DOM. This might happen if they are injected dynamically and not available yet.");
@@ -612,7 +625,6 @@ function setupAuthStateListener() {
 }
 
 async function sendEmailVerificationHandler() {
-    // منع الإرسال المتعدد إذا كان هناك إرسال قيد التقدم
     if (isSendingEmailVerification) {
         console.warn("Email verification already in progress.");
         return;
@@ -621,52 +633,45 @@ async function sendEmailVerificationHandler() {
     const user = auth ? auth.currentUser : null;
     if (!user) {
         console.warn("sendEmailVerification called but no user is logged in.");
-        showEmailVerificationStatus('evError'); // يمكن تغييرها إلى حالة خطأ مناسبة
+        showEmailVerificationStatus('evError');
         return;
     }
 
-    // تحديث حالة إرسال البريد
-    isSendingEmailVerification = true;
-    showEmailVerificationStatus('evSend'); // عرض رسالة "جاري إرسال بريد التفعيل..."
+    isSendingEmailVerification = true; // تعيين True لبدء عملية الإرسال
+    showEmailVerificationStatus('evSend'); // عرض رسالة "جاري إرسال بريد التفعيل..." وتحديث الرابط
 
     try {
-        // تحديث معلومات المستخدم للتأكد من أحدث حالة "emailVerified"
         await user.reload();
-        // إعادة جلب المستخدم بعد التحديث
         const updatedUser = auth.currentUser;
 
         if (updatedUser && updatedUser.emailVerified) {
             console.warn("Email is already verified. No need to resend.");
-            showEmailVerificationStatus('evVerified'); // عرض رسالة "بريدك الإلكتروني مؤكد بالفعل."
+            showEmailVerificationStatus('evVerified');
             return;
         }
 
         await sendEmailVerification(user);
         console.log("Email verification link sent successfully.");
-        showEmailVerificationStatus('evSent'); // عرض رسالة "تم إرسال بريد التفعيل."
+        showEmailVerificationStatus('evSent');
     } catch (error) {
         console.error("Error sending email verification:", error);
-        showEmailVerificationStatus('evError'); // عرض رسالة "حدث خطأ أثناء إرسال بريد التفعيل."
+        showEmailVerificationStatus('evError');
     } finally {
-        // لا نحتاج لإعادة تعيين isSendingEmailVerification هنا، لأن showEmailVerificationStatus تتكفل بذلك
-        // أو يمكن إعادة تعيينها هنا إذا أردت فصل المسؤوليات، لكن الطريقة الحالية تعمل.
+        // isSendingEmailVerification يتم إعادة تعيينها في showEmailVerificationStatus
     }
 }
 
 function setupEmailVerificationResendListener() {
-    // **IMPORTANT:** Call getMessageContainers here to ensure mcE is available
     getMessageContainers();
     const resendLink = document.getElementById('resendEmailVerificationLink');
     if (resendLink) {
         resendLink.addEventListener('click', (event) => {
-            event.preventDefault(); // منع السلوك الافتراضي للرابط
-            if (!isSendingEmailVerification) { // تأكد من أنه لا يوجد إرسال قيد التقدم
-                sendEmailVerificationHandler();
-            }
+            event.preventDefault();
+            // هنا لا نحتاج لفحص isSendingEmailVerification لأن sendEmailVerificationHandler نفسها ستتحقق
+            sendEmailVerificationHandler();
         });
         console.log("Email verification resend listener attached.");
     } else {
         console.warn("Email verification resend link not found in DOM.");
     }
 }
-
