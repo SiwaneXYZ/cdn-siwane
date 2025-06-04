@@ -1,4 +1,4 @@
-// membership2.js
+// membership.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -27,12 +27,15 @@ const emailVerificationHtmlTemplate = `
             حسابك غير مفعل. يرجى التحقق من بريدك الإلكتروني وتأكيد عنوانك للوصول إلى المحتوى.
             <span class="email-placeholder"></span></p>
          <div class="evPrompt">
-            <p>لم تستلم البريد؟ <a href="#" id="resendEmailVerificationLink">
-                    إعادة إرسال بريد التحقق
-                </a>.</p>
+            <p>لم تستلم البريد؟ 
+                <a href="#" id="resendEmailVerificationLink">
+                    <span class="link-text">إعادة إرسال بريد التحقق</span>
+                    <span class="spinner" style="display: none;"></span> 
+                </a>.
+            </p>
         </div>
         <div class="evMsg evSend" style="display: none;">جاري إرسال بريد التفعيل...</div>
-        <div class="evMsg evSent" style="display: none;">تم إرسال بريد التفعيل. يرجى التحقق من صندوق الوارد (وربما مجلد الرسائل غير المرغوب فيها).</div>
+        <div class="evMsg evSent" style="display: none;">تم إرسال بريد التفعيل بنجاح. يرجى التحقق من صندوق الوارد (وربما مجلد الرسائل غير المرغوب فيها).</div>
         <div class="evMsg evVerified" style="display: none;">بريدك الإلكتروني مؤكد بالفعل.</div>
         <div class="evMsg evError" style="display: none;">حدث خطأ أثناء إرسال بريد التفعيل. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</div>
     </div>
@@ -92,11 +95,6 @@ export function initializeMembership(firebaseConfig, domainProtectionConfig) {
     }
 }
 
----
-
-### وظائف الحماية من النطاق
-
-```javascript
 /**
  * Decrypts an encrypted text using AES and a given key.
  * Uses atob to decode Base64 before decryption.
@@ -262,11 +260,6 @@ function showErrorNotification(errorType) {
     }
 }
 
----
-
-### وظائف Firebase الرئيسية
-
-```javascript
 function decryptBase64AES(base64Ciphertext, key) {
     if (!window.CryptoJS) {
         console.error("CryptoJS library is not loaded.");
@@ -383,49 +376,61 @@ function showEmailVerificationStatus(status) {
     if (messageContainerEmailUnverified) {
         const promptContainer = messageContainerEmailUnverified.querySelector('.evPrompt');
         const resendLink = document.getElementById('resendEmailVerificationLink');
+        const linkTextSpan = resendLink ? resendLink.querySelector('.link-text') : null;
+        const spinnerSpan = resendLink ? resendLink.querySelector('.spinner') : null;
         const statusMessages = messageContainerEmailUnverified.querySelectorAll('.evMsg');
 
         // إخفاء جميع رسائل الحالة أولاً
         statusMessages.forEach(msg => msg.style.display = 'none');
 
+        // إخفاء السبينر والنص افتراضيًا
+        if (linkTextSpan) linkTextSpan.style.display = 'block';
+        if (spinnerSpan) spinnerSpan.style.display = 'none';
+        if (resendLink) resendLink.classList.remove('disabled'); // إزالة حالة التعطيل
+
         // تحديد ما يجب عرضه وتغيير نص الرابط
-        let linkText = 'إعادة إرسال بريد التحقق';
-        let linkEnabled = true;
+        let newLinkText = 'إعادة إرسال بريد التحقق';
+        let enableLink = true;
+        let showSpinner = false;
         let showPrompt = true; // افتراضيا عرض prompt
 
         if (status === 'evSend') {
-            linkText = 'جاري الإرسال...';
-            linkEnabled = false; // تعطيل الرابط أثناء الإرسال
-            showPrompt = false; // إخفاء prompt لإظهار رسالة evSend المنفصلة
+            newLinkText = 'جاري الإرسال...';
+            enableLink = false;
+            showSpinner = true; // إظهار السبينر
+            showPrompt = false;
             messageContainerEmailUnverified.querySelector('.evMsg.evSend').style.display = 'block';
         } else if (status === 'evSent') {
-            linkText = 'تم إرسال بريد التفعيل';
-            linkEnabled = false; // تعطيل الرابط بعد الإرسال الناجح
-            showPrompt = false; // إخفاء prompt لإظهار رسالة evSent المنفصلة
+            newLinkText = 'تم إرسال بريد التفعيل';
+            enableLink = false;
+            showSpinner = false;
+            showPrompt = false;
             messageContainerEmailUnverified.querySelector('.evMsg.evSent').style.display = 'block';
         } else if (status === 'evError') {
-            linkText = 'حدث خطأ. حاول مرة أخرى';
-            linkEnabled = true; // تمكين الرابط للسماح بالمحاولة مجدداً
-            showPrompt = false; // إخفاء prompt لإظهار رسالة evError المنفصلة
+            newLinkText = 'حدث خطأ. حاول مرة أخرى';
+            enableLink = true;
+            showSpinner = false;
+            showPrompt = false;
             messageContainerEmailUnverified.querySelector('.evMsg.evError').style.display = 'block';
         } else if (status === 'evVerified') {
-            linkText = 'البريد مؤكد بالفعل!';
-            linkEnabled = false; // تعطيل الرابط لأن البريد مؤكد
-            showPrompt = false; // إخفاء prompt لإظهار رسالة evVerified المنفصلة
+            newLinkText = 'البريد مؤكد بالفعل!';
+            enableLink = false;
+            showSpinner = false;
+            showPrompt = false;
             messageContainerEmailUnverified.querySelector('.evMsg.evVerified').style.display = 'block';
         }
         // إذا كانت الحالة 'prompt' أو أي شيء آخر غير محدد، ستظل القيم الافتراضية
         // مما يعني أن promptContainer سيبقى مرئياً مع النص الافتراضي للرابط.
 
-        // تطبيق التغييرات على الرابط والعنصر الحاوي
+        // تطبيق التغييرات على الرابط وعناصره
+        if (linkTextSpan) linkTextSpan.textContent = newLinkText;
+        if (spinnerSpan) spinnerSpan.style.display = showSpinner ? 'inline-block' : 'none';
+
         if (resendLink) {
-            resendLink.textContent = linkText;
-            if (!linkEnabled) {
-                resendLink.style.pointerEvents = 'none';
-                resendLink.style.opacity = '0.6';
+            if (!enableLink) {
+                resendLink.classList.add('disabled'); // إضافة الكلاس لتعطيل الرابط
             } else {
-                resendLink.style.pointerEvents = 'auto';
-                resendLink.style.opacity = '1';
+                resendLink.classList.remove('disabled');
             }
         }
 
@@ -434,7 +439,7 @@ function showEmailVerificationStatus(status) {
             promptContainer.style.display = showPrompt ? 'block' : 'none';
         }
 
-        isSendingEmailVerification = (status === 'evSend'); // فقط 'evSend' يعني أن الإرسال قيد التقدم
+        isSendingEmailVerification = (status === 'evSend');
     }
 }
 
@@ -667,7 +672,6 @@ function setupEmailVerificationResendListener() {
     if (resendLink) {
         resendLink.addEventListener('click', (event) => {
             event.preventDefault();
-            // هنا لا نحتاج لفحص isSendingEmailVerification لأن sendEmailVerificationHandler نفسها ستتحقق
             sendEmailVerificationHandler();
         });
         console.log("Email verification resend listener attached.");
