@@ -23,7 +23,7 @@ let globalCustomSettings = {}; // لتخزين الإعدادات المخصصة
 // HTML template for email verification messages
 const emailVerificationHtmlTemplate = `
     <div id="mcE">
-        <p class="mBox warn"><b>تنبيه! البريد الإلكتروني غير مؤكد</b><br/>
+        <p class="mBox warn">تنبيه! البريد الإلكتروني غير مؤكد<br/>
             حسابك غير مفعل. يرجى التحقق من بريدك الإلكتروني وتأكيد عنوانك للوصول إلى المحتوى.
             <span class="email-placeholder"></span></p>
          <div class="evPrompt">
