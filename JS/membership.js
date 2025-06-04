@@ -20,6 +20,24 @@ let auth;
 let db;
 let globalCustomSettings = {}; // لتخزين الإعدادات المخصصة بعد التحقق من النطاق
 
+// **NEW:** HTML template for email verification messages
+const emailVerificationHtmlTemplate = `
+    <div id="mcE">
+        <p class="mBox warn"><b>تنبيه! البريد الإلكتروني غير مؤكد</b><br/>
+            حسابك غير مفعل. يرجى التحقق من بريدك الإلكتروني وتأكيد عنوانك للوصول إلى المحتوى.
+            <span class="email-placeholder"></span></p>
+         <div class="evPrompt">
+            <p>لم تستلم البريد؟ <a href="#" id="resendEmailVerificationLink">
+                    إعادة إرسال بريد التحقق
+                </a>.</p>
+        </div>
+        <div class="evMsg evSend">جاري إرسال بريد التفعيل...</div>
+        <div class="evMsg evSent">تم إرسال بريد التفعيل. يرجى التحقق من صندوق الوارد (وربما مجلد الرسائل غير المرغوب فيها).</div>
+        <div class="evMsg evVerified">بريدك الإلكتروني مؤكد بالفعل.</div>
+        <div class="evMsg evError">حدث خطأ أثناء إرسال بريد التفعيل. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</div>
+    </div>
+`;
+
 /**
  * Initializes the Firebase application and sets up authentication/firestore instances.
  * Also performs domain verification before proceeding with Firebase functionalities.
@@ -45,8 +63,21 @@ export function initializeMembership(firebaseConfig, domainProtectionConfig) {
             db = getFirestore(app);
             console.log("Firebase app and services initialized.");
 
+            // **NEW:** Inject the email verification HTML into the page
+            // Make sure '#membership-messages' is available in your HTML
+            const membershipMessagesContainer = document.getElementById('membership-messages');
+            if (membershipMessagesContainer) {
+                membershipMessagesContainer.insertAdjacentHTML('beforeend', emailVerificationHtmlTemplate);
+                console.log("Email verification HTML injected.");
+            } else {
+                console.warn("Container with ID 'membership-messages' not found for injecting HTML.");
+            }
+
             // فقط قم بإعداد مستمع حالة المصادقة إذا تم تهيئة التطبيق والمصادقة بنجاح
             setupAuthStateListener();
+            // أضف مستمع الحدث هنا بعد تهيئة Firebase وتوفر auth وبعد حقن الـ HTML
+            setupEmailVerificationResendListener();
+
         } catch (e) {
             console.error("Firebase initialization failed:", e);
             showErrorNotification("firebase-init"); // عرض إشعار خطأ إذا فشلت تهيئة Firebase
@@ -271,8 +302,9 @@ function formatDate(timestampOrMillis) {
 
 const localStorageUserKey = 'firebaseUserProfileData';
 
-const messageContainerGeneral = document.getElementById('mcG');
-const messageContainerEmailUnverified = document.getElementById('mcE');
+// **IMPORTANT:** These global variables will now be assigned AFTER the HTML is injected
+let messageContainerGeneral; // Will be assigned later
+let messageContainerEmailUnverified; // Will be assigned later
 
 const messageHtmlStrings = {
     'not-logged-in': `<p class='mBox info'><b>معلومة!</b><br/> أهلاً بك! للوصول إلى هذا المحتوى الحصري، تحتاج إلى تسجيل الدخول. إذا لم يكن لديك حساب بعد، يمكنك إنشاء واحد بسرعة.<br/>يرجى <a href="/p/login.html">تسجيل الدخول هنا</a> لفحص بيانات حسابك وتحديد إمكانية الوصول.</p>`,
@@ -282,7 +314,19 @@ const messageHtmlStrings = {
     'data-error': `<p class='mBox error'><b>خطأ فني!</b><br/> حدث خطأ أثناء جلب بيانات حسابك أو التحقق منها.<br/>يرجى المحاولة لاحقاً. إذا استمرت المشكلة، يرجى التواصل مع مدير الموقع.<br/>إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع مدير الموقع عبر <a href="https://wa.me/212722464243">[واتسآب]</a>.</p>`
 };
 
+// **NEW:** A function to get the message containers AFTER they are injected
+function getMessageContainers() {
+    // Only assign if they haven't been assigned yet (or if they became null for some reason)
+    if (!messageContainerGeneral) {
+        messageContainerGeneral = document.getElementById('mcG');
+    }
+    if (!messageContainerEmailUnverified) {
+        messageContainerEmailUnverified = document.getElementById('mcE');
+    }
+}
+
 function hideAllRestrictionContainers() {
+    getMessageContainers(); // Ensure containers are retrieved
     if (messageContainerGeneral) messageContainerGeneral.style.display = 'none';
     if (messageContainerEmailUnverified) {
         messageContainerEmailUnverified.style.display = 'none';
@@ -291,6 +335,7 @@ function hideAllRestrictionContainers() {
 }
 
 function showRestrictionMessage(reason, userData = null, user = null) {
+    getMessageContainers(); // Ensure containers are retrieved
     // تأكد من عدم عرض رسالة التقييد إذا كانت رسالة الخطأ الشاملة معروضة (بسبب فشل التحقق من النطاق)
     const notificationVisible = document.querySelector(".notification-error") && document.querySelector(".notification-error").style.display !== 'none';
     if (notificationVisible) {
@@ -305,7 +350,7 @@ function showRestrictionMessage(reason, userData = null, user = null) {
             messageContainerEmailUnverified.style.display = 'block';
             const emailPlaceholder = messageContainerEmailUnverified.querySelector('.email-placeholder');
             if (emailPlaceholder && user && user.email) emailPlaceholder.textContent = user.email;
-            window.showEmailVerificationStatus('prompt');
+            showEmailVerificationStatus('prompt');
         }
     } else {
         const messageHtml = messageHtmlStrings[reason];
@@ -323,7 +368,8 @@ function showRestrictionMessage(reason, userData = null, user = null) {
     }
 }
 
-window.showEmailVerificationStatus = function(status) {
+function showEmailVerificationStatus(status) {
+    getMessageContainers(); // Ensure containers are retrieved
     if(messageContainerEmailUnverified) {
         const prompt = messageContainerEmailUnverified.querySelector('.evPrompt');
         const statusMessages = messageContainerEmailUnverified.querySelectorAll('.evMsg');
@@ -361,8 +407,10 @@ async function updateProtectedContentDisplay(user, userDataFromSource) {
         return;
     }
 
+    // **IMPORTANT:** Ensure containers are retrieved before using them
+    getMessageContainers();
     if (!messageContainerGeneral || !messageContainerEmailUnverified) {
-        console.error("Message containers (mcG or mcE) not found in the DOM.");
+        console.error("Message containers (mcG or mcE) not found in the DOM. This might happen if they are injected dynamically and not available yet.");
         protectedElements.forEach(element => {
             element.innerHTML = "<p>Error loading content: Message containers not found.</p>";
             element.style.display = 'block';
@@ -457,6 +505,8 @@ function setupAuthStateListener() {
         let isCacheValid = false;
         const storedData = localStorage.getItem(localStorageUserKey);
 
+        // Ensure containers are retrieved at the start of the listener
+        getMessageContainers();
         if (!messageContainerGeneral || !messageContainerEmailUnverified) {
             console.error("Message containers (mcG or mcE) not found on auth state change.");
             return;
@@ -526,29 +576,43 @@ function setupAuthStateListener() {
     });
 }
 
-window.sendEmailVerification = async function() {
+async function sendEmailVerificationHandler() {
     const user = auth ? auth.currentUser : null;
     if (!user) {
         console.warn("sendEmailVerification called but no user is logged in.");
-        window.showEmailVerificationStatus('error');
+        showEmailVerificationStatus('error');
         return;
     }
     if (user.emailVerified) {
         console.warn("sendEmailVerification called for already verified user.");
-        window.showEmailVerificationStatus('already-verified');
+        showEmailVerificationStatus('already-verified');
         return;
     }
 
-    window.showEmailVerificationStatus('sending');
+    showEmailVerificationStatus('sending');
     console.log("Attempting to send email verification to:", user.email);
 
     try {
         await sendEmailVerification(user);
         console.log("Email verification link sent successfully.");
-        window.showEmailVerificationStatus('sent');
+        showEmailVerificationStatus('sent');
     } catch (error) {
         console.error("Error sending email verification:", error);
-        window.showEmailVerificationStatus('error');
+        showEmailVerificationStatus('error');
     }
-};
+}
 
+function setupEmailVerificationResendListener() {
+    // **IMPORTANT:** Call getMessageContainers here to ensure mcE is available
+    getMessageContainers();
+    const resendLink = document.getElementById('resendEmailVerificationLink');
+    if (resendLink) {
+        resendLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            sendEmailVerificationHandler();
+        });
+        console.log("Email verification resend listener attached.");
+    } else {
+        console.warn("Email verification resend link not found in DOM.");
+    }
+}
