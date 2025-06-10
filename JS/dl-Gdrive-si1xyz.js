@@ -5,7 +5,7 @@ function getScriptSettings() {
     for (let i = 0; i < scripts.length; i++) {
         const script = scripts[i];
         // يجب أن تتطابق هذه السمة مع اسم ملف السكريبت أو أي معرف مميز
-        if (script.src.includes('your-script.js')) { // **استبدل 'your-script.js' باسم ملف السكريبت الخاص بك على CDN**
+        if (script.src.includes('https://cdn.siwane.xyz/JS/dl-Gdrive-si1xyz.js')) { // **استبدل 'your-script.js' باسم ملف السكريبت الخاص بك على CDN**
             return {
                 googleAppsScriptUrl: script.getAttribute('data-google-apps-script-url'),
                 googleDriveFileId: script.getAttribute('data-google-drive-file-id')
