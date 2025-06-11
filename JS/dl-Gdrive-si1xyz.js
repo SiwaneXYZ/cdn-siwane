@@ -3,8 +3,8 @@ function getScriptSettings() {
     const scripts = document.getElementsByTagName('script');
     for (let i = 0; i < scripts.length; i++) {
         const script = scripts[i];
-        // يجب أن تتطابق هذه السمة مع اسم ملف السكريبت أو أي معرف مميز
-        if (script.src.includes('https://cdn.siwane.xyz/JS/dl-Gdrive-si1xyz.js')) { // **استبدل 'your-script.js' باسم ملف السكريبت الخاص بك على CDN**
+        // **التعديل هنا:** تأكد من أن اسم الملف في includes() يطابق اسم ملف السكريبت على CDN
+        if (script.src.includes('https://cdn.siwane.xyz/JS/dl-Gdrive-si1xyz.js')) {
             return {
                 googleAppsScriptUrl: script.getAttribute('data-google-apps-script-url'),
                 googleDriveFileId: script.getAttribute('data-google-drive-file-id')
@@ -47,12 +47,11 @@ function getUserDataFromLocalStorage() {
 
 // --- 3. دالة لجلب رابط التنزيل من Google Apps Script ---
 async function fetchDownloadLinkFromAppsScript() {
-    // بناء الرابط لطلب Apps Script. نمرر fileId كمعامل استعلام (query parameter)
     const requestUrl = `${GOOGLE_APPS_SCRIPT_URL}?fileId=${GOOGLE_DRIVE_FILE_ID}`;
 
     try {
         const response = await fetch(requestUrl);
-        const data = await response.json(); // افترض أن Apps Script يعيد JSON
+        const data = await response.json();
 
         if (data.error) {
             console.error("خطأ من Google Apps Script:", data.error);
@@ -62,18 +61,17 @@ async function fetchDownloadLinkFromAppsScript() {
         }
         return null;
     } catch (error) {
-        console.error("خطأ في الاتصال بـ Google Apps Script:", error);
-        return null;
+            console.error("خطأ في الاتصال بـ Google Apps Script:", error);
+            return null;
+        }
     }
-}
 
 // --- 4. دالة رئيسية للتحقق وتحديث الرابط ---
 async function checkAndSetDownloadLink() {
     const userData = getUserDataFromLocalStorage();
 
-    // إخفاء رسالة الخطأ مبدئياً وتعطيل زر التنزيل
     accessMessageElement.style.display = 'none';
-    downloadLinkElement.style.pointerEvents = 'none'; // تعطيل الزر
+    downloadLinkElement.style.pointerEvents = 'none';
     downloadLinkElement.style.opacity = '0.5';
 
     if (userData) {
@@ -81,14 +79,13 @@ async function checkAndSetDownloadLink() {
         const isGmail = userEmail && userEmail.endsWith('@gmail.com');
         const isGoogleProvider = userData.provider === 'google';
 
-        // الشرط الأساسي: المستخدم مسجل الدخول عبر Google ولديه بريد Gmail
         if (isGmail && isGoogleProvider) {
             console.log("المستخدم مسجل الدخول بحساب Gmail عبر Google. محاولة جلب رابط التنزيل من Apps Script.");
-            
+
             const downloadUrl = await fetchDownloadLinkFromAppsScript();
             if (downloadUrl) {
                 downloadLinkElement.href = downloadUrl;
-                downloadLinkElement.style.pointerEvents = 'auto'; // تفعيل الزر
+                downloadLinkElement.style.pointerEvents = 'auto';
                 downloadLinkElement.style.opacity = '1';
                 console.log("تم تحديث رابط التنزيل بنجاح.");
             } else {
