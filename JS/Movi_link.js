@@ -1,20 +1,24 @@
-// قم بحفظ هذا الكود كملف JavaScript (مثلاً: player-config.js) وارفعه إلى CDN
+// **هذا هو محتوى ملف Movi_link.js على CDN**
 $(document).ready(function() {
+    // الحصول على وسم السكريبت الحالي الذي تم تحميله
     const currentScript = document.currentScript;
 
     // قراءة القيم من سمات البيانات المخصصة
+    // تأكد من أن هذه الأسطر هي ما يقرأ المتغيرات، وليس تعريفها بشكل ثابت
     const GAS_WEB_APP_URL = currentScript.getAttribute('data-gas-url');
     const SERIES_SHEET_NAME = currentScript.getAttribute('data-series-name');
     const CURRENT_EPISODE_NUMBER = parseInt(currentScript.getAttribute('data-episode-number'));
-    // الجديد: قراءة قيمة المؤقت من سمة البيانات
-    const INITIAL_COUNTDOWN_SECONDS = parseInt(currentScript.getAttribute('data-countdown-seconds')) || 10; // الافتراضي هو 10 ثواني إذا لم يتم تحديده
+    const INITIAL_COUNTDOWN_SECONDS = parseInt(currentScript.getAttribute('data-countdown-seconds')) || 10; // الافتراضي هو 10 ثواني
 
+    // **هنا يبدأ التحقق من صحة المتغيرات**
+    // هذا التحقق سيظهر خطأ في Console إذا كانت الإعدادات ناقصة
     if (!GAS_WEB_APP_URL || !SERIES_SHEET_NAME || isNaN(CURRENT_EPISODE_NUMBER)) {
         console.error("خطأ: لم يتم توفير جميع الإعدادات المطلوبة (data-gas-url, data-series-name, data-episode-number) في وسم السكريبت.");
         $("#countdown-text").text("خطأ في تهيئة المشغل. يرجى مراجعة الإعدادات.");
-        return;
+        return; // توقف عن تنفيذ السكريبت
     }
 
+    // تحديث عنوان الصفحة وعنوان الحلقة بناءً على الإعدادات
     $('title').text(`مشغل حلقة المسلسل - الحلقة ${CURRENT_EPISODE_NUMBER}`);
     $('#episode-title').text(`الحلقة ${CURRENT_EPISODE_NUMBER} - ${SERIES_SHEET_NAME}`);
 
@@ -45,7 +49,7 @@ $(document).ready(function() {
 
     function startCountdownAndPlay(videoUrl) {
         clearInterval(countdownInterval);
-        // تم تغيير القيمة الأولية للمؤقت هنا أيضاً
+        // تم تغيير القيمة الأولية للمؤقت هنا أيضاً لضمان إعادة الضبط
         countdownValue = INITIAL_COUNTDOWN_SECONDS;
         $("#countdown").text(countdownValue);
         $("#countdown-text").text("جاري تحضير الفيديو...");
@@ -128,8 +132,10 @@ $(document).ready(function() {
                 });
             },
             error: function(xhr, status, error) {
-                alert("فشل في تحميل قائمة السيرفرات: " + error);
-                $("#serversGrid").html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا.</p>");
+                // رسائل خطأ أكثر تفصيلاً للمساعدة في التشخيص
+                console.error("فشل في تحميل قائمة السيرفرات:", status, error);
+                alert("فشل في تحميل قائمة السيرفرات. يرجى المحاولة لاحقًا.");
+                $("#serversGrid").html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا. (الرجاء فحص Console المتصفح).<br>الخطأ: " + error + "</p>");
             }
         });
     }
