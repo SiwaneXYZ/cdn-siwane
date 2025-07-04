@@ -1,24 +1,21 @@
 // **هذا هو محتوى ملف Movi_link.js على CDN**
+
 $(document).ready(function() {
-    // الحصول على وسم السكريبت الحالي الذي تم تحميله
-    const currentScript = document.currentScript;
-
-    // قراءة القيم من سمات البيانات المخصصة
-    // تأكد من أن هذه الأسطر هي ما يقرأ المتغيرات، وليس تعريفها بشكل ثابت
-    const GAS_WEB_APP_URL = currentScript.getAttribute('data-gas-url');
-    const SERIES_SHEET_NAME = currentScript.getAttribute('data-series-name');
-    const CURRENT_EPISODE_NUMBER = parseInt(currentScript.getAttribute('data-episode-number'));
-    const INITIAL_COUNTDOWN_SECONDS = parseInt(currentScript.getAttribute('data-countdown-seconds')) || 10; // الافتراضي هو 10 ثواني
-
-    // **هنا يبدأ التحقق من صحة المتغيرات**
-    // هذا التحقق سيظهر خطأ في Console إذا كانت الإعدادات ناقصة
-    if (!GAS_WEB_APP_URL || !SERIES_SHEET_NAME || isNaN(CURRENT_EPISODE_NUMBER)) {
-        console.error("خطأ: لم يتم توفير جميع الإعدادات المطلوبة (data-gas-url, data-series-name, data-episode-number) في وسم السكريبت.");
+    // التحقق مما إذا كان كائن الإعدادات موجودًا
+    // هذا الشرط ضروري لضمان أن ملف player_config.js قد تم تحميله بنجاح
+    if (typeof window.playerConfig === 'undefined' || !window.playerConfig.gasUrl || !window.playerConfig.seriesName || isNaN(window.playerConfig.episodeNumber)) {
+        console.error("خطأ: كائن إعدادات المشغل (window.playerConfig) غير موجود أو غير كامل في الصفحة. تأكد من تحميل player_config.js قبل Movi_link.js.");
         $("#countdown-text").text("خطأ في تهيئة المشغل. يرجى مراجعة الإعدادات.");
-        return; // توقف عن تنفيذ السكريبت
+        return; // إيقاف التنفيذ إذا لم يتم تمرير الإعدادات بشكل صحيح
     }
 
-    // تحديث عنوان الصفحة وعنوان الحلقة بناءً على الإعدادات
+    // قراءة القيم من كائن الإعدادات
+    const GAS_WEB_APP_URL = window.playerConfig.gasUrl;
+    const SERIES_SHEET_NAME = window.playerConfig.seriesName;
+    const CURRENT_EPISODE_NUMBER = window.playerConfig.episodeNumber;
+    const INITIAL_COUNTDOWN_SECONDS = window.playerConfig.countdownSeconds || 10; // الافتراضي 10 ثواني إذا لم يتم تحديده
+
+    // تحديث عنوان الصفحة وعنوان الحلقة
     $('title').text(`مشغل حلقة المسلسل - الحلقة ${CURRENT_EPISODE_NUMBER}`);
     $('#episode-title').text(`الحلقة ${CURRENT_EPISODE_NUMBER} - ${SERIES_SHEET_NAME}`);
 
@@ -44,13 +41,11 @@ $(document).ready(function() {
     createParticles();
 
     let countdownInterval;
-    // تم تغيير القيمة الأولية للمؤقت لاستخدام المتغير الجديد
     let countdownValue = INITIAL_COUNTDOWN_SECONDS;
 
     function startCountdownAndPlay(videoUrl) {
         clearInterval(countdownInterval);
-        // تم تغيير القيمة الأولية للمؤقت هنا أيضاً لضمان إعادة الضبط
-        countdownValue = INITIAL_COUNTDOWN_SECONDS;
+        countdownValue = INITIAL_COUNTDOWN_SECONDS; // إعادة ضبط العداد
         $("#countdown").text(countdownValue);
         $("#countdown-text").text("جاري تحضير الفيديو...");
         $("#countdown-display").show();
@@ -132,7 +127,6 @@ $(document).ready(function() {
                 });
             },
             error: function(xhr, status, error) {
-                // رسائل خطأ أكثر تفصيلاً للمساعدة في التشخيص
                 console.error("فشل في تحميل قائمة السيرفرات:", status, error);
                 alert("فشل في تحميل قائمة السيرفرات. يرجى المحاولة لاحقًا.");
                 $("#serversGrid").html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا. (الرجاء فحص Console المتصفح).<br>الخطأ: " + error + "</p>");
