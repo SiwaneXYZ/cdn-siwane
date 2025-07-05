@@ -1,14 +1,55 @@
 $(document).ready(function() {
   const config = window.siwanePlayerConfig;
 
-  $('title').text(`مشغل حلقة المسلسل - الحلقة ${config.CURRENT_EPISODE_NUMBER}`);
-  $('#siwane-episode-title').text(`الحلقة ${config.CURRENT_EPISODE_NUMBER} - ${config.SERIES_SHEET_NAME}`);
+  // Validate essential config
+  if (!config || !config.GAS_WEB_APP_URL || !config.CONTENT_TYPE || !config.CONTENT_SHEET_NAME) {
+      console.error("Siwane Player Config is missing essential parameters.");
+      // Display a user-friendly error message on the page
+      $("#siwane-countdown-text").text("خطأ في إعدادات المشغل. يرجى التحقق من التهيئة.");
+      $("#siwane-countdown-display").show();
+      $("#siwane-video-frame").hide();
+      return; // Stop execution
+  }
+
+  // Set initial titles and display based on content type
+  let pageTitle = '';
+  let displayTitle = '';
+
+  if (config.CONTENT_TYPE === 'series') {
+      if (config.EPISODE_NUMBER === undefined) {
+          console.error("Siwane Player Config is missing EPISODE_NUMBER for series.");
+          $("#siwane-countdown-text").text("خطأ في إعدادات المسلسل. رقم الحلقة مفقود.");
+          $("#siwane-countdown-display").show();
+          $("#siwane-video-frame").hide();
+          return;
+      }
+      pageTitle = `مشغل حلقة المسلسل - الحلقة ${config.EPISODE_NUMBER}`;
+      displayTitle = `الحلقة ${config.EPISODE_NUMBER} - ${config.CONTENT_SHEET_NAME}`;
+  } else if (config.CONTENT_TYPE === 'movie') {
+      if (config.MOVIE_TITLE === undefined) {
+          console.error("Siwane Player Config is missing MOVIE_TITLE for movie.");
+          $("#siwane-countdown-text").text("خطأ في إعدادات الفيلم. عنوان الفيلم مفقود.");
+          $("#siwane-countdown-display").show();
+          $("#siwane-video-frame").hide();
+          return;
+      }
+      pageTitle = `مشغل الفيلم - ${config.MOVIE_TITLE}`;
+      displayTitle = `${config.MOVIE_TITLE} - ${config.CONTENT_SHEET_NAME}`;
+  } else {
+      console.error("Invalid CONTENT_TYPE in Siwane Player Config.");
+      $("#siwane-countdown-text").text("نوع المحتوى غير صالح في الإعدادات.");
+      $("#siwane-countdown-display").show();
+      $("#siwane-video-frame").hide();
+      return;
+  }
+
+  $('title').text(pageTitle);
+  $('#siwane-episode-title').text(displayTitle); // تم تغيير ID ليكون أكثر عمومية
 
   function createParticles() {
     const container = $("#siwane-particles-container");
     container.empty();
 
-    // تم تغيير العدد من 50 إلى 100 لمضاعفة الجسيمات
     for (let i = 0; i < 100; i++) {
       const particle = $('<div class="siwane-particle"></div>');
       particle.css({
@@ -59,34 +100,44 @@ $(document).ready(function() {
     }, 1000);
   }
 
-  function loadServersForEpisode(seriesName, episodeNum) {
-    const serversGrid = $("#siwane-servers-grid"); // احصل على العنصر
+  function loadServers() { // تم تغيير اسم الدالة لتكون أكثر عمومية
+    const serversGrid = $("#siwane-servers-grid");
 
     serversGrid.empty();
-    // 1. **إضافة الفئة `loading-state` هنا**
     serversGrid.addClass('loading-state');
-    serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الحلقة ${episodeNum}...</p>`);
 
+    let loadingMessage = "";
+    let ajaxUrl = config.GAS_WEB_APP_URL + '?contentSheetName=' + encodeURIComponent(config.CONTENT_SHEET_NAME);
+
+    if (config.CONTENT_TYPE === 'series') {
+        loadingMessage = `<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الحلقة ${config.EPISODE_NUMBER}...</p>`;
+        ajaxUrl += '&episodeNumber=' + encodeURIComponent(config.EPISODE_NUMBER);
+    } else if (config.CONTENT_TYPE === 'movie') {
+        loadingMessage = `<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الفيلم ${config.MOVIE_TITLE}...</p>`;
+        ajaxUrl += '&movieTitle=' + encodeURIComponent(config.MOVIE_TITLE);
+    }
+
+    serversGrid.html(loadingMessage);
 
     $.ajax({
-      url: config.GAS_WEB_APP_URL + '?seriesSheetName=' + encodeURIComponent(seriesName) + '&episodeNumber=' + encodeURIComponent(episodeNum),
+      url: ajaxUrl,
       type: 'GET',
       dataType: 'json',
       success: function(servers) {
-        // 2. **إزالة الفئة `loading-state` هنا**
         serversGrid.removeClass('loading-state');
-        // 3. **تطبيق خصائص الـ grid يدوياً في JS لضمان التحول السلس**
         serversGrid.css({
             'display': 'grid',
             'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
             'gap': '12px'
         });
 
-
         serversGrid.empty(); // مسح رسالة التحميل
 
         if (servers.length === 0) {
-          serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>لا توجد سيرفرات متاحة للحلقة ${episodeNum}.</p>`);
+          const noServersMessage = (config.CONTENT_TYPE === 'series') ?
+            `لا توجد سيرفرات متاحة للحلقة ${config.EPISODE_NUMBER}.` :
+            `لا توجد سيرفرات متاحة للفيلم ${config.MOVIE_TITLE}.`;
+          serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>${noServersMessage}</p>`);
           return;
         }
 
@@ -94,7 +145,7 @@ $(document).ready(function() {
           const serverBtn = $(`
             <div class="siwane-server-btn"
                  data-server-id="${server.id}"
-                 data-series-sheet-name="${seriesName}">
+                 data-content-sheet-name="${config.CONTENT_SHEET_NAME}">
               <div class="siwane-server-icon">${server.icon}</div>
               <span>${server.title}</span>
             </div>
@@ -107,10 +158,10 @@ $(document).ready(function() {
           $(this).addClass("active");
 
           const serverId = $(this).data("server-id");
-          const seriesSheetNameForDecryption = $(this).data("series-sheet-name");
+          const contentSheetNameForDecryption = $(this).data("content-sheet-name"); // استخدام contentSheetName
 
           $.ajax({
-            url: config.GAS_WEB_APP_URL + '?id=' + encodeURIComponent(serverId) + '&seriesSheetName=' + encodeURIComponent(seriesSheetNameForDecryption),
+            url: config.GAS_WEB_APP_URL + '?id=' + encodeURIComponent(serverId) + '&contentSheetName=' + encodeURIComponent(contentSheetNameForDecryption),
             type: 'GET',
             dataType: 'json',
             success: function(response) {
@@ -129,11 +180,9 @@ $(document).ready(function() {
         });
       },
       error: function(xhr, status, error) {
-        // 4. **إزالة الفئة `loading-state` حتى في حالة الخطأ**
         serversGrid.removeClass('loading-state');
-        // 5. **تطبيق خصائص الـ grid حتى في حالة الخطأ إذا لم تكن الأزرار ستبقى مركزة**
         serversGrid.css({
-            'display': 'grid', // أعدها لـ grid
+            'display': 'grid',
             'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
             'gap': '12px'
         });
@@ -144,10 +193,21 @@ $(document).ready(function() {
     });
   }
 
+  // Initial display before loading servers
+  let initialCountdownText = "";
+  if (config.CONTENT_TYPE === 'series') {
+      initialCountdownText = `الرجاء اختيار سيرفر للحلقة ${config.EPISODE_NUMBER}`;
+  } else if (config.CONTENT_TYPE === 'movie') {
+      initialCountdownText = `الرجاء اختيار سيرفر للفيلم ${config.MOVIE_TITLE}`;
+  } else {
+      initialCountdownText = "الرجاء اختيار سيرفر للبدء";
+  }
+
   $("#siwane-countdown").text("");
-  $("#siwane-countdown-text").text("الرجاء اختيار سيرفر للبدء");
+  $("#siwane-countdown-text").text(initialCountdownText);
   $("#siwane-countdown-display").show();
   $("#siwane-video-frame").hide();
 
-  loadServersForEpisode(config.SERIES_SHEET_NAME, config.CURRENT_EPISODE_NUMBER);
+  // Load servers based on detected content type
+  loadServers();
 });
