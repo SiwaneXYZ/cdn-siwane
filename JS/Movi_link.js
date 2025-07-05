@@ -59,30 +59,49 @@ $(document).ready(function() {
   }
 
   function loadServersForEpisode(seriesName, episodeNum) {
-    $("#siwane-servers-grid").empty();
-    $("#siwane-servers-grid").html(`<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الحلقة ${episodeNum}...</p>`);
+    const serversGrid = $("#siwane-servers-grid"); // احصل على العنصر
+
+    serversGrid.empty();
+    // 1. **إضافة الفئة `loading-state` هنا**
+    serversGrid.addClass('loading-state');
+    serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الحلقة ${episodeNum}...</p>`);
+
 
     $.ajax({
       url: config.GAS_WEB_APP_URL + '?seriesSheetName=' + encodeURIComponent(seriesName) + '&episodeNumber=' + encodeURIComponent(episodeNum),
       type: 'GET',
       dataType: 'json',
       success: function(servers) {
-        $("#siwane-servers-grid").empty();
+        // 2. **إزالة الفئة `loading-state` هنا**
+        serversGrid.removeClass('loading-state');
+        // 3. **تطبيق خصائص الـ grid يدوياً في JS لضمان التحول السلس**
+        serversGrid.css({
+            'display': 'grid',
+            'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
+            'gap': '12px'
+        });
+
+
+        serversGrid.empty(); // مسح رسالة التحميل
+
         if (servers.length === 0) {
-          $("#siwane-servers-grid").html(`<p style='color: #a9d6e5; text-align: center;'>لا توجد سيرفرات متاحة للحلقة ${episodeNum}.</p>`);
+          serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>لا توجد سيرفرات متاحة للحلقة ${episodeNum}.</p>`);
+          // في حالة عدم وجود سيرفرات، يمكنك اختيار إبقاء 'loading-state' أو تطبيق فئة أخرى
+          // إذا أردت إبقاء توسيط رسالة "لا توجد سيرفرات"، لا تزيل الفئة.
+          // serversGrid.addClass('loading-state'); // إذا أردت إبقاء التوسيط لرسالة "لا توجد"
           return;
         }
 
         servers.forEach(server => {
           const serverBtn = $(`
-            <div class="siwane-server-btn" 
-                 data-server-id="${server.id}" 
+            <div class="siwane-server-btn"
+                 data-server-id="${server.id}"
                  data-series-sheet-name="${seriesName}">
               <div class="siwane-server-icon">${server.icon}</div>
               <span>${server.title}</span>
             </div>
           `);
-          $("#siwane-servers-grid").append(serverBtn);
+          serversGrid.append(serverBtn);
         });
 
         $(".siwane-server-btn[data-server-id]").off('click').on('click', function() {
@@ -112,8 +131,17 @@ $(document).ready(function() {
         });
       },
       error: function(xhr, status, error) {
+        // 4. **إزالة الفئة `loading-state` حتى في حالة الخطأ**
+        serversGrid.removeClass('loading-state');
+        // 5. **تطبيق خصائص الـ grid حتى في حالة الخطأ إذا لم تكن الأزرار ستبقى مركزة**
+        serversGrid.css({
+            'display': 'grid', // أعدها لـ grid
+            'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
+            'gap': '12px'
+        });
+
         alert("فشل في تحميل قائمة السيرفرات: " + error);
-        $("#siwane-servers-grid").html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا.</p>");
+        serversGrid.html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا.</p>");
       }
     });
   }
