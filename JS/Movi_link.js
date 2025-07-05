@@ -8,7 +8,8 @@ $(document).ready(function() {
     const container = $("#siwane-particles-container");
     container.empty();
 
-    for (let i = 0; i < 50; i++) {
+    // تم تغيير العدد من 50 إلى 100 لمضاعفة الجسيمات
+    for (let i = 0; i < 100; i++) {
       const particle = $('<div class="siwane-particle"></div>');
       particle.css({
         left: `${Math.random() * 100}%`,
@@ -35,7 +36,7 @@ $(document).ready(function() {
     $("#siwane-countdown-text").text("جاري تحضير الفيديو...");
     $("#siwane-countdown-display").show();
     $("#siwane-video-frame").hide();
-    createParticles();
+    createParticles(); // تستدعى هنا لإنشاء جسيمات جديدة في كل مرة
 
     $('html, body').animate({
       scrollTop: $("#siwane-countdown-display").offset().top - 20
@@ -86,9 +87,6 @@ $(document).ready(function() {
 
         if (servers.length === 0) {
           serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>لا توجد سيرفرات متاحة للحلقة ${episodeNum}.</p>`);
-          // في حالة عدم وجود سيرفرات، يمكنك اختيار إبقاء 'loading-state' أو تطبيق فئة أخرى
-          // إذا أردت إبقاء توسيط رسالة "لا توجد سيرفرات"، لا تزيل الفئة.
-          // serversGrid.addClass('loading-state'); // إذا أردت إبقاء التوسيط لرسالة "لا توجد"
           return;
         }
 
