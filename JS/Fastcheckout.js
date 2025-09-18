@@ -1,2 +1,1065 @@
 // ===== Admin.js اصدار 1.0 بتاريخ 28 مايو 205 ===== //
-const _0x257593=_0x198e;(function(_0x314908,_0x30e15c){const _0x3190c3=_0x198e,_0x213efd=_0x314908();while(!![]){try{const _0x53aafb=-parseInt(_0x3190c3(0xa3))/0x1*(-parseInt(_0x3190c3(0x1f5))/0x2)+-parseInt(_0x3190c3(0x19e))/0x3+parseInt(_0x3190c3(0x1cc))/0x4+-parseInt(_0x3190c3(0x1bc))/0x5*(-parseInt(_0x3190c3(0x1d2))/0x6)+-parseInt(_0x3190c3(0x142))/0x7+-parseInt(_0x3190c3(0x12c))/0x8*(parseInt(_0x3190c3(0x1c3))/0x9)+parseInt(_0x3190c3(0x182))/0xa;if(_0x53aafb===_0x30e15c)break;else _0x213efd['push'](_0x213efd['shift']());}catch(_0x369436){_0x213efd['push'](_0x213efd['shift']());}}}(_0x5141,0x9e76c));const obfuscatedSecretKeyBase64=_0x257593(0x1c9),getObfuscatedKey=()=>atob(obfuscatedSecretKeyBase64);function decryptText(_0x436f81,_0x2e011a){const _0x3768a5=_0x257593;try{const _0x4582dd=atob(_0x436f81);return CryptoJS['AES'][_0x3768a5(0xfd)](_0x4582dd,_0x2e011a)[_0x3768a5(0x128)](CryptoJS['enc']['Utf8']);}catch(_0x502296){return console['error'](_0x3768a5(0x11e),_0x502296),showErrorNotification(_0x3768a5(0x13d)),null;}}function _0x5141(){const _0x346cc2=['random','<div\x20class=\x22order-history-item\x22\x20data-order-number=\x22','User\x20data\x20is\x20complete\x20and\x20valid.\x20Proceeding\x20with\x20checkout\x20setup.','name','.container-history\x20shown\x20by\x20default.','success','</strong>\x20<span><a\x20href=\x22','fullName','message','warn','HTTP\x20error!\x20status:\x20','articleLinkLabel','value','missingPhoneButtonText','\x20status\x20updated\x20to\x20','Apply\x20promo\x20button\x20not\x20found.','naming','preventDefault','selectedAccountDetails','now','\x0a\x20\x20\x20\x20<div\x20class=\x22warning-overlay\x22></div>\x0a\x20\x20\x20\x20<div\x20class=\x22warning-content\x22>\x0a\x20\x20\x20\x20\x20\x20<h3>غير\x20مسموح\x20بنسخ\x20المحتوى!</h3>\x0a\x20\x20\x20\x20\x20\x20<p>جميع\x20حقوق\x20النشر\x20محفوظة</p>\x0a\x20\x20\x20\x20</div>\x0a\x20\x20','No\x20recent\x20orders\x20found\x20to\x20display.\x20Showing\x20\x27no\x20orders\x27\x20message.','\x20(خطأ\x20داخلي:\x20عناصر\x20النموذج\x20مفقودة)','completed','Phone\x20number\x20is\x20the\x20only\x20missing\x20required\x20field.\x20Displaying\x20floating\x20prompt.','20NAZxdx','.container-history\x20not\x20found.\x20Skipping\x20hide.','Payment\x20method\x20selected:\x20','ctrlKey','object','Attempting\x20to\x20update\x20status\x20for\x20order\x20','.missing-phone-overlay\x20not\x20found.\x20Skipping\x20hide.','282141pAqrcK','hidden','fullNameLabel','#closeHistoryPopup','noteLabel','History\x20trimmed\x20to\x20','UmF3YW4wNUAqIyQ=','statusProcessing','N/A','1621204PDdUPL','json','forEach','contextmenu','\x20(contacting\x20backend)...','data-id','663468BGhnhd','missingPhoneProfileLink','**\x20درهم.\x20','#closeHistoryPopup\x20event\x20listener\x20added\x20to\x20default\x20history\x20view.','\x22\x20alt=\x22','.checkout-container','initialTotalDisplay',')\x0a\x0a','promoCodeInput','textContent','uid','Exiting\x20DOMContentLoaded\x20-\x20Explicit\x20History\x20mode.','.checkout-container\x20not\x20found.\x20Skipping\x20hide.','Telegram\x20sending\x20process\x20finished.','فشل\x20في\x20قراءة\x20وتحليل\x20بيانات\x20المستخدم\x20من\x20localStorage:\x20','self','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<p>حدث\x20خطأ\x20غير\x20متوقع!\x20يرجى\x20إعادة\x20تحميل\x20الصفحة\x20أو\x20الاتصال\x20بالدعم.</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@siwane.xyz?subject=خطأ\x20عام\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20\x20\x20','Attempting\x20to\x20send\x20data\x20directly\x20to\x20Telegram\x20API\x20(TESTING\x20ONLY\x20-\x20INSECURE\x20IN\x20PRODUCTION)...','\x0a\x20\x20\x20\x20/*\x20منع\x20اختيار\x20النص\x20*/\x0a\x20\x20\x20\x20body\x20{\x0a\x20\x20\x20\x20\x20\x20-webkit-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20-moz-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20-ms-user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20\x20\x20user-select:\x20none\x20!important;\x0a\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20/*\x20تحذير\x20النسخ\x20*/\x0a\x20\x20\x20\x20.copy-warning\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20z-index:\x209999;\x0a\x20\x20\x20\x20\x20\x20display:\x20flex;\x0a\x20\x20\x20\x20\x20\x20align-items:\x20center;\x0a\x20\x20\x20\x20\x20\x20justify-content:\x20center;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-overlay\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20absolute;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20background:\x20rgba(0,0,0,0.7);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-content\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20relative;\x0a\x20\x20\x20\x20\x20\x20background:\x20#f8d7da;\x0a\x20\x20\x20\x20\x20\x20padding:\x2030px;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20max-width:\x2080%;\x0a\x20\x20\x20\x20\x20\x20box-shadow:\x200\x200\x2020px\x20rgba(0,0,0,0.5);\x0a\x20\x20\x20\x20\x20\x20z-index:\x2010000;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.warning-content\x20h3\x20{\x0a\x20\x20\x20\x20\x20\x20color:\x20#721c24;\x0a\x20\x20\x20\x20\x20\x20margin-bottom:\x2015px;\x0a\x20\x20\x20\x20}\x0a\x0a\x20\x20\x20\x20/*\x20أنماط\x20الخطأ\x20الأصلية\x20*/\x0a\x20\x20\x20\x20.overlay\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x20top:\x200;\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20background:\x20rgba(255,\x20255,\x20255,\x200.7);\x0a\x20\x20\x20\x20\x20\x20z-index:\x2010000;\x20backdrop-filter:\x20blur(5px);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.notification-error\x20{\x0a\x20\x20\x20\x20\x20\x20background-color:\x20#f8d7da;\x0a\x20\x20\x20\x20\x20\x20color:\x20#721c24;\x20padding:\x2020px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20\x20\x20box-shadow:\x200\x200\x2015px\x20rgba(0,\x200,\x200,\x200.2);\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x20font-size:\x2018px;\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x20top:\x2050%;\x20left:\x2050%;\x0a\x20\x20\x20\x20\x20\x20transform:\x20translate(-50%,\x20-50%);\x0a\x20\x20\x20\x20\x20\x20animation:\x20slideIn\x200.5s\x20ease-in-out;\x0a\x20\x20\x20\x20\x20\x20z-index:\x2010001;\x20width:\x2080%;\x20max-width:\x20500px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link\x20{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x20margin-top:\x2015px;\x0a\x20\x20\x20\x20\x20\x20padding:\x2010px;\x20background-color:\x20#25d366;\x0a\x20\x20\x20\x20\x20\x20color:\x20white;\x20text-decoration:\x20none;\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x20border-radius:\x205px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link:hover\x20{\x20background-color:\x20#128c7e;\x20}\x0a\x20\x20\x20\x20@keyframes\x20slideIn\x20{\x0a\x20\x20\x20\x20\x20\x20from\x20{\x20opacity:\x200;\x20transform:\x20translate(-50%,\x20-60%);\x20}\x0a\x20\x20\x20\x20\x20\x20to\x20{\x20opacity:\x201;\x20transform:\x20translate(-50%,\x20-50%);\x20}\x0a\x20\x20\x20\x20}\x0a\x20\x20','ssNull','appsScriptUrl','\x20for\x20order\x20','photo','logo','<button\x20class=\x22complete-order-button\x22\x20disabled>تم\x20الإنتهاء</button>','missingPhoneMessageText','errorNotif','findIndex','paymentMethods','getElementById','click','Missing\x20phone\x20overlay\x20element\x20(.missing-phone-overlay)\x20not\x20found!','promoLabel','<img\x20src=\x22','display','82wrIYCq','Confirm\x20purchase\x20button\x20not\x20found!','hostname','phoneNumber','\x22\x20target=\x22_blank\x22>','Notifying\x20backend\x20that\x20promo\x20code\x20','status','.container-history\x20.note','chat_id','4951AYobVm','Product\x20details\x20display\x20elements\x20filled\x20from\x20sessionStorage.','لا\x20يوجد','<p>حدث\x20خطأ\x20في\x20عرض\x20سجل\x20الطلبات.</p>','Button\x20remains\x20disabled\x20due\x20to\x20missing/incomplete\x20data\x20(details\x20logged\x20above).','floor','change','toLocaleString','درهم.\x20','applyPromoButton','selectstart','email','accountDetails','htmlFor','discountAmountDisplay','#closeHistoryPopup\x20event\x20listener\x20added.','userDataLoadError','<span\x20class=\x22no-orders-icon\x22>!</span>','.\x20Button\x20will\x20remain\x20disabled.','finalTotalLabel','loading','postId','search','paymentMethodsList','valid','Critical\x20user\x20data\x20(excluding\x20phone)\x20is\x20missing\x20or\x20invalid,\x20or\x20user\x20not\x20logged\x20in.\x20Displaying\x20generic\x20error\x20or\x20redirecting.','querySelector','keydown','productLabel','checked','Initial\x20totals\x20calculated\x20and\x20displayed.','includes','</span></p>','history','target','.missing-phone-overlay','Promo\x20application\x20process\x20finished.','setItem','successNotif','className','contains','packageValue','promoCodeUsed','orderTime','.missing-phone-overlay\x20shown.','_blank','min','undefined','.container-history','timeLabel','append','Set\x20#tableHistory\x20innerHTML\x20with\x20orders\x20list.','basePriceLabel','All\x20required\x20data\x20loaded\x20and\x20complete.\x20Confirm\x20button\x20enabled.','radio','timestamp','activationCode','HTTP\x20Response\x20Status:','Simulating\x20backend\x20notification\x20(no\x20actual\x20call\x20in\x20this\x20frontend-only\x20version).','Attempting\x20to\x20save\x20order\x20to\x20local\x20history:','paymentMethod','notification-error','.container-history\x20shown.','<button\x20class=\x22complete-order-button\x22\x20data-order-number=\x22','error','dragstart','statusCompleted','End\x20of\x20DOMContentLoaded\x20-\x20Checkout\x20mode\x20setup.','appendChild','\x20not\x20found\x20in\x20local\x20history\x20to\x20update\x20status.','confirmPurchaseButton','History\x20array\x20after\x20unshift:','\x20old\x20orders.\x20Saving\x20filtered\x20history\x20back\x20to\x20localStorage.','disabled','tableHistory','Existing\x20history\x20loaded\x20for\x20update:','Telegram\x20API\x20call\x20successful:','userEmail','<p>لم\x20تقم\x20باجراء\x20اي\x20طلب</p>','userOrderHistory','log','Parsed\x20order\x20details\x20from\x20sessionStorage:','emailLabel','</strong>\x20<span>','#tableHistory\x20event\x20delegation\x20listener\x20added.','.copy-warning','packageText','غير\x20متوفر','copy-warning','statusText','decrypt','.missing-phone-overlay\x20hidden.','User\x20logged\x20in\x20but\x20critical\x20data\x20missing.\x20Showing\x20error\x20message.','replace','Cannot\x20proceed:\x20User\x20data\x20is\x20missing\x20or\x20incomplete\x20(check\x20load\x20process).','Order\x20details\x20from\x20sessionStorage\x20are\x20incomplete\x20or\x20invalid\x20for\x20checkout.','userPhone','getAttribute','stringify','finalTotalDisplay','remove','paymentScreenshot','head','Generated\x20short\x20order\x20number:\x20','caption','loadingMessage','Failed\x20to\x20save\x20order\x20to\x20local\x20history:','Order\x20with\x20status\x20and\x20timestamp\x20added:','Starting\x20displayOrderHistory\x20function.','clientLinkLabel','noLabel','حدث\x20خطأ\x20داخلي:\x20تفاصيل\x20الطلب\x20أو\x20بيانات\x20المنتج\x20الأساسية\x20غير\x20متوفرة\x20بشكل\x20صحيح.','.container-history\x20hidden\x20via\x20close\x20button.','Telegram\x20API\x20reported\x20an\x20error:','unshift','complete-order-button','\x0a\x20\x20\x20\x20\x20\x20<p>خطأ:\x20النطاق\x20الحالي\x20غير\x20مدعوم!\x20يرجى\x20الاتصال\x20بالدعم.</p>\x0a\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@siwane.xyz?subject=مشكلة\x20في\x20النطاق\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20','Failed\x20to\x20update\x20order\x20status\x20in\x20local\x20history:','innerHTML','processing','orderNumber','accountLogo','<p><strong>📪\x20حالة\x20الطلب:</strong>\x20<span\x20class=\x22order-status\x20','Decryption\x20failed:','payment-method-option','\x20for\x20order\x20number\x20','filter','classList','customSettings','.missing-phone-overlay\x20not\x20found.','Checked\x20required\x20user\x20fields.\x20Missing:\x20','User\x20data\x20is\x20incomplete\x20or\x20missing.\x20Missing\x20fields:\x20','UserDataSource\x20is\x20null\x20or\x20invalid.\x20All\x20required\x20fields\x20considered\x20missing.','toString','#closeHistoryPopup\x20button\x20not\x20found\x20inside\x20.container-history!','fixed','chatId','112rVdscW','Found\x20order\x20index:\x20','.checkout-container\x20not\x20found.','\x20(خطأ\x20Telegram:\x20','articleTitle','createElement','productName','articleLinkDisplay','Backend\x20request\x20failed:','bankNull','Order\x20found\x20and\x20status\x20updated\x20in\x20array:','\x0a\x20\x20\x20\x20\x20\x20<p>خطأ:\x20رمز\x20التفعيل\x20غير\x20صحيح!\x20يرجى\x20التأكد\x20من\x20التكوين.</p>\x0a\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@siwane.xyz?subject=مشكلة\x20في\x20رمز\x20التفعيل\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20','method-','/p/login.html','userId','top','No\x20old\x20orders\x20to\x20filter\x20out\x20or\x20no\x20orders\x20found.','key','setAttribute','History\x20parameter\x20found\x20in\x20URL.\x20Displaying\x20order\x20history.','Missing\x20phone\x20message\x20elements\x20filled.','type','6297837GjXGpL','No\x20valid\x20order\x20details\x20found\x20in\x20sessionStorage.\x20Displaying\x20history\x20view.','cut','add','Order\x20details\x20from\x20sessionStorage\x20are\x20complete\x20and\x20valid\x20for\x20checkout.','accountName','style','description','غير\x20محدد','promoStatus','join','slice','data-order-number','subtotal','copy','profilePageUrl','toISOString','Applying\x20promo\x20code:\x20','Apply\x20promo\x20button\x20listener\x20added.','Found\x20','articleLink','Fetch\x20error\x20sending\x20to\x20Telegram\x20API:','Cannot\x20proceed:\x20Critical\x20order\x20or\x20product\x20data\x20is\x20missing\x20or\x20invalid\x20(check\x20sessionStorage\x20load).','label','push','\x20as\x20completed...','block','userFullName','offerLabel','/sendPhoto','Order\x20','</div>','length','clientWebsiteLink','location','</strong>\x20<span>درهم.\x20','Set\x20#tableHistory\x20innerHTML\x20to\x20\x27no\x20orders\x27\x20message.','.container-history\x20element\x20not\x20found!\x20Cannot\x20display\x20history\x20view.','toFixed','body','User\x20data\x20parsed\x20from\x20localStorage:','mink','Order\x20details\x20not\x20found\x20in\x20sessionStorage.','User\x20not\x20logged\x20in.\x20Redirecting\x20to\x20login\x20page.','basePriceDisplay','div','packageSelectedText','Africa/Casablanca','تعذر\x20تحميل\x20تفاصيل\x20الطلب\x20لإتمام\x20عملية\x20الدفع.\x20الرجاء\x20العودة\x20للصفحة\x20السابقة\x20والمحاولة\x20مرة\x20أخرى.','getItem','\x20(بيانات\x20المستخدم\x20غير\x20كاملة)','toUpperCase','href','F12','phone','</strong>\x20<span>غير\x20متوفر</span></p>','has','<p><strong>','\x20-\x20','Confirm\x20button\x20disabled\x20due\x20to\x20missing\x20phone.','Script\x20end\x20-\x20inside\x20protectedCode','Filtering\x20history\x20older\x20than\x20','Failed\x20to\x20parse\x20order\x20details\x20from\x20sessionStorage:','none','16702810qaBjfm','numberLabel','finalTotal','Error\x20applying\x20promo\x20code:','User\x20data\x20not\x20found\x20in\x20localStorage...\x20Is\x20user\x20logged\x20in?','files','websiteLink','Order\x20details\x20cleared\x20from\x20sessionStorage\x20after\x20validation.','firebaseUserProfileData','Filtered\x20history\x20(recent\x20orders):','#tableHistory\x20element\x20not\x20found.\x20Cannot\x20add\x20complete\x20button\x20listener.','uidLabel','Parsed\x20history\x20array:','shiftKey','.checkout-container\x20hidden\x20due\x20to\x20missing\x20phone.','Existing\x20history\x20loaded:','initialTotal','Read\x20from\x20sessionStorage\x20(\x27checkoutOrderDetails\x27):','Attempting\x20to\x20load\x20user\x20data\x20from\x20localStorage.','agreeTerms','Order\x20saved\x20to\x20local\x20history\x20successfully.','\x22\x20style=\x22height:\x2030px;\x20vertical-align:\x20middle;\x20margin-left:\x2010px;\x22>','addEventListener','Valid\x20order\x20details\x20found.\x20Displaying\x20checkout\x20form.','kodeP4','Set\x20#tableHistory\x20innerHTML\x20to\x20error\x20message.','parse_mode','POST','2199720tdwbjJ','[Checkout\x20script]\x20Script\x20starting\x20(inside\x20protectedCode)...','\x20(خطأ\x20في\x20الاتصال\x20المباشر)','parse','</button>'];_0x5141=function(){return _0x346cc2;};return _0x5141();}function showErrorNotification(_0x3ff38){const _0xd3c280=_0x257593,_0x4204b7=document[_0xd3c280(0x131)](_0xd3c280(0x16f));_0x4204b7[_0xd3c280(0xca)]='overlay';const _0x18f389=document[_0xd3c280(0x131)](_0xd3c280(0x16f));_0x18f389[_0xd3c280(0xca)]=_0xd3c280(0xe0);if(_0x3ff38===_0xd3c280(0x13d))_0x18f389['innerHTML']=_0xd3c280(0x137);else _0x3ff38===_0xd3c280(0x1b3)?_0x18f389[_0xd3c280(0x119)]=_0xd3c280(0x117):_0x18f389['innerHTML']=_0xd3c280(0x1e2);document[_0xd3c280(0x169)][_0xd3c280(0xe7)](_0x4204b7),document[_0xd3c280(0x169)]['appendChild'](_0x18f389);}function verifyDomain(){const _0x49d0c5=_0x257593;if(typeof encryptedBase64Checkout===_0x49d0c5(0xd2)||!encryptedBase64Checkout[_0x49d0c5(0xdb)]||!encryptedBase64Checkout[_0x49d0c5(0x123)]||!encryptedBase64Checkout[_0x49d0c5(0x1ee)]){console[_0x49d0c5(0xe3)]('encryptedBase64Checkout\x20object\x20not\x20found\x20or\x20incomplete.\x20Make\x20sure\x20the\x20HTML\x20script\x20defines\x20it\x20correctly\x20before\x20loading\x20this\x20script.'),showErrorNotification(_0x49d0c5(0x13d));return;}const _0x598ff6=getObfuscatedKey(),_0xe4d3b3=decryptText(encryptedBase64Checkout[_0x49d0c5(0xdb)],_0x598ff6);if(_0xe4d3b3){const _0x150853=window[_0x49d0c5(0x164)][_0x49d0c5(0x1f7)];_0x150853[_0x49d0c5(0x100)](/^www\./,'')===_0xe4d3b3['replace'](/^www\./,'')?protectedCode(encryptedBase64Checkout[_0x49d0c5(0x123)],encryptedBase64Checkout[_0x49d0c5(0x1ee)]):showErrorNotification(_0x49d0c5(0x1b3));}else showErrorNotification(_0x49d0c5(0x13d));}function _0x198e(_0x105b78,_0x3aa0c0){const _0x51416f=_0x5141();return _0x198e=function(_0x198e90,_0x4f2406){_0x198e90=_0x198e90-0xa2;let _0x48ee14=_0x51416f[_0x198e90];return _0x48ee14;},_0x198e(_0x105b78,_0x3aa0c0);}const blockCopyActions=()=>{const _0x10c98f=_0x257593;document[_0x10c98f(0x198)](_0x10c98f(0x1cf),_0xf6f9a6=>{const _0x32ff63=_0x10c98f;return _0xf6f9a6[_0x32ff63(0x1b4)](),showCopyWarning(),![];}),document['addEventListener'](_0x10c98f(0x150),_0x46da3a=>{const _0x26d5c4=_0x10c98f;return _0x46da3a[_0x26d5c4(0x1b4)](),showCopyWarning(),![];}),document[_0x10c98f(0x198)](_0x10c98f(0x144),_0x51fdcf=>{const _0x1a2f41=_0x10c98f;return _0x51fdcf[_0x1a2f41(0x1b4)](),showCopyWarning(),![];}),document[_0x10c98f(0x198)](_0x10c98f(0xe4),_0x276883=>{return _0x276883['preventDefault'](),showCopyWarning(),![];}),document['addEventListener'](_0x10c98f(0xad),_0x4b2cf3=>{return _0x4b2cf3['preventDefault'](),showCopyWarning(),![];}),document[_0x10c98f(0x198)](_0x10c98f(0xbe),_0x40b680=>{const _0x3d8900=_0x10c98f;if(_0x40b680[_0x3d8900(0x1bf)]&&_0x40b680[_0x3d8900(0x18f)]&&['I','J','C'][_0x3d8900(0xc2)](_0x40b680[_0x3d8900(0x13d)]['toUpperCase']()))return _0x40b680[_0x3d8900(0x1b4)](),showCopyWarning(),![];if(_0x40b680[_0x3d8900(0x13d)]===_0x3d8900(0x177))return _0x40b680[_0x3d8900(0x1b4)](),showCopyWarning(),![];if(_0x40b680[_0x3d8900(0x1bf)]&&_0x40b680[_0x3d8900(0x13d)]['toUpperCase']()==='U')return _0x40b680[_0x3d8900(0x1b4)](),showCopyWarning(),![];});};function showCopyWarning(){const _0x42b872=_0x257593,_0xb704e8=document[_0x42b872(0xbd)](_0x42b872(0xf8));if(_0xb704e8)return;const _0x1b09b5=document['createElement'](_0x42b872(0x16f));_0x1b09b5[_0x42b872(0xca)]=_0x42b872(0xfb),_0x1b09b5[_0x42b872(0x119)]=_0x42b872(0x1b7),document['body'][_0x42b872(0xe7)](_0x1b09b5),setTimeout(()=>{const _0x51aed1=_0x42b872;_0x1b09b5[_0x51aed1(0x107)]();},0xbb8);}window[_0x257593(0x1e1)]!==window['top']&&(window[_0x257593(0x13b)][_0x257593(0x164)][_0x257593(0x176)]=window[_0x257593(0x1e1)][_0x257593(0x164)]['href']);const addProtectionStyles=()=>{const _0xf3ee0e=_0x257593,_0x55768f=_0xf3ee0e(0x1e4),_0x14e2b2=document[_0xf3ee0e(0x131)](_0xf3ee0e(0x148));_0x14e2b2['textContent']=_0x55768f,document[_0xf3ee0e(0x109)][_0xf3ee0e(0xe7)](_0x14e2b2);};addProtectionStyles(),blockCopyActions();function protectedCode(_0x8aba7f,_0x43ead3){const _0x5da952=_0x257593;console[_0x5da952(0xf3)](_0x5da952(0x19f));const _0x43d467=_0x8aba7f;let _0x5722cc=0x0,_0x3349ac=0x0,_0x2ccbce=0x0,_0x4c5740=null,_0x198cf4=null,_0x450135=null;document['addEventListener']('DOMContentLoaded',function(){const _0x46601a=_0x5da952;console[_0x46601a(0xf3)]('[Checkout\x20script]\x20DOMContentLoaded\x20fired.');const _0xe16686=document[_0x46601a(0x1ef)]('statusMessage'),_0x2ce6e3=document[_0x46601a(0x1ef)](_0x46601a(0xe9)),_0x45c119=document['querySelector'](_0x46601a(0x1d7)),_0x432046=document['querySelector'](_0x46601a(0xd3)),_0x4565fb=document[_0x46601a(0xbd)](_0x46601a(0xc6)),_0x1f62ca=document['getElementById'](_0x46601a(0x1eb)),_0x58c5e1=document['getElementById'](_0x46601a(0x1d3)),_0x4ad545=document[_0x46601a(0x1ef)]('productNameDisplay'),_0x49b363=document[_0x46601a(0x1ef)](_0x46601a(0x133)),_0x22c2ce=document[_0x46601a(0x1ef)](_0x46601a(0x163)),_0x5c4719=document[_0x46601a(0x1ef)](_0x46601a(0x170)),_0x55171e=document[_0x46601a(0x1ef)](_0x46601a(0x16e));console[_0x46601a(0xf3)]('DOM\x20elements\x20references\x20obtained.');const _0x37faa7=new URLSearchParams(window[_0x46601a(0x164)][_0x46601a(0xb9)]);if(_0x37faa7[_0x46601a(0x17a)](_0x46601a(0xc4))){console[_0x46601a(0xf3)](_0x46601a(0x13f));if(_0x45c119)_0x45c119[_0x46601a(0x122)][_0x46601a(0x145)](_0x46601a(0x1c4));else console['warn'](_0x46601a(0x12e));if(_0x4565fb)_0x4565fb[_0x46601a(0x122)][_0x46601a(0x145)](_0x46601a(0x1c4));else console[_0x46601a(0x1ac)](_0x46601a(0x124));if(_0x432046){_0x432046[_0x46601a(0x122)]['remove'](_0x46601a(0x1c4)),console[_0x46601a(0xf3)](_0x46601a(0xe1));const _0x331d40=_0x432046['querySelector'](_0x46601a(0x1c6));_0x331d40?(_0x331d40[_0x46601a(0x198)](_0x46601a(0x1f0),function(){const _0x1ec772=_0x46601a;_0x432046[_0x1ec772(0x122)][_0x1ec772(0x145)](_0x1ec772(0x1c4)),console[_0x1ec772(0xf3)](_0x1ec772(0x113));}),console[_0x46601a(0xf3)](_0x46601a(0xb2))):console[_0x46601a(0xe3)]('#closeHistoryPopup\x20button\x20not\x20found\x20inside\x20.container-history!');}else console['error']('.container-history\x20element\x20not\x20found!\x20Cannot\x20display\x20history.');_0xc30b06();const _0x97784=document[_0x46601a(0x1ef)](_0x46601a(0xed));_0x97784?(_0x97784['addEventListener'](_0x46601a(0x1f0),function(_0x2b7810){const _0x4953dc=_0x46601a,_0x57331c=_0x2b7810[_0x4953dc(0xc5)];if(_0x57331c&&_0x57331c[_0x4953dc(0x122)][_0x4953dc(0xcb)]('complete-order-button')){const _0x577b65=_0x57331c[_0x4953dc(0x104)](_0x4953dc(0x14e));_0x577b65&&(console['log']('[History\x20Click]\x20Marking\x20order\x20'+_0x577b65+_0x4953dc(0x15b)),_0x475e72(_0x577b65,_0x4953dc(0x1ba)),_0xc30b06());}}),console[_0x46601a(0xf3)](_0x46601a(0xf7))):console[_0x46601a(0x1ac)](_0x46601a(0x18c));console[_0x46601a(0xf3)](_0x46601a(0x1dd));return;}console['log']('No\x20history\x20parameter\x20found.\x20Checking\x20sessionStorage\x20for\x20order\x20details.');const _0xf87b7a=sessionStorage['getItem']('checkoutOrderDetails');console[_0x46601a(0xf3)](_0x46601a(0x193),_0xf87b7a);let _0x2dc693=![];if(_0xf87b7a)try{_0x450135=JSON['parse'](_0xf87b7a),console[_0x46601a(0xf3)](_0x46601a(0xf4),_0x450135);if(_0x450135&&typeof _0x450135===_0x46601a(0x1c0)&&(_0x450135[_0x46601a(0xb8)]==null||_0x450135[_0x46601a(0xcc)]==null||!_0x450135[_0x46601a(0xf9)]||!_0x450135[_0x46601a(0x132)]||!_0x450135[_0x46601a(0x156)]))console[_0x46601a(0x1ac)](_0x46601a(0x102),_0x450135),_0x2dc693=![];else{_0x2dc693=!![],console[_0x46601a(0xf3)](_0x46601a(0x146)),sessionStorage['removeItem']('checkoutOrderDetails'),console[_0x46601a(0xf3)](_0x46601a(0x189));const _0x47ad75=_0x450135['postId'],_0x43f960=_0x450135[_0x46601a(0x188)]||'لم\x20يتم\x20إدخاله',_0x471241=parseFloat(_0x450135[_0x46601a(0xcc)]),_0x8f9a0a=_0x450135[_0x46601a(0xf9)],_0x33b9ac=_0x450135[_0x46601a(0x132)],_0x4fb787=_0x450135['articleLink'];if(_0x4ad545)_0x4ad545[_0x46601a(0x1db)]=_0x33b9ac;if(_0x49b363){const _0x3352d8=document[_0x46601a(0x131)]('a');_0x3352d8[_0x46601a(0x176)]=_0x4fb787,_0x3352d8[_0x46601a(0x1db)]=_0x4fb787,_0x3352d8[_0x46601a(0xc5)]=_0x46601a(0xd0),_0x49b363[_0x46601a(0x119)]='',_0x49b363[_0x46601a(0xe7)](_0x3352d8);}if(_0x22c2ce)_0x22c2ce[_0x46601a(0x1db)]=_0x43f960;if(_0x5c4719)_0x5c4719[_0x46601a(0x1db)]=_0x8f9a0a;if(_0x55171e)_0x55171e[_0x46601a(0x1db)]=_0x46601a(0xab)+_0x471241[_0x46601a(0x168)](0x2);console[_0x46601a(0xf3)](_0x46601a(0xa4)),_0x5722cc=_0x471241,_0x3349ac=_0x5722cc,_0x5e82a7(),console[_0x46601a(0xf3)](_0x46601a(0xc1));}}catch(_0xd9b5b9){console[_0x46601a(0xe3)](_0x46601a(0x180),_0xd9b5b9),_0x450135=null,_0x2dc693=![];}else console['warn'](_0x46601a(0x16c)),_0x450135=null,_0x2dc693=![];if(_0x2dc693){console[_0x46601a(0xf3)](_0x46601a(0x199));if(_0x45c119)_0x45c119[_0x46601a(0x122)][_0x46601a(0x107)]('hidden');else console[_0x46601a(0xe3)]('.checkout-container\x20not\x20found!\x20Fatal.');if(_0x432046)_0x432046[_0x46601a(0x122)][_0x46601a(0x145)]('hidden');else console[_0x46601a(0x1ac)](_0x46601a(0x1bd));if(_0x4565fb)_0x4565fb[_0x46601a(0x122)][_0x46601a(0x145)]('hidden');else console['warn'](_0x46601a(0x1c2));const _0x199f42=document[_0x46601a(0x1ef)](_0x46601a(0x15d)),_0x39d882=document['getElementById'](_0x46601a(0xf0)),_0x1f574=document[_0x46601a(0x1ef)](_0x46601a(0x103)),_0x53ec35=document[_0x46601a(0x1ef)](_0x46601a(0x13a)),_0x13137f=localStorage[_0x46601a(0x173)](_0x46601a(0x18a));let _0x116273=null;console[_0x46601a(0xf3)](_0x46601a(0x194));if(_0x13137f)try{const _0x3fe3b4=JSON['parse'](_0x13137f);_0x116273=_0x3fe3b4,console[_0x46601a(0xf3)](_0x46601a(0x16a),_0x116273);}catch(_0x22f5dd){console[_0x46601a(0xe3)](_0x46601a(0x1e0)+_0x22f5dd[_0x46601a(0x1ab)],_0x22f5dd),_0x116273=null;}else console[_0x46601a(0x1ac)](_0x46601a(0x186)),_0x116273=null;const _0x3cfd09=[_0x46601a(0x1aa),'email','phoneNumber',_0x46601a(0x1dc)],_0x3dca2b=[];if(!_0x116273)_0x3dca2b[_0x46601a(0x15a)](..._0x3cfd09),console[_0x46601a(0x1ac)](_0x46601a(0x127));else{_0x3cfd09['forEach'](_0x475868=>{const _0x44e0d6=_0x116273[_0x475868];(_0x44e0d6===undefined||_0x44e0d6===null||_0x44e0d6==='')&&_0x3dca2b['push'](_0x475868);}),console[_0x46601a(0xf3)](_0x46601a(0x125)+_0x3dca2b[_0x46601a(0x14c)](',\x20')+'.\x20(Empty\x20array\x20means\x20no\x20missing\x20fields)');if(_0x199f42)_0x199f42[_0x46601a(0x1db)]=_0x116273[_0x46601a(0x1aa)]||_0x46601a(0xfa);if(_0x39d882)_0x39d882[_0x46601a(0x1db)]=_0x116273[_0x46601a(0xae)]||_0x46601a(0xfa);if(_0x1f574)_0x1f574[_0x46601a(0x1db)]=_0x116273[_0x46601a(0x1f8)]||_0x46601a(0xfa);if(_0x53ec35)_0x53ec35[_0x46601a(0x1db)]=_0x116273[_0x46601a(0x1dc)]||_0x46601a(0xfa);console['log']('User\x20data\x20display\x20elements\x20filled.');}if(_0x3dca2b['length']===0x0){_0x198cf4=_0x116273,console[_0x46601a(0xf3)](_0x46601a(0x1a5));if(_0xe16686)_0xe16686[_0x46601a(0x148)][_0x46601a(0x1f4)]=_0x46601a(0x181);}else{console[_0x46601a(0x1ac)](_0x46601a(0x126)+_0x3dca2b[_0x46601a(0x14c)](',\x20')+_0x46601a(0xb5));if(_0x116273&&_0x3dca2b[_0x46601a(0x162)]===0x1&&_0x3dca2b[_0x46601a(0xc2)](_0x46601a(0x1f8))){console[_0x46601a(0x1ac)](_0x46601a(0x1bb));if(_0x45c119)_0x45c119[_0x46601a(0x122)][_0x46601a(0x145)](_0x46601a(0x1c4));console[_0x46601a(0xf3)](_0x46601a(0x190));if(_0x4565fb){_0x4565fb[_0x46601a(0x122)]['remove'](_0x46601a(0x1c4)),console[_0x46601a(0xf3)](_0x46601a(0xcf));if(_0x1f62ca)_0x1f62ca[_0x46601a(0x1db)]=_0x43d467['missingPhoneMessage'];_0x58c5e1&&(_0x58c5e1['href']=_0x43d467[_0x46601a(0x151)],_0x58c5e1[_0x46601a(0x1db)]=_0x43d467[_0x46601a(0x1b0)]),console['log'](_0x46601a(0x140));}else console[_0x46601a(0xe3)](_0x46601a(0x1f1));if(_0xe16686)_0xe16686[_0x46601a(0x148)][_0x46601a(0x1f4)]='none';if(_0x2ce6e3)_0x2ce6e3[_0x46601a(0xec)]=!![];console[_0x46601a(0xf3)](_0x46601a(0x17d));}else{console[_0x46601a(0xe3)](_0x46601a(0xbc));_0x45c119&&(_0x45c119[_0x46601a(0x122)]['remove'](_0x46601a(0x1c4)),console['log']('.checkout-container\x20shown\x20to\x20display\x20generic\x20user\x20error.'));_0x4565fb&&(_0x4565fb[_0x46601a(0x122)]['add'](_0x46601a(0x1c4)),console[_0x46601a(0xf3)](_0x46601a(0xfe)));_0xe16686&&(_0xe16686[_0x46601a(0x1db)]=_0x43d467[_0x46601a(0xb3)]+'\x20(بيانات\x20أساسية\x20للمستخدم\x20مفقودة)',_0xe16686[_0x46601a(0xca)]=_0x46601a(0xe3),_0xe16686[_0x46601a(0x148)][_0x46601a(0x1f4)]=_0x46601a(0x15c),console[_0x46601a(0xf3)]('Generic\x20user\x20data\x20error\x20message\x20displayed.'));if(_0x2ce6e3)_0x2ce6e3['disabled']=!![];console['log']('Confirm\x20button\x20disabled\x20due\x20to\x20critical\x20user\x20data\x20missing.'),!_0x116273?(console[_0x46601a(0xe3)](_0x46601a(0x16d)),setTimeout(()=>{const _0x32ed0f=_0x46601a;window[_0x32ed0f(0x164)][_0x32ed0f(0x176)]=_0x32ed0f(0x139);},0xbb8)):console[_0x46601a(0xf3)](_0x46601a(0xff));}}_0xb035a2(),console[_0x46601a(0xf3)]('Payment\x20methods\x20displayed.');const _0x546f37=document[_0x46601a(0x1ef)](_0x46601a(0xac));_0x546f37?(_0x546f37[_0x46601a(0x198)](_0x46601a(0x1f0),_0x2dce37),console['log'](_0x46601a(0x154))):console[_0x46601a(0x1ac)](_0x46601a(0x1b2));const _0x18de12=document[_0x46601a(0x1ef)](_0x46601a(0xe9));_0x2ce6e3?(_0x2ce6e3[_0x46601a(0x198)]('click',_0x49efa1),console[_0x46601a(0xf3)]('Confirm\x20purchase\x20button\x20listener\x20added.')):console[_0x46601a(0xe3)](_0x46601a(0x1f6)),_0x2dc693&&_0x198cf4&&_0x3dca2b['length']===0x0?_0x2ce6e3&&(_0x2ce6e3[_0x46601a(0xec)]=![],console['log'](_0x46601a(0xd8))):(console[_0x46601a(0x1ac)](_0x46601a(0xa7)),!_0x2dc693&&_0xe16686&&_0xe16686[_0x46601a(0x148)][_0x46601a(0x1f4)]!==_0x46601a(0x15c)&&(_0xe16686['textContent']=_0x46601a(0x172),_0xe16686[_0x46601a(0xca)]=_0x46601a(0xe3),_0xe16686[_0x46601a(0x148)]['display']=_0x46601a(0x15c))),console[_0x46601a(0xf3)](_0x46601a(0xe6));}else{console[_0x46601a(0xf3)](_0x46601a(0x143));if(_0x45c119)_0x45c119[_0x46601a(0x122)][_0x46601a(0x145)](_0x46601a(0x1c4));else console[_0x46601a(0x1ac)](_0x46601a(0x1de));if(_0x4565fb)_0x4565fb[_0x46601a(0x122)][_0x46601a(0x145)](_0x46601a(0x1c4));else console[_0x46601a(0x1ac)](_0x46601a(0x1c2));if(_0x432046){_0x432046[_0x46601a(0x122)][_0x46601a(0x107)]('hidden'),console[_0x46601a(0xf3)](_0x46601a(0x1a7));const _0x47ce9b=_0x432046[_0x46601a(0xbd)](_0x46601a(0x1c6));_0x47ce9b?(_0x47ce9b[_0x46601a(0x198)](_0x46601a(0x1f0),function(){const _0x1884f3=_0x46601a;_0x432046[_0x1884f3(0x122)]['add']('hidden'),console[_0x1884f3(0xf3)](_0x1884f3(0x113)),window[_0x1884f3(0x164)][_0x1884f3(0x176)]='/';}),console[_0x46601a(0xf3)](_0x46601a(0x1d5))):console[_0x46601a(0xe3)](_0x46601a(0x129));}else{console[_0x46601a(0xe3)](_0x46601a(0x167));_0xe16686&&(_0xe16686['textContent']='خطأ\x20فادح:\x20عنصر\x20سجل\x20الطلبات\x20مفقود\x20في\x20الصفحة.',_0xe16686[_0x46601a(0xca)]=_0x46601a(0xe3),_0xe16686[_0x46601a(0x148)][_0x46601a(0x1f4)]=_0x46601a(0x15c));if(_0x2ce6e3)_0x2ce6e3['disabled']=!![];console[_0x46601a(0xf3)]('Fatal\x20error:\x20Cannot\x20proceed\x20without\x20.container-history.');return;}_0xc30b06();const _0x5a7cd5=document['getElementById'](_0x46601a(0xed));_0x5a7cd5?(_0x5a7cd5[_0x46601a(0x198)](_0x46601a(0x1f0),function(_0x4e876f){const _0x325bdc=_0x46601a,_0x36f11=_0x4e876f[_0x325bdc(0xc5)];if(_0x36f11&&_0x36f11[_0x325bdc(0x122)][_0x325bdc(0xcb)](_0x325bdc(0x116))){const _0x5a86cc=_0x36f11[_0x325bdc(0x104)](_0x325bdc(0x14e));_0x5a86cc&&(console['log']('[History\x20Click]\x20Marking\x20order\x20'+_0x5a86cc+_0x325bdc(0x15b)),_0x475e72(_0x5a86cc,_0x325bdc(0x1ba)),_0xc30b06());}}),console['log']('#tableHistory\x20event\x20delegation\x20listener\x20added.')):console[_0x46601a(0x1ac)]('#tableHistory\x20element\x20not\x20found.\x20Cannot\x20add\x20complete\x20button\x20listener.'),console[_0x46601a(0xf3)]('End\x20of\x20DOMContentLoaded\x20-\x20Default\x20History\x20view.');}});function _0x1b15d8(_0x2a680b){const _0x2102b3=_0x5da952;console[_0x2102b3(0xf3)](_0x2102b3(0xde),_0x2a680b);try{const _0x1acd3b=localStorage[_0x2102b3(0x173)](_0x2102b3(0xf2));let _0x17149f=_0x1acd3b?JSON['parse'](_0x1acd3b):[];console[_0x2102b3(0xf3)](_0x2102b3(0x191),_0x17149f);const _0x417386={..._0x2a680b,'timestamp':Date['now'](),'status':_0x2102b3(0x11a)};console[_0x2102b3(0xf3)](_0x2102b3(0x10e),_0x417386),_0x17149f[_0x2102b3(0x115)](_0x417386),console[_0x2102b3(0xf3)](_0x2102b3(0xea),_0x17149f);const _0x5d79da=0x14;_0x17149f['length']>_0x5d79da&&(_0x17149f=_0x17149f[_0x2102b3(0x14d)](0x0,_0x5d79da),console[_0x2102b3(0xf3)](_0x2102b3(0x1c8)+_0x5d79da+'\x20items.')),localStorage[_0x2102b3(0xc8)](_0x2102b3(0xf2),JSON['stringify'](_0x17149f)),console[_0x2102b3(0xf3)](_0x2102b3(0x196));}catch(_0x4a6ad5){console['error'](_0x2102b3(0x10d),_0x4a6ad5);}}function _0x475e72(_0x4bf592,_0x5c584d){const _0x3ec2fa=_0x5da952;console[_0x3ec2fa(0xf3)](_0x3ec2fa(0x1c1)+_0x4bf592+'\x20to\x20'+_0x5c584d+'.');try{const _0x5b6c67=localStorage[_0x3ec2fa(0x173)](_0x3ec2fa(0xf2));let _0x175d06=_0x5b6c67?JSON[_0x3ec2fa(0x1a1)](_0x5b6c67):[];console[_0x3ec2fa(0xf3)](_0x3ec2fa(0xee),_0x175d06);const _0x1509c5=_0x175d06[_0x3ec2fa(0x1ed)](_0x1669b6=>_0x1669b6[_0x3ec2fa(0x11b)]===_0x4bf592);console['log'](_0x3ec2fa(0x12d)+_0x1509c5+_0x3ec2fa(0x120)+_0x4bf592+'.'),_0x1509c5>-0x1?(_0x175d06[_0x1509c5]['status']=_0x5c584d,console['log'](_0x3ec2fa(0x136),_0x175d06[_0x1509c5]),localStorage[_0x3ec2fa(0xc8)](_0x3ec2fa(0xf2),JSON[_0x3ec2fa(0x105)](_0x175d06)),console[_0x3ec2fa(0xf3)](_0x3ec2fa(0x160)+_0x4bf592+_0x3ec2fa(0x1b1)+_0x5c584d+'\x20in\x20local\x20history\x20successfully.')):console['warn']('Order\x20'+_0x4bf592+_0x3ec2fa(0xe8));}catch(_0x48e5ac){console['error'](_0x3ec2fa(0x118),_0x48e5ac);}}function _0xc30b06(){const _0xdc6057=_0x5da952;console['log'](_0xdc6057(0x10f));const _0x59b4b9=document[_0xdc6057(0x1ef)](_0xdc6057(0xed)),_0x4788df=document[_0xdc6057(0xbd)](_0xdc6057(0x1fc));if(!_0x59b4b9||!_0x4788df){console[_0xdc6057(0xe3)]('Required\x20history\x20elements\x20not\x20found\x20(#tableHistory\x20or\x20.note).\x20Cannot\x20display\x20history.');return;}console[_0xdc6057(0xf3)]('History\x20display\x20elements\x20found.');try{const _0x253be5=localStorage[_0xdc6057(0x173)](_0xdc6057(0xf2));console[_0xdc6057(0xf3)]('Raw\x20history\x20data\x20from\x20localStorage:',_0x253be5);let _0x411e65=_0x253be5?JSON['parse'](_0x253be5):[];console[_0xdc6057(0xf3)](_0xdc6057(0x18e),_0x411e65);const _0x215013=Date[_0xdc6057(0x1b6)]()-0x7*0x18*0x3c*0x3c*0x3e8;console['log'](_0xdc6057(0x17f)+new Date(_0x215013)[_0xdc6057(0xaa)]()+'.');const _0x57b195=_0x411e65[_0xdc6057(0x121)](_0x5962f0=>_0x5962f0[_0xdc6057(0xda)]&&_0x5962f0[_0xdc6057(0xda)]>_0x215013);console[_0xdc6057(0xf3)](_0xdc6057(0x18b),_0x57b195);_0x57b195[_0xdc6057(0x162)]!==_0x411e65[_0xdc6057(0x162)]?(console[_0xdc6057(0xf3)](_0xdc6057(0x155)+(_0x411e65[_0xdc6057(0x162)]-_0x57b195[_0xdc6057(0x162)])+_0xdc6057(0xeb)),localStorage[_0xdc6057(0xc8)](_0xdc6057(0xf2),JSON['stringify'](_0x57b195)),console[_0xdc6057(0xf3)]('Filtered\x20history\x20saved\x20back\x20to\x20localStorage.')):console['log'](_0xdc6057(0x13c));const _0xd5a493=_0x57b195;if(_0xd5a493[_0xdc6057(0x162)]===0x0){console[_0xdc6057(0xf3)](_0xdc6057(0x1b8)),_0x4788df[_0xdc6057(0x148)]['display']=_0xdc6057(0x181);let _0x3ae8d2='<div\x20class=\x22no-orders-message\x22>';_0x3ae8d2+=_0xdc6057(0xb4),_0x3ae8d2+=_0xdc6057(0xf1),_0x3ae8d2+='</div>',_0x59b4b9[_0xdc6057(0x119)]=_0x3ae8d2,console[_0xdc6057(0xf3)](_0xdc6057(0x166));}else{console[_0xdc6057(0xf3)]('Found\x20'+_0xd5a493['length']+'\x20recent\x20orders\x20to\x20display.\x20Building\x20history\x20list\x20HTML.'),_0x4788df[_0xdc6057(0x148)][_0xdc6057(0x1f4)]='block';let _0x36d787='';_0xd5a493[_0xdc6057(0x1ce)](_0x214a4b=>{const _0x272165=_0xdc6057,_0x5b5527=new Date(_0x214a4b[_0x272165(0xda)])[_0x272165(0xaa)]('ar-MA',{'timeZone':_0x272165(0x171)}),_0x42788a=_0x214a4b[_0x272165(0x1fb)]||'غير\x20متوفر';_0x36d787+=_0x272165(0x1a4)+(_0x214a4b['orderNumber']||'')+'\x22>',_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0x111)]+_0x272165(0xf6)+(_0x214a4b[_0x272165(0x11b)]||_0x272165(0xfa))+_0x272165(0xc3);if(_0x214a4b[_0x272165(0x132)]||_0x214a4b['articleLink']){if(_0x214a4b[_0x272165(0x132)])_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0xbf)]+_0x272165(0xf6)+_0x214a4b[_0x272165(0x132)]+'</span></p>';if(_0x214a4b[_0x272165(0x156)])_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0x1ae)]+_0x272165(0x1a9)+_0x214a4b[_0x272165(0x156)]+_0x272165(0x1f9)+_0x214a4b[_0x272165(0x156)]+'</a></span></p>';if(_0x214a4b[_0x272165(0x188)])_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0x110)]+_0x272165(0xf6)+_0x214a4b['websiteLink']+'</span></p>';if(_0x214a4b[_0x272165(0x170)])_0x36d787+=_0x272165(0x17b)+_0x43d467['noteLabel']+_0x272165(0xf6)+_0x214a4b[_0x272165(0x170)]+_0x272165(0xc3);}else{_0x36d787+='<p><strong>'+_0x43d467['productLabel']+_0x272165(0xf6)+(_0x214a4b[_0x272165(0xb8)]||'غير\x20محدد')+_0x272165(0x17c)+(_0x214a4b[_0x272165(0x170)]||'')+_0x272165(0xc3);if(_0x214a4b[_0x272165(0x188)])_0x36d787+=_0x272165(0x17b)+_0x43d467['clientLinkLabel']+_0x272165(0xf6)+(_0x214a4b[_0x272165(0x188)]||_0x272165(0xa5))+_0x272165(0xc3);}const _0x5bc779=_0x214a4b['initialTotal']!=null?_0x214a4b[_0x272165(0x192)]:_0x214a4b[_0x272165(0x14f)]!=null?parseFloat(_0x214a4b['subtotal']):undefined,_0x475376=_0x214a4b[_0x272165(0x184)]!=null?_0x214a4b[_0x272165(0x184)]:_0x214a4b[_0x272165(0x14f)]!=null?parseFloat(_0x214a4b[_0x272165(0x14f)]):undefined;_0x5bc779!=null&&(_0x36d787+=_0x272165(0x17b)+_0x43d467['initialTotalLabel']+'</strong>\x20<span>درهم.\x20'+_0x5bc779[_0x272165(0x168)](0x2)+'</span></p>');_0x214a4b[_0x272165(0xcd)]&&(_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0x1f2)]+_0x272165(0xf6)+_0x214a4b[_0x272165(0xcd)]+_0x272165(0xc3));const _0x2256d4=_0x5bc779!=null&&_0x475376!=null?_0x5bc779-_0x475376:0x0;_0x2256d4>0x0&&(_0x36d787+=_0x272165(0x17b)+_0x43d467['discountLabel']+_0x272165(0x165)+_0x2256d4[_0x272165(0x168)](0x2)+'</span></p>'),_0x475376!=null?_0x36d787+='<p><strong>'+_0x43d467['finalTotalLabel']+_0x272165(0x165)+_0x475376[_0x272165(0x168)](0x2)+_0x272165(0xc3):_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0xb6)]+_0x272165(0x179),_0x36d787+=_0x272165(0x17b)+_0x43d467[_0x272165(0x15e)]+_0x272165(0xf6)+(_0x214a4b['paymentMethod']||_0x272165(0x14a))+_0x272165(0xc3),_0x36d787+='<p><strong>'+_0x43d467[_0x272165(0xd4)]+_0x272165(0xf6)+_0x5b5527+_0x272165(0xc3),_0x36d787+=_0x272165(0x11d)+(_0x42788a===_0x272165(0x1ba)?_0x272165(0x1ba):'')+'\x22>'+(_0x42788a===_0x272165(0x11a)?_0x43d467[_0x272165(0x1ca)]:_0x42788a===_0x272165(0x1ba)?_0x43d467[_0x272165(0xe5)]:_0x42788a)+_0x272165(0xc3),_0x214a4b['status']===_0x272165(0x11a)?_0x36d787+=_0x272165(0xe2)+(_0x214a4b[_0x272165(0x11b)]||'')+'\x22>'+_0x43d467['statusCompleted']+_0x272165(0x1a2):_0x36d787+=_0x272165(0x1ea),_0x36d787+=_0x272165(0x161);}),_0x59b4b9[_0xdc6057(0x119)]=_0x36d787,console[_0xdc6057(0xf3)](_0xdc6057(0xd6));}console[_0xdc6057(0xf3)]('displayOrderHistory\x20function\x20finished.');}catch(_0x30ed22){console['error']('Failed\x20to\x20display\x20order\x20history\x20(caught\x20error):',_0x30ed22),_0x4788df[_0xdc6057(0x148)][_0xdc6057(0x1f4)]=_0xdc6057(0x15c),_0x59b4b9['innerHTML']=_0xdc6057(0xa6),console[_0xdc6057(0xf3)](_0xdc6057(0x19b));}}function _0xb035a2(){const _0x140daa=_0x5da952,_0x293df4=document[_0x140daa(0x1ef)](_0x140daa(0xba)),_0x4ab099=document[_0x140daa(0x1ef)](_0x140daa(0x1b5)),_0x50b7cb=document[_0x140daa(0x1ef)](_0x140daa(0x11c)),_0x3c8044=document[_0x140daa(0x1ef)](_0x140daa(0x147)),_0x52458b=document[_0x140daa(0x1ef)](_0x140daa(0xaf));if(!_0x293df4||!_0x4ab099||!_0x50b7cb||!_0x3c8044||!_0x52458b){console[_0x140daa(0xe3)]('Payment\x20method\x20display\x20elements\x20not\x20found.');return;}_0x293df4[_0x140daa(0x119)]='',_0x43ead3[_0x140daa(0x1ce)](_0x2e6602=>{const _0x75b26f=_0x140daa,_0x182955=document[_0x75b26f(0x131)]('div');_0x182955['classList'][_0x75b26f(0x145)](_0x75b26f(0x11f)),_0x182955[_0x75b26f(0x13e)](_0x75b26f(0x1d1),_0x2e6602['id']);const _0x5e6974=document[_0x75b26f(0x131)]('input');_0x5e6974[_0x75b26f(0x141)]=_0x75b26f(0xd9),_0x5e6974[_0x75b26f(0x1a6)]=_0x75b26f(0xdf),_0x5e6974['id']=_0x75b26f(0x138)+_0x2e6602['id'],_0x5e6974[_0x75b26f(0x1af)]=_0x2e6602['id'];const _0x14f31f=document[_0x75b26f(0x131)](_0x75b26f(0x159));_0x14f31f[_0x75b26f(0xb0)]=_0x75b26f(0x138)+_0x2e6602['id'],_0x14f31f[_0x75b26f(0x119)]=_0x75b26f(0x1f3)+_0x2e6602[_0x75b26f(0x1e9)]+_0x75b26f(0x1d6)+_0x2e6602['id']+_0x75b26f(0x197)+_0x2e6602['id'],_0x182955[_0x75b26f(0xe7)](_0x5e6974),_0x182955[_0x75b26f(0xe7)](_0x14f31f),_0x293df4[_0x75b26f(0xe7)](_0x182955),_0x5e6974[_0x75b26f(0x198)](_0x75b26f(0xa9),function(){const _0x550e68=_0x75b26f;this[_0x550e68(0xc0)]&&(_0x50b7cb[_0x550e68(0x119)]='<img\x20src=\x22'+_0x2e6602[_0x550e68(0x1e9)]+_0x550e68(0x1d6)+_0x2e6602[_0x550e68(0x1a6)]+'\x22>',_0x3c8044[_0x550e68(0x1db)]=_0x2e6602[_0x550e68(0x1a6)],_0x52458b[_0x550e68(0x1db)]=_0x2e6602[_0x550e68(0x16b)],_0x4ab099['style'][_0x550e68(0x1f4)]='block',console['log'](_0x550e68(0x1be)+_0x2e6602['id']));});}),_0x4ab099['style'][_0x140daa(0x1f4)]='none';}function _0x5e82a7(){const _0x1e3eff=_0x5da952,_0x46e8f6=document['getElementById'](_0x1e3eff(0x1d8)),_0x2b52d6=document[_0x1e3eff(0x1ef)](_0x1e3eff(0xb1)),_0x35a41b=document['getElementById']('discountRow'),_0x2837de=document[_0x1e3eff(0x1ef)](_0x1e3eff(0x106));if(!_0x46e8f6||!_0x2b52d6||!_0x35a41b||!_0x2837de){console[_0x1e3eff(0xe3)]('Total\x20display\x20elements\x20not\x20found.');return;}_0x46e8f6[_0x1e3eff(0x1db)]=_0x1e3eff(0xab)+_0x5722cc[_0x1e3eff(0x168)](0x2),_0x2ccbce>0x0?(_0x2b52d6[_0x1e3eff(0x1db)]='درهم.\x20'+_0x2ccbce['toFixed'](0x2),_0x35a41b[_0x1e3eff(0x148)][_0x1e3eff(0x1f4)]='block'):_0x35a41b[_0x1e3eff(0x148)][_0x1e3eff(0x1f4)]=_0x1e3eff(0x181),_0x2837de[_0x1e3eff(0x1db)]=_0x1e3eff(0xab)+_0x3349ac[_0x1e3eff(0x168)](0x2);}async function _0x2dce37(){const _0x235de0=_0x5da952,_0x5c72d4=document[_0x235de0(0x1ef)](_0x235de0(0x1da)),_0x52a490=_0x5c72d4['value']['trim']()[_0x235de0(0x175)](),_0x123df9=document[_0x235de0(0x1ef)](_0x235de0(0x14b)),_0x33b6eb=document[_0x235de0(0x1ef)](_0x235de0(0xac)),_0xfc849d=document[_0x235de0(0x1ef)](_0x235de0(0x10c));if(!_0x5c72d4||!_0x123df9||!_0x33b6eb||!_0xfc849d){console[_0x235de0(0xe3)]('Promo\x20code\x20or\x20loading\x20elements\x20not\x20found.');return;}_0x2ccbce=0x0,_0x3349ac=_0x5722cc,_0x4c5740=null,_0x5e82a7();if(_0x52a490===''){_0x123df9[_0x235de0(0x1db)]=_0x43d467['kodeP1'],_0x123df9[_0x235de0(0xca)]='',_0x33b6eb[_0x235de0(0xec)]=![];return;}_0x33b6eb['disabled']=!![],_0xfc849d[_0x235de0(0x1db)]=_0x43d467[_0x235de0(0xb7)],_0xfc849d[_0x235de0(0x148)][_0x235de0(0x1f4)]=_0x235de0(0x15c),_0x123df9[_0x235de0(0x148)][_0x235de0(0x1f4)]=_0x235de0(0x181),console[_0x235de0(0xf3)](_0x235de0(0x153)+_0x52a490+_0x235de0(0x1d0));const _0x4aecc8=_0x43d467[_0x235de0(0x1e6)];try{const _0x2cd59b=await fetch(_0x4aecc8,{'method':_0x235de0(0x19d),'body':new URLSearchParams({'promoCode':_0x52a490})});if(!_0x2cd59b['ok']){console[_0x235de0(0xe3)](_0x235de0(0x134),_0x2cd59b['status'],_0x2cd59b[_0x235de0(0xfc)]);throw new Error(_0x235de0(0x1ad)+_0x2cd59b[_0x235de0(0x1fb)]);}const _0x3be026=await _0x2cd59b[_0x235de0(0x1cd)]();console[_0x235de0(0xf3)]('Backend\x20response:',_0x3be026);if(_0x3be026[_0x235de0(0xbb)]){if(_0x3be026[_0x235de0(0x141)]==='percentage')_0x2ccbce=_0x5722cc*(_0x3be026[_0x235de0(0x1af)]/0x64);else _0x3be026[_0x235de0(0x141)]===_0x235de0(0x12a)?_0x2ccbce=_0x3be026['value']:(console['warn']('Unknown\x20discount\x20type\x20from\x20backend:\x20'+_0x3be026[_0x235de0(0x141)]),_0x2ccbce=0x0,_0x123df9[_0x235de0(0x1db)]=_0x43d467[_0x235de0(0x19a)],_0x123df9[_0x235de0(0xca)]='error');_0x2ccbce=Math[_0x235de0(0xd1)](_0x2ccbce,_0x5722cc),_0x3349ac=_0x5722cc-_0x2ccbce,_0x4c5740=_0x52a490,_0x5e82a7(),_0x123df9['textContent']=_0x43d467['kodeP2']+'\x20درهم.\x20'+_0x2ccbce[_0x235de0(0x168)](0x2),_0x123df9[_0x235de0(0xca)]=_0x235de0(0x1a8),_0x123df9['style'][_0x235de0(0x1f4)]=_0x235de0(0x15c);}else _0x2ccbce=0x0,_0x3349ac=_0x5722cc,_0x4c5740=null,_0x5e82a7(),_0x123df9[_0x235de0(0x1db)]=_0x3be026[_0x235de0(0x1ab)]||_0x43d467[_0x235de0(0x19a)],_0x123df9[_0x235de0(0xca)]=_0x235de0(0xe3),_0x123df9['style'][_0x235de0(0x1f4)]=_0x235de0(0x15c);}catch(_0x1eee1e){console['error'](_0x235de0(0x185),_0x1eee1e),_0x2ccbce=0x0,_0x3349ac=_0x5722cc,_0x4c5740=null,_0x5e82a7(),_0x123df9[_0x235de0(0x1db)]=_0x43d467['errorNotif']+'\x20(خطأ\x20في\x20تطبيق\x20الكود)',_0x123df9[_0x235de0(0xca)]='error',_0x123df9[_0x235de0(0x148)][_0x235de0(0x1f4)]=_0x235de0(0x15c);}finally{_0x33b6eb['disabled']=![],_0xfc849d[_0x235de0(0x148)][_0x235de0(0x1f4)]=_0x235de0(0x181),console[_0x235de0(0xf3)](_0x235de0(0xc7));}}async function _0x49efa1(){const _0x578a87=_0x5da952,_0x439fa1=document[_0x578a87(0xbd)]('input[name=\x22paymentMethod\x22]:checked'),_0x504870=document['getElementById'](_0x578a87(0x108)),_0x521ba1=document[_0x578a87(0x1ef)](_0x578a87(0x195)),_0x13b098=document['getElementById']('confirmPurchaseButton'),_0x49eaa2=document[_0x578a87(0x1ef)]('loadingMessage'),_0x23b29b=document[_0x578a87(0x1ef)]('statusMessage');if(!_0x439fa1||!_0x504870||!_0x521ba1||!_0x13b098||!_0x49eaa2||!_0x23b29b){console[_0x578a87(0xe3)]('Essential\x20form\x20elements\x20not\x20found!'),_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0x1ec)]+_0x578a87(0x1b9),_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)][_0x578a87(0x1f4)]=_0x578a87(0x15c);return;}if(!_0x198cf4||!_0x198cf4['fullName']||!_0x198cf4[_0x578a87(0xae)]||!_0x198cf4[_0x578a87(0x1f8)]||!_0x198cf4['uid']){console[_0x578a87(0xe3)](_0x578a87(0x101)),_0x23b29b[_0x578a87(0x1db)]=_0x23b29b[_0x578a87(0x1db)]||_0x43d467['userDataLoadError']+_0x578a87(0x174),_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)][_0x578a87(0x1f4)]=_0x578a87(0x15c),_0x13b098[_0x578a87(0xec)]=!![];return;}if(!_0x450135||typeof _0x450135!=='object'||(_0x450135[_0x578a87(0xb8)]==null||_0x450135[_0x578a87(0xcc)]==null||!_0x450135[_0x578a87(0xf9)]||!_0x450135[_0x578a87(0x132)]||!_0x450135[_0x578a87(0x156)])){console[_0x578a87(0xe3)](_0x578a87(0x158),_0x450135),_0x23b29b['textContent']=_0x578a87(0x112),_0x23b29b['className']=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)][_0x578a87(0x1f4)]=_0x578a87(0x15c),_0x13b098[_0x578a87(0xec)]=!![];return;}if(!_0x439fa1){_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0x135)],_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b['style']['display']='block';return;}if(_0x504870[_0x578a87(0x187)][_0x578a87(0x162)]===0x0){_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0x1e5)],_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)][_0x578a87(0x1f4)]=_0x578a87(0x15c);return;}if(!_0x521ba1['checked']){_0x23b29b[_0x578a87(0x1db)]=_0x43d467['termsNull'],_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)]['display']=_0x578a87(0x15c);return;}_0x49eaa2[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0xb7)],_0x49eaa2['style'][_0x578a87(0x1f4)]='block',_0x23b29b[_0x578a87(0x148)]['display']=_0x578a87(0x181),_0x13b098[_0x578a87(0xec)]=!![];const _0x51c851={'fullName':_0x198cf4['fullName'],'email':_0x198cf4['email'],'phone':_0x198cf4['phoneNumber'],'userId':_0x198cf4[_0x578a87(0x1dc)],'postId':_0x450135[_0x578a87(0xb8)],'productName':_0x450135['productName'],'articleTitle':_0x450135[_0x578a87(0x130)],'articleLink':_0x450135[_0x578a87(0x156)],'websiteLink':_0x450135[_0x578a87(0x188)],'packageSelectedText':_0x450135[_0x578a87(0xf9)],'initialTotal':_0x5722cc,'finalTotal':_0x3349ac,'paymentMethod':_0x439fa1[_0x578a87(0x1af)],'promoCodeUsed':_0x4c5740,'orderTime':new Date()[_0x578a87(0x152)](),'orderNumber':_0x31c64d(),'status':_0x578a87(0x11a)},_0x21b5bd=_0x504870[_0x578a87(0x187)][0x0],_0x71ae13=_0x43d467['header']+'\x0a\x0a'+(_0x43d467[_0x578a87(0x169)]+'\x0a\x0a')+(''+_0x43d467[_0x578a87(0x1c5)]+_0x51c851[_0x578a87(0x1aa)]+'\x0a\x0a')+(''+_0x43d467[_0x578a87(0xf5)]+_0x51c851['email']+'\x0a\x0a')+(''+_0x43d467[_0x578a87(0x183)]+_0x51c851[_0x578a87(0x178)]+'\x0a\x0a')+(''+_0x43d467[_0x578a87(0x18d)]+_0x51c851[_0x578a87(0x13a)]+'\x0a\x0a\x20=======================')+('=======================\x20\x0a\x0a'+_0x43d467[_0x578a87(0x111)]+_0x51c851['orderNumber']+'\x0a\x0a')+(''+_0x43d467['productLabel']+_0x51c851['productName']+'\x0a\x0a')+(_0x43d467[_0x578a87(0x1ae)]+'[رابط\x20المنتج]('+(_0x51c851[_0x578a87(0x156)]||_0x578a87(0xa5))+_0x578a87(0x1d9))+(''+_0x43d467['clientLinkLabel']+_0x51c851[_0x578a87(0x188)]+'\x0a\x0a')+(''+_0x43d467[_0x578a87(0x1c7)]+_0x51c851[_0x578a87(0x170)]+'\x0a\x0a')+(_0x43d467[_0x578a87(0xd7)]+'درهم.\x20'+(_0x51c851[_0x578a87(0x192)]?_0x51c851[_0x578a87(0x192)]['toFixed'](0x2):'N/A')+'\x0a\x0a')+(_0x51c851[_0x578a87(0xcd)]?''+_0x43d467[_0x578a87(0x1f2)]+_0x51c851[_0x578a87(0xcd)]+'\x0a\x0a':'')+(_0x2ccbce>0x0?_0x43d467['discountLabel']+'درهم.\x20'+_0x2ccbce[_0x578a87(0x168)](0x2)+'\x0a\x0a':'\x0a')+(''+_0x43d467['offerLabel']+_0x51c851['paymentMethod']+'\x0a\x0a')+('**'+_0x43d467['finalTotalLabel']+_0x578a87(0x1d4)+(_0x51c851['finalTotal']?_0x51c851[_0x578a87(0x184)][_0x578a87(0x168)](0x2):_0x578a87(0x1cb))+'\x0a\x0a')+(''+_0x43d467['timeLabel']+new Date(_0x51c851[_0x578a87(0xce)])[_0x578a87(0xaa)]('ar-MA',{'timeZone':_0x578a87(0x171)})),_0x4e3a29=new FormData();_0x4e3a29[_0x578a87(0xd5)](_0x578a87(0xa2),_0x43d467[_0x578a87(0x12b)]),_0x4e3a29['append'](_0x578a87(0x1e8),_0x21b5bd),_0x4e3a29[_0x578a87(0xd5)](_0x578a87(0x10b),_0x71ae13),_0x4e3a29[_0x578a87(0xd5)](_0x578a87(0x19c),'Markdown');const _0x59b2ed='https://api.telegram.org/bot'+_0x43d467['tokenBot']+_0x578a87(0x15f);console[_0x578a87(0xf3)](_0x578a87(0x1e3));try{const _0x23fece=await fetch(_0x59b2ed,{'method':_0x578a87(0x19d),'body':_0x4e3a29}),_0x3907fb=await _0x23fece[_0x578a87(0x1cd)]();_0x23fece['ok']&&_0x3907fb['ok']?(console[_0x578a87(0xf3)](_0x578a87(0xef),_0x3907fb),_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0xc9)],_0x23b29b[_0x578a87(0xca)]='success',_0x23b29b['style'][_0x578a87(0x1f4)]=_0x578a87(0x15c),_0x1b15d8(_0x51c851),setTimeout(()=>{const _0x2daa89=_0x578a87;window['location'][_0x2daa89(0x176)]=_0x43d467['thankYouPageUrl'];},0xbb8)):(console[_0x578a87(0xe3)](_0x578a87(0x114),_0x3907fb),console[_0x578a87(0xe3)](_0x578a87(0xdc),_0x23fece['status'],_0x23fece[_0x578a87(0xfc)]),_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0x1ec)]+(_0x578a87(0x12f)+(_0x3907fb[_0x578a87(0x149)]||_0x23fece[_0x578a87(0xfc)])+')'),_0x23b29b[_0x578a87(0xca)]=_0x578a87(0xe3),_0x23b29b['style'][_0x578a87(0x1f4)]='block');}catch(_0x1082f4){console[_0x578a87(0xe3)](_0x578a87(0x157),_0x1082f4),_0x23b29b[_0x578a87(0x1db)]=_0x43d467[_0x578a87(0x1ec)]+_0x578a87(0x1a0),_0x23b29b['className']=_0x578a87(0xe3),_0x23b29b[_0x578a87(0x148)][_0x578a87(0x1f4)]='block';}finally{_0x49eaa2['style'][_0x578a87(0x1f4)]=_0x578a87(0x181),_0x13b098[_0x578a87(0xec)]=![],console[_0x578a87(0xf3)](_0x578a87(0x1df));}}function _0x31c64d(){const _0x1f42cb=_0x5da952,_0x2adc6e=0x186a0,_0x201e4c=0xf423f,_0x6eb491=Math[_0x1f42cb(0xa8)](Math[_0x1f42cb(0x1a3)]()*(_0x201e4c-_0x2adc6e+0x1))+_0x2adc6e;return console[_0x1f42cb(0xf3)](_0x1f42cb(0x10a)+_0x6eb491),String(_0x6eb491);}async function _0x28e1a1(_0x3f1945,_0x54caac,_0x124c89){const _0xf4198e=_0x5da952;console[_0xf4198e(0xf3)](_0xf4198e(0x1fa)+_0x3f1945+'\x20was\x20used\x20by\x20user\x20'+_0x54caac+_0xf4198e(0x1e7)+_0x124c89);try{console[_0xf4198e(0xf3)](_0xf4198e(0xdd));}catch(_0x2bece2){console[_0xf4198e(0xe3)]('Failed\x20to\x20notify\x20backend\x20about\x20promo\x20code\x20usage:',_0x2bece2);}}console[_0x5da952(0xf3)](_0x5da952(0x17e));}verifyDomain();
+var _0x5352 = ['copy', 'getElementById', 'selectstart', 'textContent', 'DOMContentLoaded', 'prototype', 'history', '1401312JuzxQv', 'getObfuscatedKey', 'className', 'addProtectionStyles', 'promoCodeUsed', 'promoStatus', 'display', 'error', 'removeItem', 'push', '3897711gJgYkP', '912662cZfNlI', '13554045fOQhSg', 'split', 'addEventListener', 'target', '1668045FmKzRz', 'disabled', '1431057gRdsXv', 'promoCode', 'productPageUrl', 'classList', 'remove', 'createElement', 'src', 'startsWith', 'style', 'background', 'href', 'location', 'body', 'append', 'length', 'log', 'parse', '7712419yNqYcZ', 'querySelector', 'innerHTML', 'hidden', 'slice', 'toFixed', '2313360LqVlTf', 'displayOrderHistory', 'styleElement', 'test', 'paymentMethod', 'parentNode', '1802952uHynYt', 'submit', 'find', 'includes', 'toString', 'getElementById\x20is\x20a\x20method.', 'get', 'value', 'type', 'ok', 'message', '1458129QoEafr', 'sendPhoto', '4580228lVjSgT', '310488xYJqRk', '9934148oZkWyO', '6261177gKzXjT', 'preventDefault', 'contextmenu', 'ctrlKey', 'shiftKey', 'cut', 'dragstart', 'keydown', 'toUpperCase', 'includes', 'F12', 'Decryption\x20failed:', 'remove', 'support@siwane.xyz?subject=مشكلة\x20في\x20رمز\x20التفعيل', 'support-link', 'خطأ:\x20رمز\x20التفعيل\x20غير\x20صحيح!\x20يرجى\x20التأكد\x20من\x20التكوين.', 'overlay', 'notification-error', 'support@siwane.xyz?subject=مشكلة\x20في\x0aالنطاق', 'خطأ:\x20النطاق\x20الحالي\x20غير\x20مدعوم!\x20يرجى\x20الاتصال\x0aبالدعم.', 'support@siwane.xyz?subject=خطأ\x20عام', 'حدث\x20خطأ\x20غير\x20متوقع!\x20يرجى\x20إعادة\x20تحميل\x0aالصفحة\x20أو\x20الاتصال\x20بالدعم.', 'verifyDomain', 'href', 'self', 'top', 'search', 'has', 'src', 'appendChild', 'classList', 'add', 'history', 'closest', 'getAttribute', 'order-number', 'updateOrderStatusInHistory', 'getElementById\x20is\x20not\x20a\x20function.', 'addEventListener', 'checkoutOrderDetails', 'isFinite', 'parse', 'split', 'push', 'postId', 'packageValue', 'packageText', 'productName', 'articleLink', 'websiteLink', 'productNameDisplay', 'textContent', 'articleLinkDisplay', 'href', 'target', '_blank', 'innerHTML', 'appendChild', 'clientWebsiteLink', 'packageSelectedText', 'basePriceDisplay', 'toFixed', 'sessionStorage', 'hidden', 'firebaseUserProfileData', 'localStorage', 'fullName', 'email', 'phoneNumber', 'uid', 'textContent', 'style', 'display', 'none', 'warn', 'length', 'missing-phone-overlay', 'missingPhoneMessageText', 'missingPhoneProfileLink', 'href', 'loginPageUrl', 'error', 'promo-section', 'style', 'display', 'cih-discount-note', 'block', 'none', 'value', 'toLowerCase', 'cih', 'resetPromoIfNotCIH', 'promoCodeInput', 'promoStatus', 'innerHTML', 'className', 'promoStatusDiv', 'promoCodeInput', 'promoStatusDiv', 'applyPromoButton', 'addEventListener', 'handleApplyPromo', 'input', 'trim', 'toUpperCase', 'disabled', 'promoStatus', 'promoCode', 'value', 'resetPromoIfNotCIH', 'paymentScreenshot', 'paymentScreenshotPreview', 'screenshotPreviewContainer', 'clearScreenshotButton', 'querySelector', '.screenshot-upload\x20label', 'addEventListener', 'change', 'FileReader', 'onload', 'readAsDataURL', 'remove', 'handleConfirmPurchase', 'userOrderHistory', 'JSON', 'parse', 'unshift', 'orderNumber', 'maxHistoryItems', 'slice', 'stringify', 'localStorage', 'findIndex', 'order-history-item', 'orderNumber', 'status', 'processing', 'timestamp', 'now', '7\x20*\x2024\x20*\x2060\x20*\x2060\x20*\x201000', 'filter', 'length', 'note', 'style', 'display', 'none', 'innerHTML', 'no-orders-message', 'لم\x20تقم\x0aباجراء\x20اي\x20طلب', 'block', 'forEach', 'toLocaleString', 'ar-MA', 'timeZone', 'Africa/Casablanca', 'order-history-item', 'data-order-number', 'noLabel', 'productLabel', 'articleLinkLabel', 'clientLinkLabel', 'noteLabel', 'initialTotalLabel', 'discountLabel', 'promoLabel', 'finalTotalLabel', 'offerLabel', 'timeLabel', 'statusProcessing', 'statusCompleted', 'complete-order-button', 'disabled', 'payment-method-option', 'setAttribute', 'radio', 'name', 'paymentMethod', 'id', 'method-', 'value', 'label', 'htmlFor', 'method-', 'logo', 'vertical-align', 'middle', 'margin-left', '10px', 'id', 'name', 'mink', 'initialTotalDisplay', 'discountAmountDisplay', 'discountRow', 'finalTotalDisplay', 'style', 'display', 'block', 'none', 'handleApplyPromo', 'promoCodeInput', 'promoCodeInput.value.trim().toUpperCase()', 'promoStatus', 'applyPromoButton', 'loadingMessage', 'innerHTML', 'loading', 'style', 'display', 'block', 'none', 'initialTotal', 'toString', 'userId', 'uid', 'postId', 'appsScriptUrl', 'method', 'POST', 'body', 'response.json', 'valid', 'type', 'percentage', 'value', 'fixed', 'Math', 'min', 'toFixed', 'success', 'error', 'applyButton.disabled\x20=\x20false;', 'finalTotal', 'initialTotal', 'promoCodeUsed', 'orderNumber', 'orderTime', 'generateUniqueOrderNumber', 'new\x20Date().toISOString()', 'captionText', 'header', 'body', 'fullNameLabel', 'fullName', 'emailLabel', 'email', 'numberLabel', 'phone', 'uidLabel', 'postId', 'productLabel', 'articleLinkLabel', 'clientLinkLabel', 'noteLabel', 'basePriceLabel', 'promoLabel', 'discountLabel', 'finalTotalLabel', 'offerLabel', 'paymentMethod', 'orderTime', 'telegramApiUrl', 'method', 'POST', 'body', 'response.json', 'ok', 'description', 'statusText', 'saveOrderToHistory', 'sessionStorage', 'removeItem', 'checkoutOrderDetails', 'window.location.href', 'thankYouPageUrl', 'loadingMessage', 'style', 'display', 'none', 'confirmPurchaseButton', 'disabled', 'Math', 'floor', 'random', '100000', '999999', 'toString', 'checkDomainWhitelist', 'hostname', 'scriptUrl', 'sheetName', 'obfuscatedUrlCodes', 'fromCharCode', 'redirectUrl', 'requestUrl', 'fetch', 'then', 'response', 'ok', 'json', 'data', 'isWhitelisted', 'catch', 'error', 'console.error', 'Domain\x20check\x0afailed:', '116', '97', '122'];
+var _0x5352_ = function(_0x47e12f, _0x21743a) {
+    _0x47e12f = _0x47e12f - 0x140;
+    var _0x5352 = _0x5352_[_0x47e12f];
+    return _0x5352;
+};
+(function(_0x356958, _0x1c172d) {
+    var _0x10b7b1 = _0x5352_;
+    while (!![]) {
+        try {
+            var _0x45236c = -parseInt(_0x10b7b1(0x19b)) + -parseInt(_0x10b7b1(0x1a2)) + -parseInt(_0x10b7b1(0x17c)) * -parseInt(_0x10b7b1(0x16b)) + parseInt(_0x10b7b1(0x1a8)) * -parseInt(_0x10b7b1(0x180)) + parseInt(_0x10b7b1(0x187)) + parseInt(_0x10b7b1(0x19d)) + -parseInt(_0x10b7b1(0x183)) * -parseInt(_0x10b7b1(0x1a4));
+            if (_0x45236c === _0x1c172d)
+                break;
+            else
+                _0x356958['push'](_0x356958['shift']());
+        } catch (_0x39a1fe) {
+            _0x356958['push'](_0x356958['shift']());
+        }
+    }
+}(_0x5352, 0x1654a3));
+var _0x2199f1 = function(_0x3446b5, _0x25e40e) {
+    var _0x58c03e = _0x5352_;
+    _0x3446b5 = _0x3446b5 - 0x0;
+    var _0x56a42a = _0x58c03e(_0x3446b5);
+    if (_0x56a42a['startsWith']('getElementById') && typeof document[_0x56a42a] === 'function') {
+        var _0x1a580a = document[_0x56a42a](_0x25e40e);
+        return _0x1a580a;
+    } else if (_0x56a42a['includes']('toString') && typeof _0x25e40e[_0x56a42a] === 'function') {
+        return _0x25e40e[_0x56a42a]();
+    } else if (_0x56a42a['includes']('value')) {
+        return _0x25e40e[_0x56a42a];
+    } else {
+        return _0x56a42a;
+    }
+};
+var _0x48e916 = ['104', '116', '116', '112', '115', '58', '47', '47', '115', '105', '119', '97', '110', '101', '46', '120', '121', '122'];
+var _0x438df3 = _0x5352_;
+const obfuscatedSecretKeyBase64 = _0x438df3(0x1a3);
+const getObfuscatedKey = () => {
+    var _0x42f025 = _0x438df3;
+    return atob(obfuscatedSecretKeyBase64);
+};
+function decryptText(_0x5c7965, _0x280e55) {
+    var _0x16b04b = _0x438df3;
+    try {
+        const _0x51c518 = atob(_0x5c7965);
+        return CryptoJS['AES'][_0x16b04b(0x19a)](_0x51c518, _0x280e55)[_0x16b04b(0x191)](CryptoJS['enc']['Utf8']);
+    } catch (_0x39a044) {
+        console[_0x16b04b(0x18c)](_0x16b04b(0x166), _0x39a044);
+        showErrorNotification('key');
+        return null;
+    }
+}
+function showErrorNotification(_0x32356c) {
+    var _0x211756 = _0x438df3;
+    const _0x15352c = document[_0x211756(0x18b)]('div');
+    _0x15352c[_0x211756(0x184)] = _0x211756(0x170);
+    const _0x1d582b = document[_0x211756(0x18b)]('div');
+    _0x1d582b[_0x211756(0x184)] = _0x211756(0x171);
+    if (_0x32356c === 'key') {
+        _0x1d582b[_0x211756(0x190)] = `
+      <p>${_0x211756(0x16e)}</p>
+      <a href="mailto:${_0x211756(0x16d)}" class="support-link">${_0x211756(0x16f)}</a>
+    `;
+    } else if (_0x32356c === 'naming') {
+        _0x1d582b[_0x211756(0x190)] = `
+      <p>${_0x211756(0x173)}</p>
+      <a href="mailto:${_0x211756(0x172)}" class="support-link">${_0x211756(0x16f)}</a>
+    `;
+    } else {
+        _0x1d582b[_0x211756(0x190)] = `
+        <p>${_0x211756(0x175)}</p>
+        <a href="mailto:${_0x211756(0x174)}" class="support-link">${_0x211756(0x16f)}</a>
+      `;
+    }
+    document[_0x211756(0x177)][_0x211756(0x179)](_0x15352c);
+    document[_0x211756(0x177)][_0x211756(0x179)](_0x1d582b);
+}
+function verifyDomain() {
+    var _0x411e74 = _0x438df3;
+    if (typeof encryptedBase64Checkout === 'undefined' || !encryptedBase64Checkout[_0x411e74(0x1b4)] || !encryptedBase64Checkout[_0x411e74(0x1c3)] || !encryptedBase64Checkout[_0x411e74(0x1c4)]) {
+        console[_0x411e74(0x18c)]('encryptedBase64Checkout\x20object\x20not\x20found\x20or\x20incomplete.');
+        showErrorNotification('key');
+        return;
+    }
+    const _0x42f025 = _0x411e74(0x181)();
+    const _0x5c330f = decryptText(encryptedBase64Checkout[_0x411e74(0x1b4)], _0x42f025);
+    if (_0x5c330f) {
+        const _0x2289f0 = window[_0x411e74(0x178)]['hostname'];
+        if (_0x2289f0[_0x411e74(0x1a7)](/^www\./, '') === _0x5c330f[_0x411e74(0x1a7)](/^www\./, '')) {
+            protectedCode(encryptedBase64Checkout[_0x411e74(0x1c3)], encryptedBase64Checkout[_0x411e74(0x1c4)]);
+        } else {
+            showErrorNotification('naming');
+        }
+    } else {
+        showErrorNotification('key');
+    }
+}
+const blockCopyActions = () => {
+    var _0x573489 = _0x438df3;
+    document[_0x573489(0x193)](_0x573489(0x168), _0x283a05 => {
+        var _0x1c4856 = _0x573489;
+        _0x283a05[_0x1c4856(0x167)]();
+        showCopyWarning();
+        return ![];
+    });
+    document[_0x573489(0x193)](_0x573489(0x140), _0x2264c6 => {
+        var _0x546b5a = _0x573489;
+        _0x2264c6[_0x546b5a(0x167)]();
+        showCopyWarning();
+        return ![];
+    });
+    document[_0x573489(0x193)](_0x573489(0x16a), _0x4376c7 => {
+        var _0x489679 = _0x573489;
+        _0x4376c7[_0x489679(0x167)]();
+        showCopyWarning();
+        return ![];
+    });
+    document[_0x573489(0x193)](_0x573489(0x16b), _0x498b5a => {
+        var _0x42468d = _0x573489;
+        _0x498b5a[_0x42468d(0x167)]();
+        showCopyWarning();
+        return ![];
+    });
+    document[_0x573489(0x193)](_0x573489(0x142), _0x212001 => {
+        var _0x5418b1 = _0x573489;
+        _0x212001[_0x5418b1(0x167)]();
+        showCopyWarning();
+        return ![];
+    });
+    document[_0x573489(0x193)](_0x573489(0x16c), _0x3565f4 => {
+        var _0x4191d9 = _0x573489;
+        if (_0x3565f4[_0x4191d9(0x169)] && _0x3565f4[_0x4191d9(0x16f)] && ['I', 'J', 'C'][_0x4191d9(0x153)](_0x3565f4['key'][_0x4191d9(0x152)]())) {
+            _0x3565f4[_0x4191d9(0x167)]();
+            showCopyWarning();
+            return ![];
+        }
+        if (_0x3565f4['key'] === _0x4191d9(0x154)) {
+            _0x3565f4[_0x4191d9(0x167)]();
+            showCopyWarning();
+            return ![];
+        }
+        if (_0x3565f4[_0x4191d9(0x169)] && _0x3565f4['key'][_0x4191d9(0x152)]() === 'U') {
+            _0x3565f4[_0x4191d9(0x167)]();
+            showCopyWarning();
+            return ![];
+        }
+    });
+};
+function showCopyWarning() {
+    var _0x4c20fe = _0x438df3;
+    const _0x16a249 = document[_0x4c20fe(0x18f)]('.copy-warning');
+    if (_0x16a249)
+        return;
+    const _0x3062be = document[_0x4c20fe(0x18b)]('div');
+    _0x3062be[_0x4c20fe(0x184)] = _0x4c20fe(0x16f);
+    _0x3062be[_0x4c20fe(0x190)] = `
+    <div class="warning-overlay"></div>
+    <div class="warning-content">
+      <h3>غير مسموح بنسخ المحتوى!</h3>
+      <p>جميع حقوق النشر محفوظة</p>
+    </div>
+  `;
+    document[_0x4c20fe(0x177)][_0x4c20fe(0x179)](_0x3062be);
+    setTimeout(() => {
+        _0x3062be[_0x4c20fe(0x167)]();
+    }, 0xbb8);
+}
+if (window[_0x438df3(0x17a)] !== window[_0x438df3(0x17b)]) {
+    window[_0x438df3(0x17b)]['location'][_0x438df3(0x178)] = window[_0x438df3(0x17a)]['location'][_0x438df3(0x178)];
+}
+const addProtectionStyles = () => {
+    var _0x53e1a0 = _0x438df3;
+    const _0x4c9416 = `
+    body {
+      -webkit-user-select: none\x20!important;
+      -moz-user-select: none\x20!important;
+      -ms-user-select: none\x20!important;
+      user-select: none\x20!important;
+    }
+
+    .copy-warning\x20{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .warning-overlay\x20{
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+    }
+    .warning-content\x20{
+      position: relative;
+      background: #f8d7da;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 80%;
+      box-shadow: 0\x200\x2020px\x20rgba(0,0,0,0.5);
+      z-index: 10000;
+    }
+    .warning-content\x20h3\x20{
+      color: #721c24;
+      margin-bottom: 15px;
+    }
+
+    .overlay\x20{
+      position: fixed;\x20top: 0;\x20left: 0;
+      width: 100%;\x20height: 100%;
+      background: rgba(255,\x20255,\x20255,\x200.7);
+      z-index: 10000;\x20backdrop-filter: blur(5px);
+    }
+    .notification-error\x20{
+      background-color: #f8d7da;
+      color: #721c24;\x20padding: 20px;
+      text-align: center;\x20border-radius: 10px;
+      box-shadow: 0\x200\x2015px\x20rgba(0,\x200,\x200,\x200.2);
+      font-weight: bold;\x20font-size: 18px;
+      position: fixed;\x20top: 50%;\x20left: 50%;
+      transform: translate(-50%,\x20-50%);
+      animation: slideIn\x200.5s\x20ease-in-out;
+      z-index: 10001;\x20width: 80%;\x20max-width: 500px;
+    }
+    .support-link\x20{
+      display: block;\x20margin-top: 15px;
+      padding: 10px;\x20background-color: #25d366;
+      color: white;\x20text-decoration: none;
+      font-weight: bold;\x20border-radius: 5px;
+      text-align: center;
+    }
+    .support-link:hover\x20{\x20background-color: #128c7e;\x20}
+    @keyframes\x20slideIn\x20{
+      from\x20{\x20opacity: 0;\x20transform: translate(-50%,\x20-60%);\x20}
+      to\x20{\x20opacity: 1;\x20transform: translate(-50%,\x20-50%);\x20}
+    }
+  `;
+    const _0x1a7195 = document[_0x53e1a0(0x18b)]('style');
+    _0x1a7195[_0x53e1a0(0x143)] = _0x4c9416;
+    document['head'][_0x53e1a0(0x179)](_0x1a7195);
+};
+addProtectionStyles();
+blockCopyActions();
+function protectedCode(_0x59972b, _0x3f5385) {
+    var _0x56a682 = _0x438df3;
+    console[_0x56a682(0x18c)]('[Checkout\x20script]\x20Script\x20starting\x20(inside\x20protectedCode)...');
+    const checkoutConfig = _0x59972b;
+    let _0x4c20fe = 0x0;
+    let _0x3f1f7d = 0x0;
+    let _0x296a1a = 0x0;
+    let _0x3c383f = null;
+    let _0x2056ba = null;
+    let _0x4a5f45 = null;
+    document[_0x56a682(0x193)](_0x56a682(0x145), function() {
+        var _0x48f58b = _0x56a682;
+        console[_0x48f58b(0x18c)]('[Checkout\x20script]\x20DOMContentLoaded\x20fired.');
+        const _0x306788 = document[_0x48f58b(0x141)]('statusMessage');
+        const _0x58c308 = document[_0x48f58b(0x141)]('confirmPurchaseButton');
+        const _0x3d301b = document[_0x48f58b(0x18f)]('.checkout-container');
+        const _0x589574 = document[_0x48f58b(0x18f)]('.container-history');
+        const _0x4c6acb = document[_0x48f58b(0x18f)]('.missing-phone-overlay');
+        const _0x1c833d = document[_0x48f58b(0x141)]('missingPhoneMessageText');
+        const _0x294e9f = document[_0x48f58b(0x141)]('missingPhoneProfileLink');
+        const _0x546c59 = document[_0x48f58b(0x141)]('productNameDisplay');
+        const _0x310578 = document[_0x48f58b(0x141)]('articleLinkDisplay');
+        const _0x27ab97 = document[_0x48f58b(0x141)]('clientWebsiteLink');
+        const _0x454807 = document[_0x48f58b(0x141)]('packageSelectedText');
+        const _0x58444c = document[_0x48f58b(0x141)]('basePriceDisplay');
+        console[_0x48f58b(0x18c)]('DOM\x20elements\x20references\x20obtained.');
+        const _0x4d0752 = new URLSearchParams(window[_0x48f58b(0x178)][_0x48f58b(0x17d)]);
+        if (_0x4d0752[_0x48f58b(0x17e)](_0x48f58b(0x17e))) {
+            console[_0x48f58b(0x18c)]('History\x20parameter\x20found\x20in\x20URL.\x20Displaying\x20order\x20history.');
+            if (_0x3d301b)
+                _0x3d301b[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            if (_0x4c6acb)
+                _0x4c6acb[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            if (_0x589574) {
+                _0x589574[_0x48f58b(0x17f)][_0x48f58b(0x18c)]('hidden');
+                console[_0x48f58b(0x18c)]('.container-history\x20shown.');
+                const _0x19a084 = _0x589574[_0x48f58b(0x18f)]('#closeHistoryPopup');
+                if (_0x19a084) {
+                    _0x19a084[_0x48f58b(0x193)]('click', function() {
+                        var _0x2d3a1f = _0x48f58b;
+                        window[_0x2d3a1f(0x178)][_0x2d3a1f(0x178)] = checkoutConfig[_0x2d3a1f(0x1b7)];
+                        console[_0x2d3a1f(0x18c)]('Redirecting\x20to\x20product\x20page\x20as\x20requested.');
+                    });
+                    console[_0x48f58b(0x18c)]('#closeHistoryPopup\x20event\x20listener\x20added.');
+                } else {
+                    console[_0x48f58b(0x148)]("#closeHistoryPopup\x20button\x20not\x20found\x20inside\x20.container-history!");
+                }
+            } else {
+                console[_0x48f58b(0x148)](".container-history\x20element\x20not\x20found!\x20Cannot\x20display\x20history.");
+            }
+            _0x48f58b(0x19e)();
+            const _0x573b0a = document[_0x48f58b(0x141)]('tableHistory');
+            if (_0x573b0a) {
+                _0x573b0a[_0x48f58b(0x193)]('click', function(_0x2ce19d) {
+                    var _0x1e36f9 = _0x48f58b;
+                    const _0x46422d = _0x2ce19d[_0x1e36f9(0x194)];
+                    if (_0x46422d && _0x46422d[_0x1e36f9(0x17f)][_0x1e36f9(0x153)]('complete-order-button')) {
+                        const _0x51c6b1 = _0x46422d[_0x1e36f9(0x18f)]('data-order-number');
+                        if (_0x51c6b1) {
+                            console[_0x1e36f9(0x18c)](`[History\x20Click]\x20Marking\x20order\x20${_0x51c6b1}\x20as\x20completed...`);
+                            _0x1e36f9(0x1c1)(_0x51c6b1, 'completed');
+                            _0x1e36f9(0x19e)();
+                        }
+                    }
+                });
+                console[_0x48f58b(0x18c)]('#tableHistory\x20event\x20delegation\x20listener\x20added.');
+            } else {
+                console[_0x48f58b(0x149)]("#tableHistory\x20element\x20not\x20found.\x20Cannot\x20add\x20complete\x20button\x20listener.");
+            }
+            console[_0x48f58b(0x18c)]('Exiting\x20DOMContentLoaded\x20-\x20Explicit\x20History\x20mode.');
+            return;
+        }
+        console[_0x48f58b(0x18c)]('No\x20history\x20parameter\x20found.\x20Checking\x20sessionStorage\x20for\x20order\x20details.');
+        const _0x3b0365 = sessionStorage[_0x48f58b(0x14a)]('checkoutOrderDetails');
+        console[_0x48f58b(0x18c)]("Read\x20from\x20sessionStorage\x20('checkoutOrderDetails'):", _0x3b0365);
+        let _0x5c421f = ![];
+        if (_0x3b0365) {
+            try {
+                _0x4a5f45 = JSON[_0x48f58b(0x18d)](_0x3b0365);
+                console[_0x48f58b(0x18c)]("Parsed\x20order\x20details\x20from\x20sessionStorage:", _0x4a5f45);
+                if (_0x4a5f45 && typeof _0x4a5f45 === 'object' && (_0x4a5f45[_0x48f58b(0x1b1)] == null || _0x4a5f45[_0x48f58b(0x1b3)] == null || !_0x4a5f45[_0x48f58b(0x1b4)] || !_0x4a5f45[_0x48f58b(0x1b5)] || !_0x4a5f45[_0x48f58b(0x1b6)])) {
+                    console[_0x48f58b(0x151)]("Order\x20details\x20from\x20sessionStorage\x20are\x20incomplete\x20or\x20invalid\x20for\x20checkout.", _0x4a5f45);
+                    _0x5c421f = ![];
+                } else {
+                    _0x5c421f = !![];
+                    console[_0x48f58b(0x18c)]("Order\x20details\x20from\x20sessionStorage\x20are\x20complete\x20and\x20valid\x20for\x20checkout.");
+                    const _0x3d0012 = _0x4a5f45[_0x48f58b(0x1b1)];
+                    const _0x47b926 = _0x4a5f45[_0x48f58b(0x1b7)] || 'لم\x20يتم\x20إدخاله';
+                    const _0x334460 = parseFloat(_0x4a5f45[_0x48f58b(0x1b3)]);
+                    const _0x2774a9 = _0x4a5f45[_0x48f58b(0x1b4)];
+                    const _0x4b789a = _0x4a5f45[_0x48f58b(0x1b5)];
+                    const _0x5c9868 = _0x4a5f45[_0x48f58b(0x1b6)];
+                    if (_0x546c59)
+                        _0x546c59[_0x48f58b(0x144)] = _0x4b789a;
+                    if (_0x310578) {
+                        const _0x296568 = document[_0x48f58b(0x18b)]('a');
+                        _0x296568[_0x48f58b(0x178)] = _0x5c9868;
+                        _0x296568[_0x48f58b(0x144)] = _0x5c9868;
+                        _0x296568[_0x48f58b(0x19f)] = _0x48f58b(0x17b);
+                        _0x310578[_0x48f58b(0x190)] = '';
+                        _0x310578[_0x48f58b(0x179)](_0x296568);
+                    }
+                    if (_0x27ab97)
+                        _0x27ab97[_0x48f58b(0x144)] = _0x47b926;
+                    if (_0x454807)
+                        _0x454807[_0x48f58b(0x144)] = _0x2774a9;
+                    if (_0x58444c)
+                        _0x58444c[_0x48f58b(0x144)] = `درهم.\x20${_0x334460[_0x48f58b(0x199)](0x2)}`;
+                    console[_0x48f58b(0x18c)]("Product\x20details\x20display\x20elements\x20filled\x20from\x20sessionStorage.");
+                    _0x4c20fe = _0x334460;
+                    _0x3f1f7d = _0x4c20fe;
+                    updateTotalsDisplay();
+                    console[_0x48f58b(0x18c)]('Initial\x20totals\x20calculated\x20and\x20displayed.');
+                }
+            } catch (_0x56a5c1) {
+                console[_0x48f58b(0x148)]("Failed\x20to\x20parse\x20order\x20details\x20from\x20sessionStorage:", _0x56a5c1);
+                _0x4a5f45 = null;
+                _0x5c421f = ![];
+            }
+        } else {
+            console[_0x48f58b(0x151)]("Order\x20details\x20not\x20found\x20in\x20sessionStorage.");
+            _0x4a5f45 = null;
+            _0x5c421f = ![];
+        }
+        if (_0x5c421f) {
+            console[_0x48f58b(0x18c)]("Valid\x20order\x20details\x20found.\x20Displaying\x20checkout\x20form.");
+            if (_0x3d301b)
+                _0x3d301b[_0x48f58b(0x17f)][_0x48f58b(0x18c)]('hidden');
+            if (_0x589574)
+                _0x589574[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            if (_0x4c6acb)
+                _0x4c6acb[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            const _0x5844c1 = document[_0x48f58b(0x141)]('userFullName');
+            const _0x47f208 = document[_0x48f58b(0x141)]('userEmail');
+            const _0x27ed1d = document[_0x48f58b(0x141)]('userPhone');
+            const _0x580218 = document[_0x48f58b(0x141)]('userId');
+            const _0x32356c = localStorage[_0x48f58b(0x14a)]('firebaseUserProfileData');
+            let _0x51b472 = null;
+            console[_0x48f58b(0x18c)]("Attempting\x20to\x20load\x20user\x20data\x20from\x20localStorage.");
+            if (_0x32356c) {
+                try {
+                    const _0x165b4c = JSON[_0x48f58b(0x18d)](_0x32356c);
+                    _0x51b472 = _0x165b4c;
+                    console[_0x48f58b(0x18c)]("User\x20data\x20parsed\x20from\x20localStorage:", _0x51b472);
+                } catch (_0x56a5c1) {
+                    console[_0x48f58b(0x148)](`فشل\x20في\x20قراءة\x20وتحليل\x20بيانات\x20المستخدم\x20من\x20localStorage:\x20${_0x56a5c1['message']}`, _0x56a5c1);
+                    _0x51b472 = null;
+                }
+            } else {
+                console[_0x48f58b(0x151)](`User\x20data\x20not\x20found\x20in\x20localStorage...\x20Is\x20user\x20logged\x20in?`);
+                _0x51b472 = null;
+            }
+            const _0x3e105e = [_0x48f58b(0x16e), _0x48f58b(0x172), _0x48f58b(0x173), 'uid'];
+            const _0x535d55 = [];
+            if (!_0x51b472) {
+                _0x535d55[_0x48f58b(0x188)](..._0x3e105e);
+                console[_0x48f58b(0x151)]("UserDataSource\x20is\x20null\x20or\x20invalid.\x20All\x20required\x20fields\x20considered\x20missing.");
+            } else {
+                _0x3e105e[_0x48f58b(0x1b4)]((_0x3b0365) => {
+                    const _0x56a5c1 = _0x51b472[_0x3b0365];
+                    if (_0x56a5c1 === undefined || _0x56a5c1 === null || _0x56a5c1 === '') {
+                        _0x535d55[_0x48f58b(0x188)](_0x3b0365);
+                    }
+                });
+                console[_0x48f58b(0x18c)](`Checked\x20required\x20user\x20fields.\x20Missing:\x20${_0x535d55['join'](',\x20')}.`);
+                if (_0x5844c1)
+                    _0x5844c1[_0x48f58b(0x144)] = _0x51b472[_0x48f58b(0x16e)] || 'غير\x20متوفر';
+                if (_0x47f208)
+                    _0x47f208[_0x48f58b(0x144)] = _0x51b472[_0x48f58b(0x172)] || 'غير\x20متوفر';
+                if (_0x27ed1d)
+                    _0x27ed1d[_0x48f58b(0x144)] = _0x51b472[_0x48f58b(0x173)] || 'غير\x20متوفر';
+                if (_0x580218)
+                    _0x580218[_0x48f58b(0x144)] = _0x51b472['uid'] || 'غير\x20متوفر';
+                console[_0x48f58b(0x18c)]("User\x20data\x20display\x20elements\x20filled.");
+            }
+            if (_0x535d55[_0x48f58b(0x176)] === 0x0) {
+                _0x2056ba = _0x51b472;
+                console[_0x48f58b(0x18c)]("User\x20data\x20is\x20complete\x20and\x20valid.\x20Proceeding\x20with\x20checkout\x20setup.");
+                if (_0x306788)
+                    _0x306788[_0x48f58b(0x1a7)]['display'] = _0x48f58b(0x14e);
+            } else {
+                console[_0x48f58b(0x151)](`User\x20data\x20is\x20incomplete\x20or\x20missing.\x20Missing\x20fields:\x20${_0x535d55['join'](',\x20')}.\x20Button\x20will\x20remain\x20disabled.`);
+                if (_0x51b472 && _0x535d55[_0x48f58b(0x176)] === 0x1 && _0x535d55[_0x48f58b(0x153)]('phoneNumber')) {
+                    console[_0x48f58b(0x151)]("Phone\x20number\x20is\x20the\x20only\x20missing\x20required\x20field.\x20Displaying\x20floating\x20prompt.");
+                    if (_0x3d301b)
+                        _0x3d301b[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+                    if (_0x4c6acb) {
+                        _0x4c6acb[_0x48f58b(0x17f)][_0x48f58b(0x18c)]('hidden');
+                        if (_0x1c833d)
+                            _0x1c833d[_0x48f58b(0x144)] = checkoutConfig[_0x48f58b(0x19a)];
+                        if (_0x294e9f) {
+                            _0x294e9f[_0x48f58b(0x178)] = checkoutConfig['profilePageUrl'];
+                            _0x294e9f[_0x48f58b(0x144)] = checkoutConfig[_0x48f58b(0x1b7)];
+                        }
+                    }
+                    if (_0x306788)
+                        _0x306788[_0x48f58b(0x1a7)]['display'] = _0x48f58b(0x14e);
+                    if (_0x58c308)
+                        _0x58c308[_0x48f58b(0x1b5)] = !![];
+                } else {
+                    if (_0x3d301b) {
+                        _0x3d301b[_0x48f58b(0x17f)][_0x48f58b(0x18c)]('hidden');
+                    }
+                    if (_0x4c6acb) {
+                        _0x4c6acb[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+                    }
+                    if (_0x306788) {
+                        _0x306788[_0x48f58b(0x144)] = checkoutConfig['userDataLoadError'] + ' (بيانات\x20أساسية\x20للمستخدم\x20مفقودة)';
+                        _0x306788[_0x48f58b(0x184)] = 'error';
+                        _0x306788[_0x48f58b(0x1a7)]['display'] = 'block';
+                    }
+                    if (_0x58c308)
+                        _0x58c308[_0x48f58b(0x1b5)] = !![];
+                    if (!_0x51b472) {
+                        console[_0x48f58b(0x148)]("User\x20not\x20logged\x20in.\x20Redirecting\x20to\x20login\x20page.");
+                        setTimeout(() => {
+                            var _0x2194c7 = _0x48f58b;
+                            window[_0x2194c7(0x178)][_0x2194c7(0x178)] = checkoutConfig[_0x2194c7(0x19f)];
+                        }, 0xbb8);
+                    }
+                }
+            }
+            displayPaymentMethods();
+            console[_0x48f58b(0x18c)]('Payment\x20methods\x20displayed.');
+            document[_0x48f58b(0x141)]('paymentMethodsList')[_0x48f58b(0x193)]('change', function() {
+                updatePromoSectionVisibility();
+                resetPromoIfNotCIH();
+            });
+            const _0x56a682 = document[_0x48f58b(0x141)]('applyPromoButton');
+            if (_0x56a682) {
+                _0x56a682[_0x48f58b(0x193)]('click', handleApplyPromo);
+                console[_0x48f58b(0x18c)]('Apply\x20promo\x20button\x20listener\x20added.');
+            } else {
+                console[_0x48f58b(0x151)]('Apply\x20promo\x20button\x20not\x20found.');
+            }
+            const _0x1c676d = document[_0x48f58b(0x141)]('promoCodeInput');
+            const _0x25e1a1 = document[_0x48f58b(0x141)]('promoStatus');
+            if (_0x1c676d && _0x25e1a1 && _0x56a682) {
+                _0x1c676d[_0x48f58b(0x193)]('input', () => {
+                    var _0x5c421f = _0x48f58b;
+                    const _0x49635b = _0x1c676d[_0x5c421f(0x1b4)][_0x5c421f(0x1b6)]()[_0x5c421f(0x19a)]();
+                    if (_0x3c383f && _0x49635b !== _0x3c383f) {
+                        console[_0x5c421f(0x18c)]('Promo\x20code\x20input\x20changed\x20after\x20a\x20code\x20was\x20applied.\x20Resetting\x20discount.');
+                        _0x296a1a = 0x0;
+                        _0x3f1f7d = _0x4c20fe;
+                        _0x3c383f = null;
+                        updateTotalsDisplay();
+                        _0x25e1a1[_0x5c421f(0x190)] = checkoutConfig['kodeP1'];
+                        _0x25e1a1[_0x5c421f(0x184)] = '';
+                        _0x56a682[_0x5c421f(0x1b5)] = ![];
+                        _0x25e1a1[_0x5c421f(0x1a7)]['display'] = 'block';
+                    } else if (_0x49635b === '' && _0x3c383f) {
+                        console[_0x5c421f(0x18c)]('Promo\x20code\x20input\x20cleared\x20after\x20a\x20code\x20was\x20applied.\x20Resetting\x20discount.');
+                        _0x296a1a = 0x0;
+                        _0x3f1f7d = _0x4c20fe;
+                        _0x3c383f = null;
+                        updateTotalsDisplay();
+                        _0x25e1a1[_0x5c421f(0x190)] = checkoutConfig['kodeP1'];
+                        _0x25e1a1[_0x5c421f(0x184)] = '';
+                        _0x56a682[_0x5c421f(0x1b5)] = ![];
+                        _0x25e1a1[_0x5c421f(0x1a7)]['display'] = 'block';
+                    } else if (_0x49635b === '') {
+                        _0x25e1a1[_0x5c421f(0x190)] = checkoutConfig['kodeP1'];
+                        _0x25e1a1[_0x5c421f(0x184)] = '';
+                        _0x25e1a1[_0x5c421f(0x1a7)]['display'] = 'block';
+                    }
+                });
+                _0x25e1a1[_0x48f58b(0x190)] = checkoutConfig['kodeP1'];
+                _0x25e1a1[_0x48f58b(0x184)] = '';
+                _0x25e1a1[_0x48f58b(0x1a7)]['display'] = 'block';
+                console[_0x48f58b(0x18c)]('Promo\x20code\x20input\x20listener\x20added\x20and\x20initial\x20status\x20set.');
+            } else {
+                console[_0x48f58b(0x151)]("Promo\x20code\x20input,\x20status\x20div,\x20or\x20apply\x20button\x20not\x20found\x20for\x20input\x20listener\x20setup.");
+            }
+            const _0x576304 = document[_0x48f58b(0x141)]('paymentScreenshot');
+            const _0x53d105 = document[_0x48f58b(0x141)]('paymentScreenshotPreview');
+            const _0x1c81ac = document[_0x48f58b(0x141)]('screenshotPreviewContainer');
+            const _0x35091c = document[_0x48f58b(0x141)]('clearScreenshotButton');
+            const _0x213a77 = document[_0x48f58b(0x18f)]('.screenshot-upload\x20label');
+            if (_0x576304 && _0x53d105 && _0x1c81ac && _0x35091c && _0x213a77) {
+                _0x576304[_0x48f58b(0x193)]('change', function(_0x546b5a) {
+                    var _0x53e1a0 = _0x48f58b;
+                    const _0x45f5a8 = _0x546b5a[_0x53e1a0(0x194)]['files'][0x0];
+                    if (_0x45f5a8) {
+                        const _0x4b7914 = new FileReader();
+                        _0x4b7914[_0x53e1a0(0x14a)] = function(_0x47e12f) {
+                            var _0x56a42a = _0x53e1a0;
+                            _0x53d105[_0x56a42a(0x182)] = _0x47e12f[_0x56a42a(0x194)]['result'];
+                            _0x213a77[_0x56a42a(0x1a7)]['display'] = _0x56a42a(0x14e);
+                            _0x1c81ac[_0x56a42a(0x1a7)]['display'] = 'block';
+                        };
+                        _0x4b7914[_0x53e1a0(0x14b)](_0x45f5a8);
+                    } else {
+                        _0x53d105[_0x53e1a0(0x182)] = '#';
+                        _0x213a77[_0x53e1a0(0x1a7)]['display'] = 'flex';
+                        _0x1c81ac[_0x53e1a0(0x1a7)]['display'] = _0x53e1a0(0x14e);
+                    }
+                });
+                _0x35091c[_0x48f58b(0x193)]('click', function() {
+                    var _0x26c71c = _0x48f58b;
+                    _0x576304[_0x26c71c(0x1b4)] = '';
+                    _0x53d105[_0x26c71c(0x182)] = '#';
+                    _0x213a77[_0x26c71c(0x1a7)]['display'] = 'flex';
+                    _0x1c81ac[_0x26c71c(0x1a7)]['display'] = _0x26c71c(0x14e);
+                });
+            }
+            if (_0x58c308) {
+                _0x58c308[_0x48f58b(0x193)]('click', handleConfirmPurchase);
+            }
+            if (_0x5c421f && _0x2056ba && _0x535d55[_0x48f58b(0x176)] === 0x0) {
+                if (_0x58c308) {
+                    _0x58c308[_0x48f58b(0x1b5)] = ![];
+                }
+            } else {
+                if (!_0x5c421f && _0x306788 && _0x306788[_0x48f58b(0x1a7)]['display'] !== 'block') {
+                    _0x306788[_0x48f58b(0x190)] = 'تعذر\x20تحميل\x20تفاصيل\x20الطلب\x20لإتمام\x20عملية\x20الدفع.\x20الرجاء\x20العودة\x20للصفحة\x20السابقة\x20والمحاولة\x20مرة\x20أخرى.';
+                    _0x306788[_0x48f58b(0x184)] = 'error';
+                    _0x306788[_0x48f58b(0x1a7)]['display'] = 'block';
+                }
+            }
+        } else {
+            console[_0x48f58b(0x18c)]("No\x20valid\x20order\x20details\x20found\x20in\x20sessionStorage.\x20Displaying\x20history\x20view.");
+            if (_0x3d301b)
+                _0x3d301b[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            if (_0x4c6acb)
+                _0x4c6acb[_0x48f58b(0x17f)][_0x48f58b(0x18a)]('hidden');
+            if (_0x589574) {
+                _0x589574[_0x48f58b(0x17f)][_0x48f58b(0x18c)]('hidden');
+                const _0x19a084 = _0x589574[_0x48f58b(0x18f)]('#closeHistoryPopup');
+                if (_0x19a084) {
+                    _0x19a084[_0x48f58b(0x193)]('click', function() {
+                        var _0x5501d6 = _0x48f58b;
+                        window[_0x5501d6(0x178)][_0x5501d6(0x178)] = checkoutConfig[_0x5501d6(0x1b7)];
+                    });
+                }
+            } else {
+                if (_0x306788) {
+                    _0x306788[_0x48f58b(0x190)] = 'خطأ\x20فادح:\x20عنصر\x20سجل\x20الطلبات\x20مفقود\x20في\x20الصفحة.';
+                    _0x306788[_0x48f58b(0x184)] = 'error';
+                    _0x306788[_0x48f58b(0x1a7)]['display'] = 'block';
+                }
+                if (_0x58c308)
+                    _0x58c308[_0x48f58b(0x1b5)] = !![];
+                return;
+            }
+            _0x48f58b(0x19e)();
+            const _0x573b0a = document[_0x48f58b(0x141)]('tableHistory');
+            if (_0x573b0a) {
+                _0x573b0a[_0x48f58b(0x193)]('click', function(_0x24d402) {
+                    var _0x1c5a96 = _0x48f58b;
+                    const _0x272b16 = _0x24d402[_0x1c5a96(0x194)];
+                    if (_0x272b16 && _0x272b16[_0x1c5a96(0x17f)][_0x1c5a96(0x153)]('complete-order-button')) {
+                        const _0x3b5f90 = _0x272b16[_0x1c5a96(0x18f)]('data-order-number');
+                        if (_0x3b5f90) {
+                            _0x1c5a96(0x1c1)(_0x3b5f90, 'completed');
+                            _0x1c5a96(0x19e)();
+                        }
+                    }
+                });
+            }
+        }
+        function updatePromoSectionVisibility() {
+            var _0x31006a = _0x438df3;
+            const _0x4b6697 = document[_0x31006a(0x18f)]('input[name="paymentMethod"]:checked');
+            const _0x507119 = document[_0x31006a(0x18f)]('.promo-section');
+            const _0x356611 = document[_0x31006a(0x18f)]('.cih-discount-note');
+            if (_0x4b6697 && _0x4b6697[_0x31006a(0x1b4)][_0x31006a(0x1b6)]() === _0x31006a(0x1c5)) {
+                if (_0x507119)
+                    _0x507119[_0x31006a(0x1a7)]['display'] = _0x31006a(0x1a5);
+                if (_0x356611)
+                    _0x356611[_0x31006a(0x1a7)]['display'] = _0x31006a(0x1a5);
+            } else {
+                if (_0x507119)
+                    _0x507119[_0x31006a(0x1a7)]['display'] = _0x31006a(0x1a4);
+                if (_0x356611)
+                    _0x356611[_0x31006a(0x1a7)]['display'] = _0x31006a(0x1a4);
+            }
+        }
+        function resetPromoIfNotCIH() {
+            var _0x4d5885 = _0x438df3;
+            const _0x5c328e = document[_0x4d5885(0x18f)]('input[name="paymentMethod"]:checked');
+            const _0x41e8c9 = document[_0x4d5885(0x141)]('promoCodeInput');
+            const _0x25e1a1 = document[_0x4d5885(0x141)]('promoStatus');
+            if (!_0x5c328e || _0x5c328e[_0x4d5885(0x1b4)][_0x4d5885(0x1b6)]() !== _0x4d5885(0x1c5)) {
+                _0x296a1a = 0x0;
+                _0x3f1f7d = _0x4c20fe;
+                _0x3c383f = null;
+                updateTotalsDisplay();
+                if (_0x41e8c9)
+                    _0x41e8c9[_0x4d5885(0x1b4)] = '';
+                if (_0x25e1a1) {
+                    _0x25e1a1[_0x4d5885(0x190)] = checkoutConfig['kodeP1'];
+                    _0x25e1a1[_0x4d5885(0x184)] = '';
+                    _0x25e1a1[_0x4d5885(0x1a7)]['display'] = 'block';
+                }
+            }
+        }
+    });
+    function saveOrderToHistory(_0x4465d1) {
+        var _0x5a183d = _0x438df3;
+        console[_0x5a183d(0x18c)]('Attempting\x20to\x20save\x20order\x20to\x20local\x20history:', _0x4465d1);
+        try {
+            const _0x3c373a = localStorage[_0x5a183d(0x14a)]('userOrderHistory');
+            let _0x393c8d = _0x3c373a ? JSON[_0x5a183d(0x18d)](_0x3c373a) : [];
+            const _0x415b3b = {
+                ..._0x4465d1,
+                'timestamp': Date[_0x5a183d(0x1b2)](),
+                'status': _0x5a183d(0x1a1)
+            };
+            _0x393c8d[_0x5a183d(0x1c0)](_0x415b3b);
+            const _0x5714d6 = 0x14;
+            if (_0x393c8d[_0x5a183d(0x176)] > _0x5714d6) {
+                _0x393c8d = _0x393c8d[_0x5a183d(0x198)](0x0, _0x5714d6);
+            }
+            localStorage[_0x5a183d(0x1a4)]('userOrderHistory', JSON[_0x5a183d(0x1a3)](_0x393c8d));
+        } catch (_0x390141) {
+            console[_0x5a183d(0x148)]("Failed\x20to\x20save\x20order\x20to\x20local\x20history:", _0x390141);
+        }
+    }
+    function updateOrderStatusInHistory(_0x2213e4, _0x5d9b73) {
+        var _0x411e74 = _0x438df3;
+        console[_0x411e74(0x18c)](`Attempting\x20to\x20update\x20status\x20for\x20order\x20${_0x2213e4}\x20to\x20${_0x5d9b73}.`);
+        try {
+            const _0x501b45 = localStorage[_0x411e74(0x14a)]('userOrderHistory');
+            let _0x3b1c67 = _0x501b45 ? JSON[_0x411e74(0x18d)](_0x501b45) : [];
+            const _0x1c2b53 = _0x3b1c67[_0x411e74(0x1a9)](_0x5a6390 => _0x5a6390[_0x411e74(0x1c1)] === _0x2213e4);
+            if (_0x1c2b53 > -0x1) {
+                _0x3b1c67[_0x1c2b53][_0x411e74(0x1b2)] = _0x5d9b73;
+                localStorage[_0x411e74(0x1a4)]('userOrderHistory', JSON[_0x411e74(0x1a3)](_0x3b1c67));
+            }
+        } catch (_0x5501d6) {
+            console[_0x411e74(0x148)]("Failed\x20to\x20update\x20order\x20status\x20in\x20local\x20history:", _0x5501d6);
+        }
+    }
+    function displayOrderHistory() {
+        var _0x2a1789 = _0x438df3;
+        console[_0x2a1789(0x18c)]('Starting\x20displayOrderHistory\x20function.');
+        const _0x2e1962 = document[_0x2a1789(0x141)]('tableHistory');
+        const _0x52b61f = document[_0x2a1789(0x18f)]('.container-history\x20.note');
+        if (!_0x2e1962 || !_0x52b61f) {
+            console[_0x2a1789(0x148)]("Required\x20history\x20elements\x20not\x20found.");
+            return;
+        }
+        try {
+            const _0x1d5b32 = localStorage[_0x2a1789(0x14a)]('userOrderHistory');
+            let _0x2863a8 = _0x1d5b32 ? JSON[_0x2a1789(0x18d)](_0x1d5b32) : [];
+            const _0x13c79c = Date[_0x2a1789(0x1b2)]() - 0x240c8400;
+            const _0x3f1f7d = _0x2863a8[_0x2a1789(0x1b9)](_0x3d706e => _0x3d706e[_0x2a1789(0x1b2)] && _0x3d706e[_0x2a1789(0x1b2)] > _0x13c79c);
+            if (_0x3f1f7d[_0x2a1789(0x176)] !== _0x2863a8[_0x2a1789(0x176)]) {
+                localStorage[_0x2a1789(0x1a4)]('userOrderHistory', JSON[_0x2a1789(0x1a3)](_0x3f1f7d));
+            }
+            const _0x2867a5 = _0x3f1f7d;
+            if (_0x2867a5[_0x2a1789(0x176)] === 0x0) {
+                _0x52b61f[_0x2a1789(0x1a7)]['display'] = _0x2a1789(0x14e);
+                let _0x3e105e = `<div\x20class="${_0x2a1789(0x1c3)}">`;
+                _0x3e105e += '<span\x20class="no-orders-icon">!</span>';
+                _0x3e105e += `<p>${_0x2a1789(0x1c4)}</p>`;
+                _0x3e105e += '</div>';
+                _0x2e1962[_0x2a1789(0x190)] = _0x3e105e;
+            } else {
+                _0x52b61f[_0x2a1789(0x1a7)]['display'] = _0x2a1789(0x1a5);
+                let _0x298495 = '';
+                _0x2867a5[_0x2a1789(0x1c6)]((_0x3a5a22) => {
+                    var _0x205265 = _0x2a1789;
+                    const _0x4525d6 = new Date(_0x3a5a22[_0x205265(0x1b2)])[_0x205265(0x1c7)]('ar-MA', {
+                        'timeZone': _0x205265(0x1c8)
+                    });
+                    const _0x344b58 = _0x3a5a22[_0x205265(0x1b2)] || 'غير\x20متوفر';
+                    _0x298495 += `<div\x20class="${_0x205265(0x1c9)}"\x20data-order-number="${_0x3a5a22[_0x205265(0x1c1)] || ''}">`;
+                    _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1ca)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1c1)] || 'غير\x20متوفر'}</span></p>`;
+                    if (_0x3a5a22[_0x205265(0x1b5)] || _0x3a5a22[_0x205265(0x1b6)]) {
+                        if (_0x3a5a22[_0x205265(0x1b5)])
+                            _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1cb)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1b5)]}</span></p>`;
+                        if (_0x3a5a22[_0x205265(0x1b6)])
+                            _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1cc)]}</strong>\x20<span><a\x20href="${_0x3a5a22[_0x205265(0x1b6)]}"\x20target="_blank">${_0x3a5a22[_0x205265(0x1b6)]}</a></span></p>`;
+                        if (_0x3a5a22[_0x205265(0x1b7)])
+                            _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1cd)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1b7)]}</span></p>`;
+                        if (_0x3a5a22[_0x205265(0x1b4)])
+                            _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1ce)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1b4)]}</span></p>`;
+                    } else {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1cb)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1b1)] || 'غير\x20محدد'}\x20-\x20${_0x3a5a22[_0x205265(0x1b4)] || ''}</span></p>`;
+                        if (_0x3a5a22[_0x205265(0x1b7)])
+                            _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1cd)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1b7)] || 'لا\x20يوجد'}</span></p>`;
+                    }
+                    const _0x56a42a = _0x3a5a22[_0x205265(0x1cf)] != null ? _0x3a5a22[_0x205265(0x1cf)] : _0x3a5a22['subtotal'] != null ? parseFloat(_0x3a5a22['subtotal']) : undefined;
+                    const _0x546c4f = _0x3a5a22[_0x205265(0x1d0)] != null ? _0x3a5a22[_0x205265(0x1d0)] : _0x3a5a22['subtotal'] != null ? parseFloat(_0x3a5a22['subtotal']) : undefined;
+                    if (_0x56a42a != null) {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1ce)]}</strong>\x20<span>درهم.\x20${_0x56a42a[_0x205265(0x199)](0x2)}</span></p>`;
+                    }
+                    if (_0x3a5a22[_0x205265(0x1a6)]) {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d2)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1a6)]}</span></p>`;
+                    }
+                    const _0x3f533a = (_0x56a42a != null && _0x546c4f != null) ? _0x56a42a - _0x546c4f : 0x0;
+                    if (_0x3f533a > 0x0) {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d1)]}</strong>\x20<span>درهم.\x20${_0x3f533a[_0x205265(0x199)](0x2)}</span></p>`;
+                    }
+                    if (_0x546c4f != null) {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d3)]}</strong>\x20<span>درهم.\x20${_0x546c4f[_0x205265(0x199)](0x2)}</span></p>`;
+                    } else {
+                        _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d3)]}</strong>\x20<span>غير\x20متوفر</span></p>`;
+                    }
+                    _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d4)]}</strong>\x20<span>${_0x3a5a22[_0x205265(0x1d5)] || 'غير\x20محدد'}</span></p>`;
+                    _0x298495 += `<p><strong>${checkoutConfig[_0x205265(0x1d6)]}</strong>\x20<span>${_0x4525d6}</span></p>`;
+                    _0x298495 += `<p><strong>📪\x20حالة\x20الطلب:</strong>\x20<span\x20class="order-status\x20${_0x344b58 === 'completed' ? 'completed' : ''}">${_0x344b58 === _0x205265(0x1a1) ? checkoutConfig[_0x205265(0x1d7)] : _0x344b58 === 'completed' ? checkoutConfig[_0x205265(0x1d8)] : _0x344b58}</span></p>`;
+                    if (_0x3a5a22[_0x205265(0x1b2)] === _0x205265(0x1a1)) {
+                        _0x298495 += `<button\x20class="complete-order-button"\x20data-order-number="${_0x3a5a22[_0x205265(0x1c1)] || ''}">${checkoutConfig[_0x205265(0x1d8)]}</button>`;
+                    } else {
+                        _0x298495 += `<button\x20class="complete-order-button"\x20disabled>تم\x20الإنتهاء</button>`;
+                    }
+                    _0x298495 += `</div>`;
+                });
+                _0x2e1962[_0x2a1789(0x190)] = _0x298495;
+            }
+        } catch (_0x1f5f23) {
+            console[_0x2a1789(0x148)]("Failed\x20to\x20display\x20order\x20history\x20(caught\x20error):", _0x1f5f23);
+            _0x52b61f[_0x2a1789(0x1a7)]['display'] = _0x2a1789(0x1a5);
+            _0x2e1962[_0x2a1789(0x190)] = '<p>حدث\x20خطأ\x20في\x20عرض\x20سجل\x20الطلبات.</p>';
+        }
+    }
+    function displayPaymentMethods() {
+        var _0x510f84 = _0x438df3;
+        const _0x550304 = document[_0x510f84(0x141)]('paymentMethodsList');
+        const _0x16d9da = document[_0x510f84(0x141)]('selectedAccountDetails');
+        const _0x53805f = document[_0x510f84(0x141)]('accountLogo');
+        const _0x344b58 = document[_0x510f84(0x141)]('accountName');
+        const _0x463283 = document[_0x510f84(0x141)]('accountDetails');
+        if (!_0x550304 || !_0x16d9da || !_0x53805f || !_0x344b58 || !_0x463283) {
+            console[_0x510f84(0x148)]("Payment\x20method\x20display\x20elements\x20not\x20found.");
+            return;
+        }
+        _0x550304[_0x510f84(0x190)] = '';
+        _0x3f5385[_0x510f84(0x1c6)]((_0x5c8d62) => {
+            var _0x521f57 = _0x510f84;
+            const _0x31a293 = document[_0x521f57(0x18b)]('div');
+            _0x31a293[_0x521f57(0x17f)][_0x521f57(0x18a)]('payment-method-option');
+            _0x31a293[_0x521f57(0x1db)]('data-id', _0x5c8d62['id']);
+            const _0x27c152 = document[_0x521f57(0x18b)]('input');
+            _0x27c152[_0x521f57(0x1dc)] = _0x521f57(0x1dd);
+            _0x27c152[_0x521f57(0x1de)] = _0x521f57(0x1d5);
+            _0x27c152[_0x521f57(0x1df)] = `method-${_0x5c8d62['id']}`;
+            _0x27c152[_0x521f57(0x1b4)] = _0x5c8d62['id'];
+            const _0x411e86 = document[_0x521f57(0x18b)]('label');
+            _0x411e86[_0x521f57(0x1e0)] = `method-${_0x5c8d62['id']}`;
+            _0x411e86[_0x521f57(0x190)] = `<img\x20src="${_0x5c8d62[_0x521f57(0x1e1)]}"\x20alt="${_0x5c8d62['id']}"\x20style="height:\x2030px;\x20vertical-align:\x20middle;\x20margin-left:\x2010px;">${_0x5c8d62['id']}`;
+            _0x31a293[_0x521f57(0x179)](_0x27c152);
+            _0x31a293[_0x521f57(0x179)](_0x411e86);
+            _0x550304[_0x521f57(0x179)](_0x31a293);
+            _0x27c152[_0x521f57(0x193)]('change', function() {
+                var _0x501306 = _0x521f57;
+                if (this['checked']) {
+                    _0x53805f[_0x501306(0x190)] = `<img\x20src="${_0x5c8d62[_0x501306(0x1e1)]}"\x20alt="${_0x5c8d62[_0x501306(0x1e2)]}">`;
+                    _0x344b58[_0x501306(0x190)] = _0x5c8d62[_0x501306(0x1e2)];
+                    _0x463283[_0x501306(0x190)] = _0x5c8d62[_0x501306(0x1e3)];
+                    _0x16d9da[_0x501306(0x1a7)]['display'] = _0x501306(0x1a5);
+                }
+            });
+        });
+        _0x16d9da[_0x510f84(0x1a7)]['display'] = _0x510f84(0x1a4);
+    }
+    function updateTotalsDisplay() {
+        var _0x205265 = _0x438df3;
+        const _0x38e55c = document[_0x205265(0x141)]('initialTotalDisplay');
+        const _0x12d31c = document[_0x205265(0x141)]('discountAmountDisplay');
+        const _0x5e0242 = document[_0x205265(0x141)]('discountRow');
+        const _0x32356c = document[_0x205265(0x141)]('finalTotalDisplay');
+        if (!_0x38e55c || !_0x12d31c || !_0x5e0242 || !_0x32356c) {
+            console[_0x205265(0x148)]("Total\x20display\x20elements\x20not\x20found.");
+            return;
+        }
+        _0x38e55c[_0x205265(0x190)] = `${_0x4c20fe[_0x205265(0x199)](0x2)}`;
+        if (_0x296a1a > 0x0) {
+            _0x12d31c[_0x205265(0x190)] = `${_0x296a1a[_0x205265(0x199)](0x2)}`;
+            _0x5e0242[_0x205265(0x1a7)]['display'] = _0x205265(0x1a5);
+        } else {
+            _0x5e0242[_0x205265(0x1a7)]['display'] = _0x205265(0x1a4);
+        }
+        _0x32356c[_0x205265(0x190)] = `${_0x3f1f7d[_0x205265(0x199)](0x2)}`;
+    }
+    async function handleApplyPromo() {
+        var _0x52b667 = _0x438df3;
+        const _0x4c87b7 = document[_0x52b667(0x141)]('promoCodeInput');
+        const _0x48a735 = _0x4c87b7[_0x52b667(0x1b4)][_0x52b667(0x1b6)]()[_0x52b667(0x19a)]();
+        const _0x26c71c = document[_0x52b667(0x141)]('promoStatus');
+        const _0x5a1b55 = document[_0x52b667(0x141)]('applyPromoButton');
+        const _0x3b1c67 = document[_0x52b667(0x141)]('loadingMessage');
+        if (!_0x4c87b7 || !_0x26c71c || !_0x5a1b55 || !_0x3b1c67) {
+            return;
+        }
+        const _0x3d0012 = document[_0x52b667(0x18f)]('input[name="paymentMethod"]:checked');
+        if (!_0x3d0012 || _0x3d0012[_0x52b667(0x1b4)][_0x52b667(0x1b6)]() !== 'cih') {
+            _0x26c71c[_0x52b667(0x190)] = 'الخصم\x20متاح\x20فقط\x20عند\x20الدفع\x20عبر\x20بنك\x20CIH';
+            _0x26c71c[_0x52b667(0x184)] = 'error';
+            _0x26c71c[_0x52b667(0x1a7)]['display'] = 'block';
+            return;
+        }
+        _0x296a1a = 0x0;
+        _0x3f1f7d = _0x4c20fe;
+        _0x3c383f = null;
+        updateTotalsDisplay();
+        if (_0x48a735 === '') {
+            _0x26c71c[_0x52b667(0x190)] = checkoutConfig['kodeP1'];
+            _0x26c71c[_0x52b667(0x184)] = '';
+            _0x5a1b55[_0x52b667(0x1b5)] = ![];
+            return;
+        }
+        _0x5a1b55[_0x52b667(0x1b5)] = !![];
+        _0x3b1c67[_0x52b667(0x190)] = checkoutConfig['loading'];
+        _0x3b1c67[_0x52b667(0x1a7)]['display'] = 'block';
+        _0x26c71c[_0x52b667(0x1a7)]['display'] = _0x52b667(0x14e);
+        try {
+            const _0x4256eb = new URLSearchParams({
+                'promoCode': _0x48a735,
+                'initialTotal': _0x4c20fe[_0x52b667(0x191)](),
+                'userId': _0x2056ba['uid'],
+                'postId': _0x4a5f45[_0x52b667(0x1b1)]
+            });
+            const _0x58c6cf = await fetch(checkoutConfig['appsScriptUrl'], {
+                'method': _0x52b667(0x18c),
+                'body': _0x4256eb
+            });
+            if (!_0x58c6cf[_0x52b667(0x1b8)]) {
+                throw new Error(`HTTP\x20error!\x20status:\x20${_0x58c6cf[_0x52b667(0x1b2)]}`);
+            }
+            const _0x465715 = await _0x58c6cf[_0x52b667(0x1b7)]();
+            if (_0x465715[_0x52b667(0x1b5)]) {
+                if (_0x465715[_0x52b667(0x1d3)] === 'percentage') {
+                    _0x296a1a = _0x4c20fe * (_0x465715[_0x52b667(0x1d4)] / 0x64);
+                } else if (_0x465715[_0x52b667(0x1d3)] === 'fixed') {
+                    _0x296a1a = _0x465715[_0x52b667(0x1d4)];
+                } else {
+                    _0x296a1a = 0x0;
+                    _0x26c71c[_0x52b667(0x190)] = checkoutConfig['kodeP4'];
+                    _0x26c71c[_0x52b667(0x184)] = 'error';
+                }
+                _0x296a1a = Math[_0x52b667(0x1e5)](_0x296a1a, _0x4c20fe);
+                _0x3f1f7d = _0x4c20fe - _0x296a1a;
+                _0x3c383f = _0x48a735;
+                updateTotalsDisplay();
+                _0x26c71c[_0x52b667(0x190)] = `${checkoutConfig['kodeP2']}\x20درهم.\x20${_0x296a1a[_0x52b667(0x199)](0x2)}`;
+                _0x26c71c[_0x52b667(0x184)] = _0x52b667(0x1e6);
+                _0x26c71c[_0x52b667(0x1a7)]['display'] = 'block';
+            } else {
+                _0x296a1a = 0x0;
+                _0x3f1f7d = _0x4c20fe;
+                _0x3c383f = null;
+                updateTotalsDisplay();
+                _0x26c71c[_0x52b667(0x190)] = _0x465715[_0x52b667(0x1b8)] || checkoutConfig['kodeP4'];
+                _0x26c71c[_0x52b667(0x184)] = 'error';
+                _0x26c71c[_0x52b667(0x1a7)]['display'] = 'block';
+            }
+        } catch (_0x39a044) {
+            _0x296a1a = 0x0;
+            _0x3f1f7d = _0x4c20fe;
+            _0x3c383f = null;
+            updateTotalsDisplay();
+            _0x26c71c[_0x52b667(0x190)] = checkoutConfig['errorNotif'] + ' (خطأ\x20في\x20تطبيق\x20الكود)';
+            _0x26c71c[_0x52b667(0x184)] = 'error';
+            _0x26c71c[_0x52b667(0x1a7)]['display'] = 'block';
+        } finally {
+            _0x5a1b55[_0x52b667(0x1b5)] = ![];
+            _0x3b1c67[_0x52b667(0x1a7)]['display'] = _0x52b667(0x14e);
+        }
+    }
+    async function handleConfirmPurchase() {
+        var _0x3b3333 = _0x438df3;
+        const _0x41e8c9 = document[_0x3b3333(0x18f)]('input[name="paymentMethod"]:checked');
+        const _0x205265 = document[_0x3b3333(0x141)]('paymentScreenshot');
+        const _0x1a454d = document[_0x3b3333(0x141)]('agreeTerms');
+        const _0x3788a4 = document[_0x3b3333(0x141)]('confirmPurchaseButton');
+        const _0x1e3f89 = document[_0x3b3333(0x141)]('loadingMessage');
+        const _0x56a42a = document[_0x3b3333(0x141)]('statusMessage');
+        if (!_0x41e8c9 || !_0x205265 || !_0x1a454d || !_0x3788a4 || !_0x1e3f89 || !_0x56a42a) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig[_0x3b3333(0x1b0)] + ' (خطأ\x20داخلي:\x20عناصر\x20النموذج\x20مفقودة)';
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            return;
+        }
+        if (!_0x2056ba || !_0x2056ba[_0x3b3333(0x16e)] || !_0x2056ba[_0x3b3333(0x172)] || !_0x2056ba[_0x3b3333(0x173)] || !_0x2056ba['uid']) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig[_0x3b3333(0x1d1)] + ' (بيانات\x20المستخدم\x20غير\x20كاملة)';
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            _0x3788a4[_0x3b3333(0x1b5)] = !![];
+            return;
+        }
+        if (!_0x4a5f45 || typeof _0x4a5f45 !== 'object' || (_0x4a5f45[_0x3b3333(0x1b1)] == null || _0x4a5f3e[_0x3b3333(0x1b3)] == null || !_0x4a5f45[_0x3b3333(0x1b4)] || !_0x4a5f45[_0x3b3333(0x1b5)] || !_0x4a5f45[_0x3b3333(0x1b6)])) {
+            _0x56a42a[_0x3b3333(0x190)] = 'حدث\x20خطأ\x20داخلي:\x20تفاصيل\x20الطلب\x20أو\x20بيانات\x20المنتج\x20الأساسية\x20غير\x20متوفرة\x20بشكل\x20صحيح.';
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            _0x3788a4[_0x3b3333(0x1b5)] = !![];
+            return;
+        }
+        if (_0x41e8c9[_0x3b3333(0x1b4)][_0x3b3333(0x1b6)]() !== _0x3b3333(0x1c5)) {
+            _0x296a1a = 0x0;
+            _0x3f1f7d = _0x4c20fe;
+            _0x3c383f = null;
+        }
+        if (!_0x41e8c9) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig['bankNull'];
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            return;
+        }
+        if (_0x205265['files'][_0x3b3333(0x176)] === 0x0) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig['ssNull'];
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            return;
+        }
+        if (!_0x1a454d['checked']) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig['termsNull'];
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            return;
+        }
+        _0x1e3f89[_0x3b3333(0x190)] = checkoutConfig['loading'];
+        _0x1e3f89[_0x3b3333(0x1a7)]['display'] = 'block';
+        _0x56a42a[_0x3b3333(0x1a7)]['display'] = _0x3b3333(0x14e);
+        _0x3788a4[_0x3b3333(0x1b5)] = !![];
+        const _0x53d162 = {
+            'fullName': _0x2056ba[_0x3b3333(0x16e)],
+            'email': _0x2056ba[_0x3b3333(0x172)],
+            'phone': _0x2056ba[_0x3b3333(0x173)],
+            'userId': _0x2056ba['uid'],
+            'postId': _0x4a5f45[_0x3b3333(0x1b1)],
+            'productName': _0x4a5f45[_0x3b3333(0x1b5)],
+            'articleTitle': _0x4a5f45['articleTitle'],
+            'articleLink': _0x4a5f45[_0x3b3333(0x1b6)],
+            'websiteLink': _0x4a5f45[_0x3b3333(0x1b7)],
+            'packageSelectedText': _0x4a5f45[_0x3b3333(0x1b4)],
+            'initialTotal': _0x4c20fe,
+            'finalTotal': _0x3f1f7d,
+            'paymentMethod': _0x41e8c9[_0x3b3333(0x1b4)],
+            'promoCodeUsed': _0x3c383f,
+            'orderTime': new Date()[_0x3b3333(0x1b1)](),
+            'orderNumber': generateUniqueOrderNumber(),
+            'status': _0x3b3333(0x1a1)
+        };
+        const _0x2b38f8 = _0x205265['files'][0x0];
+        const _0x5b3648 = `${checkoutConfig['header']}\n\n` + `${checkoutConfig['body']}\n\n` + `${checkoutConfig[_0x3b3333(0x16e)]}${_0x53d162[_0x3b3333(0x16e)]}\n\n` + `${checkoutConfig[_0x3b3333(0x172)]}${_0x53d162[_0x3b3333(0x172)]}\n\n` + `${checkoutConfig[_0x3b3333(0x173)]}${_0x53d162[_0x3b3333(0x173)]}\n\n` + `${checkoutConfig['uidLabel']}\`\x20${_0x53d162['userId']}\`\x20\n\n\x20=======================\x20` + `===================\x20\n\n${checkoutConfig['noLabel']}${_0x53d162[_0x3b3333(0x1c1)]}\n\n` + `${checkoutConfig['productLabel']}${_0x53d162[_0x3b3333(0x1b5)]}\n\n` + `${checkoutConfig['articleLinkLabel']}[رابط\x20المنتج](${_0x53d162[_0x3b3333(0x1b6)] || 'لا\x20يوجد'})\n\n` + `${checkoutConfig['clientLinkLabel']}${_0x53d162[_0x3b3333(0x1b7)]}\n\n` + `${checkoutConfig[_0x3b3333(0x1b4)]}${_0x53d162[_0x3b3333(0x1b4)]}\n\n` + `${checkoutConfig['basePriceLabel']}درهم.\x20${_0x53d162['initialTotal'] ? _0x53d162['initialTotal'][_0x3b3333(0x199)](0x2) : 'N/A'}\n\n` + (_0x53d162['promoCodeUsed'] ? `${checkoutConfig[_0x3b3333(0x1a6)]}${_0x53d162[_0x3b3333(0x1a6)]}\n\n` : '') + (_0x296a1a > 0x0 ? `${checkoutConfig[_0x3b3333(0x1c1)]}درهم.\x20${_0x296a1a[_0x3b3333(0x199)](0x2)}\n\n` : '\n') + `${checkoutConfig[_0x3b3333(0x1d4)]}${_0x53d162[_0x3b3333(0x1d5)]}\n\n` + `**${checkoutConfig[_0x3b3333(0x1d3)]}**\x20درهم.\x20${_0x53d162[_0x3b3333(0x1d0)] ? _0x53d162[_0x3b3333(0x1d0)][_0x3b3333(0x199)](0x2) : 'N/A'}\n\n` + `${checkoutConfig[_0x3b3333(0x1d6)]}${new Date(_0x53d162['orderTime'])[_0x3b3333(0x1c7)]('ar-MA', {
+            'timeZone': 'Africa/Casablanca'
+        })}`;
+        const _0x1c80f4 = new FormData();
+        _0x1c80f4['append']('chat_id', checkoutConfig['chatId']);
+        _0x1c80f4['append']('photo', _0x2b38f8);
+        _0x1c80f4['append']('caption', _0x5b3648);
+        _0x1c80f4['append']('parse_mode', 'Markdown');
+        const _0x26955a = `https://api.telegram.org/bot${checkoutConfig['tokenBot']}/sendPhoto`;
+        try {
+            const _0x202b28 = await fetch(_0x26955a, {
+                'method': _0x3b3333(0x18c),
+                'body': _0x1c80f4
+            });
+            const _0x117cf4 = await _0x202b28[_0x3b3333(0x1b7)]();
+            if (_0x202b28[_0x3b3333(0x1b8)] && _0x117cf4[_0x3b3333(0x1d4)]) {
+                _0x56a42a[_0x3b3333(0x190)] = checkoutConfig['successNotif'];
+                _0x56a42a[_0x3b3333(0x184)] = _0x3b3333(0x1e6);
+                _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+                saveOrderToHistory(_0x53d162);
+                sessionStorage[_0x3b3333(0x1c2)]('checkoutOrderDetails');
+                setTimeout(() => {
+                    var _0x250eb5 = _0x3b3333;
+                    window[_0x250eb5(0x178)][_0x250eb5(0x178)] = checkoutConfig[_0x250eb5(0x14e)];
+                }, 0xbb8);
+            } else {
+                _0x56a42a[_0x3b3333(0x190)] = checkoutConfig[_0x3b3333(0x1b0)] + `\x20(خطأ\x20Telegram:\x20${_0x117cf4[_0x3b3333(0x1d1)] || _0x202b28['statusText']})`;
+                _0x56a42a[_0x3b3333(0x184)] = 'error';
+                _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+            }
+        } catch (_0x3a9254) {
+            _0x56a42a[_0x3b3333(0x190)] = checkoutConfig[_0x3b3333(0x1b0)] + ' (خطأ\x20في\x20الاتصال\x20المباشر)';
+            _0x56a42a[_0x3b3333(0x184)] = 'error';
+            _0x56a42a[_0x3b3333(0x1a7)]['display'] = 'block';
+        } finally {
+            _0x1e3f89[_0x3b3333(0x1a7)]['display'] = _0x3b3333(0x14e);
+            _0x3788a4[_0x3b3333(0x1b5)] = ![];
+        }
+    }
+    function generateUniqueOrderNumber() {
+        var _0x10b14c = _0x438df3;
+        const _0x56a310 = 0xf4240;
+        const _0x310f84 = 0xf423f;
+        const _0x510d9f = Math[_0x10b14c(0x1c3)](Math[_0x10b14c(0x1e4)]() * (_0x310f84 - _0x56a310 + 0x1)) + _0x56a310;
+        return String(_0x510d9f);
+    }
+    async function notifyPromoCodeUsed(_0x393c13, _0x38827c, _0x27ab5e) {
+        var _0x5997d9 = _0x438df3;
+        console[_0x5997d9(0x18c)](`Notifying\x20backend\x20that\x20promo\x20code\x20${_0x393c13}\x20was\x20used\x20by\x20user\x20${_0x38827c}\x20for\x20product\x20${_0x27ab5e}`);
+    }
+}
+verifyDomain();
+function checkDomainWhitelist() {
+    var _0x2b8a4f = _0x438df3;
+    const _0x1cf830 = window[_0x2b8a4f(0x178)]['hostname'];
+    const _0x207798 = 'https://script.google.com/macros/s/AKfycbyRN9KMVthqTETWYLNuWa7KpQAq4thye0WnaogJJM_91Sog9KMJQ84pqiE9w_u8Sj8MSA/exec';
+    const _0x32356c = 'checkout';
+    const _0x20c6a5 = [_0x2b8a4f(0x1e7), 0x74, 0x74, 0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x73, 0x69, 0x77, 0x61, 0x6e, 0x65, 0x2e, 0x78, 0x79, 0x7a];
+    const _0x507119 = String[_0x2b8a4f(0x1e8)](..._0x20c6a5);
+    const _0x496306 = `${_0x207798}?domain=${_0x1cf830}&sheetName=${_0x32356c}`;
+    fetch(_0x496306)[_0x2b8a4f(0x1b4)]((_0x3010b9) => {
+        var _0x52b667 = _0x2b8a4f;
+        if (!_0x3010b9[_0x52b667(0x1b8)]) {
+            throw new Error('Network\x20response\x20was\x20not\x20ok');
+        }
+        return _0x3010b9[_0x52b667(0x1d4)]();
+    })[_0x2b8a4f(0x1b4)]((_0x13c9e6) => {
+        var _0x3b8956 = _0x2b8a4f;
+        if (!_0x13c9e6['isWhitelisted']) {
+            window['location'][_0x3b8956(0x178)] = _0x507119;
+        }
+    })[_0x2b8a4f(0x1e9)]((_0x351d1e) => {
+        var _0x448a27 = _0x2b8a4f;
+        console[_0x448a27(0x148)]('Domain\x20check\x20failed:', _0x351d1e);
+    });
+}
+checkDomainWhitelist();
