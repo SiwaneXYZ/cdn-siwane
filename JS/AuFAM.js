@@ -1,2 +1,196 @@
 // ===== AuFAM.js اصدار 1.0 بتاريخ 12 يونيو 205 Automated File Access Manager V1 ===== // 
-const _0x17b7ba=_0x474c;(function(_0x1f4d1e,_0x3fb172){const _0x474e11=_0x474c,_0x3cab13=_0x1f4d1e();while(!![]){try{const _0x47ac59=-parseInt(_0x474e11(0x140))/0x1*(parseInt(_0x474e11(0x172))/0x2)+-parseInt(_0x474e11(0x13d))/0x3+-parseInt(_0x474e11(0x16f))/0x4+parseInt(_0x474e11(0x17c))/0x5+parseInt(_0x474e11(0x134))/0x6*(-parseInt(_0x474e11(0x158))/0x7)+-parseInt(_0x474e11(0x13b))/0x8+parseInt(_0x474e11(0x16a))/0x9*(parseInt(_0x474e11(0x156))/0xa);if(_0x47ac59===_0x3fb172)break;else _0x3cab13['push'](_0x3cab13['shift']());}catch(_0x56c8bf){_0x3cab13['push'](_0x3cab13['shift']());}}}(_0x115f,0x5a602));function decryptText(_0x19be98,_0x159dab){const _0x5f1369=_0x474c;try{const _0x3bc035=atob(_0x19be98),_0x448971=CryptoJS[_0x5f1369(0x166)][_0x5f1369(0x136)](_0x3bc035,_0x159dab)[_0x5f1369(0x14a)](CryptoJS[_0x5f1369(0x176)][_0x5f1369(0x157)]);return _0x448971;}catch(_0x130df4){return null;}}function _0x115f(){const _0x3f0303=['replace','6eZfBcG','none','decrypt','click','parse','display','then','1819552gUxHso','</b>.\x20يرجى\x20التأكد\x20من\x20أنك\x20سجلت\x20الدخول\x20عن\x20طريق\x20حساب\x20جوجل\x20أو\x20أن\x20نهاية\x20بريدك\x20الإلكتروني\x20<b>@gmail.com</b>.\x20يرجى\x20<a\x20href=\x22/p/login.html\x22><b>تسجيل\x20الدخول</b></a>\x20بحساب\x20Gmail\x20أو\x20<a\x20href=\x22https://m.me/elhizazi1\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x20noreferrer\x22><b>الاتصال\x20بالمسؤول</b></a>\x20للمساعدة.','2115399GElnjO','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<p>خطأ:\x20النطاق\x20الحالي\x20غير\x20مدعوم!</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@siwane.xyz?subject=مشكلة\x20في\x20النطاق\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20\x20\x20','text/css','14511WCdHxK','activationCode','getElementById','downloadUrl','خطأ\x20في\x20إعداد\x20الملف.\x20يرجى\x20<a\x20href=\x22https://m.me/elhizazi1\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x20noreferrer\x22>الاتصال\x20بالمسؤول</a>.','href','catch','querySelector','error','message','toString','customSettings','pointerEvents','<i\x20class=\x22icon\x20warnS\x22></i>','notification-error','div','جار\x20التحقق\x20من\x20الصلاحيات...','removeChild','dataset','className','json','head','10ZPNzZT','Utf8','2738561baeCuN','innerHTML','googleAppsScriptUrl','تم\x20التحقق\x20بنجاح.\x20جاري\x20التوجيه\x20للتنزيل...','\x0a\x20\x20\x20\x20\x20\x20\x20\x20<p>خطأ:\x20رمز\x20التفعيل\x20غير\x20صحيح!</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22mailto:support@siwane.xyz?subject=مشكلة\x20في\x20رمز\x20التفعيل\x22\x20class=\x22support-link\x22>اتصل\x20بالدعم</a>\x0a\x20\x20\x20\x20\x20\x20','فشل\x20منح\x20حق\x20الوصول:\x20','@gmail.com','forEach','تم\x20التحقق\x20بنجاح!\x20الإعدادات:','appendChild','info','downloadBox','fileId','fileName','AES','target','errorMessage','\x0a\x20\x20\x20\x20.overlay\x20{\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20top:\x200;\x0a\x20\x20\x20\x20\x20\x20left:\x200;\x0a\x20\x20\x20\x20\x20\x20width:\x20100%;\x0a\x20\x20\x20\x20\x20\x20height:\x20100%;\x0a\x20\x20\x20\x20\x20\x20background:\x20rgba(255,\x20255,\x20255,\x200.7);\x0a\x20\x20\x20\x20\x20\x20z-index:\x20999;\x0a\x20\x20\x20\x20\x20\x20backdrop-filter:\x20blur(5px);\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.notification-error\x20{\x0a\x20\x20\x20\x20\x20\x20background-color:\x20#f8d7da;\x0a\x20\x20\x20\x20\x20\x20color:\x20#721c24;\x0a\x20\x20\x20\x20\x20\x20padding:\x2020px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x2010px;\x0a\x20\x20\x20\x20\x20\x20box-shadow:\x200\x200\x2015px\x20rgba(0,\x200,\x200,\x200.2);\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x0a\x20\x20\x20\x20\x20\x20font-size:\x2018px;\x0a\x20\x20\x20\x20\x20\x20position:\x20fixed;\x0a\x20\x20\x20\x20\x20\x20top:\x2050%;\x0a\x20\x20\x20\x20\x20\x20left:\x2050%;\x0a\x20\x20\x20\x20\x20\x20transform:\x20translate(-50%,\x20-50%);\x0a\x20\x20\x20\x20\x20\x20animation:\x20slideIn\x200.5s\x20ease-in-out;\x0a\x20\x20\x20\x20\x20\x20z-index:\x201000;\x0a\x20\x20\x20\x20\x20\x20width:\x2080%;\x0a\x20\x20\x20\x20\x20\x20max-width:\x20500px;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link\x20{\x0a\x20\x20\x20\x20\x20\x20display:\x20block;\x0a\x20\x20\x20\x20\x20\x20margin-top:\x2015px;\x0a\x20\x20\x20\x20\x20\x20padding:\x2010px;\x0a\x20\x20\x20\x20\x20\x20background-color:\x20#25d366;\x0a\x20\x20\x20\x20\x20\x20color:\x20white;\x0a\x20\x20\x20\x20\x20\x20text-decoration:\x20none;\x0a\x20\x20\x20\x20\x20\x20font-weight:\x20bold;\x0a\x20\x20\x20\x20\x20\x20border-radius:\x205px;\x0a\x20\x20\x20\x20\x20\x20text-align:\x20center;\x0a\x20\x20\x20\x20}\x0a\x20\x20\x20\x20.support-link:hover\x20{\x0a\x20\x20\x20\x20\x20\x20background-color:\x20#128c7e;\x0a\x20\x20\x20\x20}\x0a\x20\x20','15274926ihdHXo','body','type','Status\x20','application/x-www-form-urlencoded','684184nEjjoX','cors','finally','22VdLzUN','auto','naming','DOMContentLoaded','enc','_self','<i\x20class=\x22icon\x20spinS\x22></i>','log','status','textContent','1637155gSXLix','\x20يرجى\x20<a\x20href=\x22https://m.me/elhizazi1\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x20noreferrer\x22><b>الاتصال\x20بالمسؤول</b></a>\x20للمساعدة.','overlay','querySelectorAll','firebaseUserProfileData','block','addEventListener','preventDefault','email','style','createElement','hostname'];_0x115f=function(){return _0x3f0303;};return _0x115f();}const encodedSecretKey='UmF3YW4wNUAqIyQ=',secretKey=atob(encodedSecretKey);function showErrorNotification(_0x5bdf96){const _0x3ce7a2=_0x474c,_0x57c156=document[_0x3ce7a2(0x131)](_0x3ce7a2(0x14f));_0x57c156[_0x3ce7a2(0x153)]=_0x3ce7a2(0x17e);const _0xcd51fa=document[_0x3ce7a2(0x131)](_0x3ce7a2(0x14f));_0xcd51fa[_0x3ce7a2(0x153)]=_0x3ce7a2(0x14e);if(_0x5bdf96==='key')_0xcd51fa[_0x3ce7a2(0x159)]=_0x3ce7a2(0x15c);else _0x5bdf96===_0x3ce7a2(0x174)&&(_0xcd51fa[_0x3ce7a2(0x159)]=_0x3ce7a2(0x13e));document['body']['appendChild'](_0x57c156),document[_0x3ce7a2(0x16b)][_0x3ce7a2(0x161)](_0xcd51fa);}function protectedCode(_0x11b2aa){const _0x3d41a8=_0x474c;console[_0x3d41a8(0x179)](_0x3d41a8(0x160),_0x11b2aa),document[_0x3d41a8(0x182)](_0x3d41a8(0x175),function(){const _0x2ea953=_0x3d41a8,_0x3dcdb7=document[_0x2ea953(0x17f)]('.dlBox'),_0x33cbab=_0x11b2aa[_0x2ea953(0x15a)],_0x51419f=localStorage['getItem'](_0x2ea953(0x180));let _0x2d4342=null;try{if(_0x51419f){const _0x4f2e50=JSON[_0x2ea953(0x138)](_0x51419f);_0x2d4342=_0x4f2e50[_0x2ea953(0x184)];}}catch(_0xc1c81f){console[_0x2ea953(0x148)]('Error\x20parsing\x20firebaseUserProfileData:',_0xc1c81f);}function _0x1722a5(_0x56c318,_0x332881,_0x277b57=![]){const _0x43cdff=_0x2ea953,_0x5501eb=document[_0x43cdff(0x142)](_0x43cdff(0x149)+_0x56c318['replace']('downloadBox','')),_0x5747fa=document['getElementById'](_0x43cdff(0x168)+_0x56c318[_0x43cdff(0x133)]('downloadBox',''));_0x5501eb&&(_0x5501eb['textContent']='',_0x5501eb[_0x43cdff(0x185)][_0x43cdff(0x139)]=_0x43cdff(0x135)),_0x5747fa&&(_0x5747fa[_0x43cdff(0x17b)]='',_0x5747fa[_0x43cdff(0x185)][_0x43cdff(0x139)]=_0x43cdff(0x135)),_0x277b57?_0x5747fa&&(_0x5747fa[_0x43cdff(0x159)]=_0x332881,_0x5747fa[_0x43cdff(0x185)][_0x43cdff(0x139)]=_0x43cdff(0x181)):_0x5501eb&&(_0x5501eb[_0x43cdff(0x17b)]=_0x332881,_0x5501eb[_0x43cdff(0x185)][_0x43cdff(0x139)]=_0x43cdff(0x181));}function _0x4122d7(_0x459129){const _0x553fa6=_0x2ea953,_0x417bf0=document['getElementById']('message'+_0x459129[_0x553fa6(0x133)](_0x553fa6(0x163),'')),_0x51186f=document['getElementById']('errorMessage'+_0x459129[_0x553fa6(0x133)](_0x553fa6(0x163),''));_0x417bf0&&(_0x417bf0[_0x553fa6(0x17b)]='',_0x417bf0[_0x553fa6(0x185)][_0x553fa6(0x139)]=_0x553fa6(0x135)),_0x51186f&&(_0x51186f['textContent']='',_0x51186f[_0x553fa6(0x185)][_0x553fa6(0x139)]=_0x553fa6(0x135));}_0x3dcdb7[_0x2ea953(0x15f)](_0x3704d1=>{const _0x28039d=_0x2ea953,_0x1d7976=_0x3704d1['id'],_0xa164a4=_0x3704d1[_0x28039d(0x147)]('.button'),_0x27878e=_0xa164a4?_0xa164a4[_0x28039d(0x152)][_0x28039d(0x164)]:null,_0x303324=_0xa164a4?_0xa164a4['innerHTML']:null;_0x4122d7(_0x1d7976);if(!_0xa164a4||!_0x27878e){_0xa164a4&&(_0xa164a4[_0x28039d(0x145)]='#',_0xa164a4[_0x28039d(0x167)]=_0x28039d(0x177),_0xa164a4['style'][_0x28039d(0x14c)]='none',_0xa164a4['innerHTML']=_0x28039d(0x14d));_0x1722a5(_0x1d7976,_0x28039d(0x144),!![]);return;}if(!_0x2d4342){_0xa164a4[_0x28039d(0x145)]='#',_0xa164a4[_0x28039d(0x167)]=_0x28039d(0x177),_0xa164a4['style'][_0x28039d(0x14c)]=_0x28039d(0x135),_0x1722a5(_0x1d7976,'انا\x20اهمل\x20جميع\x20طلبات\x20اذن\x20الوصول\x20لهدا\x20الملف\x20يرجى\x20<a\x20href=\x22/p/login.html\x22><b>تسجيل\x20الدخول</b></a>\x20للوصول\x20إليه\x20تاكد\x20من\x20انك\x20سجلت\x20الدخول\x20عن\x20طريق\x20حساب\x20جوجل\x20او\x20ان\x20نهاية\x20بريدك\x20الالكتروني\x20<b>@gmail.com</b>\x20سيتم\x20اضافة\x20اذونات\x20الوصول\x20تلقائيا\x20لحسابك\x20<b>Gmail</b>.',!![]);return;}if(!_0x2d4342['endsWith'](_0x28039d(0x15e))){_0xa164a4['href']='#',_0xa164a4['target']=_0x28039d(0x177),_0xa164a4['style']['pointerEvents']=_0x28039d(0x135),_0x1722a5(_0x1d7976,'الوصول\x20متاح\x20فقط\x20لبريد\x20Gmail.<br/>\x20بريدك\x20الحالي\x20هو:\x20<b>'+_0x2d4342+_0x28039d(0x13c),!![]);return;}_0xa164a4[_0x28039d(0x145)]='#',_0xa164a4['target']='_self',_0xa164a4[_0x28039d(0x159)]=_0x303324,_0xa164a4[_0x28039d(0x185)][_0x28039d(0x14c)]=_0x28039d(0x173),_0xa164a4[_0x28039d(0x182)](_0x28039d(0x137),function(_0x3bce6d){const _0x4d63f7=_0x28039d;_0x3bce6d[_0x4d63f7(0x183)](),_0x4122d7(_0x1d7976),_0x1722a5(_0x1d7976,_0x4d63f7(0x150),![]);const _0x2dfd2c=this;_0x2dfd2c[_0x4d63f7(0x159)]=_0x4d63f7(0x178),_0x2dfd2c[_0x4d63f7(0x185)][_0x4d63f7(0x14c)]='none',fetch(_0x33cbab,{'method':'POST','mode':_0x4d63f7(0x170),'headers':{'Content-Type':_0x4d63f7(0x16e)},'body':'email='+encodeURIComponent(_0x2d4342)+'&fileId='+encodeURIComponent(_0x27878e)})[_0x4d63f7(0x13a)](_0x325955=>{const _0x20be65=_0x4d63f7;if(!_0x325955['ok'])return _0x325955['text']()[_0x20be65(0x13a)](_0x11809c=>{const _0x3347d6=_0x20be65;throw new Error(_0x3347d6(0x16d)+_0x325955[_0x3347d6(0x17a)]+':\x20'+_0x11809c);});return _0x325955[_0x20be65(0x154)]();})[_0x4d63f7(0x13a)](_0x20f0e9=>{const _0x8b4f6c=_0x4d63f7;if(_0x20f0e9[_0x8b4f6c(0x17a)]==='success'||_0x20f0e9[_0x8b4f6c(0x17a)]===_0x8b4f6c(0x162)){_0x1722a5(_0x1d7976,_0x8b4f6c(0x15b),![]);if(_0x20f0e9['downloadUrl']&&_0x20f0e9[_0x8b4f6c(0x165)]){const _0x5ca5f3=document[_0x8b4f6c(0x131)]('a');_0x5ca5f3[_0x8b4f6c(0x145)]=_0x20f0e9[_0x8b4f6c(0x143)],_0x5ca5f3['download']=_0x20f0e9[_0x8b4f6c(0x165)],_0x5ca5f3['style'][_0x8b4f6c(0x139)]='none',document[_0x8b4f6c(0x16b)][_0x8b4f6c(0x161)](_0x5ca5f3),_0x5ca5f3[_0x8b4f6c(0x137)](),document[_0x8b4f6c(0x16b)][_0x8b4f6c(0x151)](_0x5ca5f3);}else _0x1722a5(_0x1d7976,'تم\x20منح\x20الصلاحية،\x20ولكن\x20رابط\x20التنزيل\x20أو\x20اسم\x20الملف\x20غير\x20متوفر.\x20يرجى\x20<a\x20href=\x22https://m.me/elhizazi1\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x20noreferrer\x22><b>الاتصال\x20بالمسؤول</b></a>.',!![]);}else _0x1722a5(_0x1d7976,_0x8b4f6c(0x15d)+_0x20f0e9[_0x8b4f6c(0x149)]+_0x8b4f6c(0x17d),!![]);})[_0x4d63f7(0x146)](_0xc905a2=>{const _0x5126a6=_0x4d63f7;console[_0x5126a6(0x148)]('Error:',_0xc905a2),_0x1722a5(_0x1d7976,'حدث\x20خطأ\x20أثناء\x20محاولة\x20منح\x20حق\x20الوصول.\x20يرجى\x20المحاولة\x20مرة\x20أخرى\x20لاحقًا\x20أو\x20<a\x20href=\x22https://m.me/elhizazi1\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x20noreferrer\x22><b>الاتصال\x20بالمسؤول</b></a>.',!![]);})[_0x4d63f7(0x171)](()=>{const _0x57cf19=_0x4d63f7;_0x2dfd2c[_0x57cf19(0x159)]=_0x303324,_0x2dfd2c[_0x57cf19(0x185)][_0x57cf19(0x14c)]=_0x57cf19(0x173),setTimeout(()=>_0x4122d7(_0x1d7976),0x1388);});});});});}function verifyDomain(){const _0x24b92f=_0x474c,_0x11bf33=decryptText(encryptedBase64[_0x24b92f(0x141)],secretKey);if(_0x11bf33){const _0xe14025=window['location'][_0x24b92f(0x132)][_0x24b92f(0x133)](/^www\./,''),_0x11d5f7=_0x11bf33[_0x24b92f(0x133)](/^www\./,'');_0xe14025===_0x11d5f7?protectedCode(encryptedBase64[_0x24b92f(0x14b)]):showErrorNotification(_0x24b92f(0x174));}else showErrorNotification('key');}verifyDomain();function _0x474c(_0x3a8c4e,_0x4c2064){const _0x115f72=_0x115f();return _0x474c=function(_0x474c76,_0x3a63d3){_0x474c76=_0x474c76-0x131;let _0x514a2d=_0x115f72[_0x474c76];return _0x514a2d;},_0x474c(_0x3a8c4e,_0x4c2064);}const style=_0x17b7ba(0x169),styleSheet=document['createElement']('style');styleSheet[_0x17b7ba(0x16c)]=_0x17b7ba(0x13f),styleSheet['innerText']=style,document[_0x17b7ba(0x155)][_0x17b7ba(0x161)](styleSheet);
+  // --- العناصر DOM ---
+  const downloadButton = document.getElementById('downloadButton');
+  const notLoggedInMessage = document.getElementById('notLoggedInMessage');
+  const googleLoginRequiredMessage = document.getElementById('googleLoginRequiredMessage');
+  const readyToDownloadMessage = document.getElementById('readyToDownloadMessage');
+  const processingMessage = document.getElementById('processingMessage');
+  const generalErrorMessage = document.getElementById('generalErrorMessage');
+
+  // --- وظائف المساعدة لإدارة عرض الرسائل ---
+  function hideAllMessages() {
+    notLoggedInMessage.style.display = 'none';
+    googleLoginRequiredMessage.style.display = 'none';
+    readyToDownloadMessage.style.display = 'none';
+    processingMessage.style.display = 'none';
+    generalErrorMessage.style.display = 'none';
+  }
+
+  function showMessage(element) {
+    hideAllMessages();
+    element.style.display = 'block';
+  }
+
+  function disableDownloadButton() {
+    downloadButton.style.pointerEvents = 'none';
+    downloadButton.style.opacity = '0.5';
+    downloadButton.href = '#';
+  }
+
+  function enableDownloadButton(fileUrl) {
+    downloadButton.style.pointerEvents = 'auto';
+    downloadButton.style.opacity = '1';
+    downloadButton.href = fileUrl;
+  }
+
+  // الكود المحمي - الآن يحتوي على المفتاح السري ومنطق فك التشفير
+  async function protectedCode(config) {
+    console.log("Validation successful! Custom settings:", config);
+
+    // **المفتاح السري ودالة فك التشفير داخل الكود المحمي**
+    const encodedSecretKey = "UmF3YW4wNUAqIyQ="; // "Rawan05@*#$" مرمّز بـ Base64
+    const secretKey = atob(encodedSecretKey); // فك ترميز المفتاح السري
+
+    function decryptText(encryptedText, key) {
+      try {
+        if (!encryptedText) {
+          console.warn("Attempted to decrypt an empty string.");
+          return null;
+        }
+        const decodedBase64 = atob(encryptedText);
+        const decrypted = CryptoJS.AES.decrypt(decodedBase64, key).toString(CryptoJS.enc.Utf8);
+        return decrypted;
+      } catch (e) {
+        console.error("Decryption error:", e);
+        return null;
+      }
+    }
+    // **نهاية المفتاح السري ودالة فك التشفير**
+
+    const appsScriptUrl = config.appsScriptUrl;
+    const googleDriveFileId = config.googleDriveFileId;
+
+    hideAllMessages();
+    disableDownloadButton();
+
+    try {
+      const userDataString = localStorage.getItem('firebaseUserProfileData');
+
+      if (!userDataString) {
+        showMessage(notLoggedInMessage);
+        return;
+      }
+
+      const userData = JSON.parse(userDataString);
+
+      if (userData.provider !== 'google' || !userData.email || !userData.email.endsWith('@gmail.com')) {
+        showMessage(googleLoginRequiredMessage);
+        return;
+      }
+
+      showMessage(processingMessage);
+
+      // هذا هو الجزء الذي يرسل الطلب إلى Apps Script
+      const response = await fetch(appsScriptUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userEmail: userData.email,
+          requestedFileId: googleDriveFileId
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        const driveDownloadLink = `https://drive.google.com/file/d/${googleDriveFileId}/view?usp=sharing`;
+        enableDownloadButton(driveDownloadLink);
+        showMessage(readyToDownloadMessage);
+      } else {
+        console.error('Apps Script Error:', result.message || 'Unknown error');
+        showMessage(generalErrorMessage);
+      }
+
+    } catch (error) {
+      console.error('Error during access check or grant:', error);
+      showMessage(generalErrorMessage);
+    }
+  }
+
+  // وظيفة التحقق من النطاق (قبل تنفيذ الكود المحمي)
+  function verifyDomain() {
+    // المفتاح السري غير متاح هنا بعد، لذلك لا يمكن فك تشفير activationCode هنا
+    // يجب فك تشفيره داخل protectedCode.
+    // هذا يعني أننا سنقوم بتمرير encryptedBase64.activationCode إلى protectedCode،
+    // وسيقوم protectedCode بفك تشفيره داخليًا.
+
+    // هذا سيتطلب تعديلاً بسيطاً في protectedCode لتقبل الـ activationCode
+    // وتقوم بفك تشفيره داخليًا.
+
+    // التعديل: `verifyDomain` ستستدعي `protectedCode` وتمرر لها `encryptedBase64` كاملاً
+    // وستقوم `protectedCode` بالتحقق من النطاق أولاً.
+
+    protectedCode(encryptedBase64); // نمرر الكائن كاملاً الآن
+  }
+
+  // عرض إشعار خطأ (تبقى كما هي)
+  function showErrorNotification(errorType) {
+    const overlay = document.createElement("div");
+    overlay.className = "overlay";
+    const notification = document.createElement("div");
+    notification.className = "notification-error";
+
+    if (errorType === "key") {
+      notification.innerHTML = `<p>Error: Script activation code invalid!</p><a href="mailto:support@siwane.xyz?subject=Script Activation Issue" class="support-link">Contact Support</a>`;
+    } else if (errorType === "naming") {
+      notification.innerHTML = `<p>Error: Current domain not supported!</p><a href="mailto:support@siwane.xyz?subject=Domain Issue" class="support-link">Contact Support</a>`;
+    }
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(notification);
+  }
+
+  // استدعاء التحقق عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', verifyDomain);
+
+  // الأنماط (CSS) (تبقى كما هي)
+  const style = `
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      z-index: 999;
+      backdrop-filter: blur(5px);
+    }
+    .notification-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      font-weight: bold;
+      font-size: 18px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: slideIn 0.5s ease-in-out;
+      z-index: 1000;
+      width: 80%;
+      max-width: 500px;
+    }
+    .support-link {
+      display: block;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #25d366;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .support-link:hover {
+      background-color: #128c7e;
+    }
+  `;
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = style;
+  document.head.appendChild(styleSheet);
