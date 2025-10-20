@@ -3,31 +3,30 @@ import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/fi
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginCheckbox = document.getElementById('forlogPop');
-    const userIconLabel = document.querySelector('.logReg');
+    const userIconLabel = document.querySelector('.logReg'); // هذا هو الـ <label for="forlogPop">
     const popupWrapper = document.querySelector('.logPop-wrp');
-    const belumLogDiv = document.querySelector('.NotLog'); // Not Logged In section
-    const sudahLogDiv = document.querySelector('.DonLog'); // Logged In section
+    const belumLogDiv = document.querySelector('.NotLog'); 
+    const sudahLogDiv = document.querySelector('.DonLog'); 
 
-    // Select elements within the logged-in section using aria-label
+    // تحديد عناصر القائمة (منتجاتي، نقاطي، ادمن، الخروج)
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
-    // Select the "نقاطي" element (assuming 'منتجاتي' is referenced by 'نقاطي' in your JS)
+    const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
 
 
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
 
-    // Store the original HTML of the user icon label to revert if no profile image
+    // المحتوى الأصلي لـ userIconLabel (وهو أيقونة SVG الافتراضية)
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
 
-    // Read Firebase config from script tag
+    // منطق جلب وتهيئة Firebase (بقي كما هو)
     const firebaseConfigScript = document.getElementById('json:firebaseconfig');
     let firebaseConfig = {};
-
     if (firebaseConfigScript) {
-        const configText = firebaseConfigScript.textContent;
+        // ... (منطق جلب config)
         try {
-            const configData = JSON.parse(configText);
+            const configData = JSON.parse(firebaseConfigScript.textContent);
             if (configData && typeof configData === 'object') {
                  firebaseConfig = {
                      apiKey: configData.apiKey,
@@ -38,151 +37,97 @@ document.addEventListener('DOMContentLoaded', () => {
                      messagingSenderId: configData.messagingSenderId,
                      appId: configData.appId,
                  };
-
-                 // Basic validation
                  if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
                       firebaseConfig = {};
-                      console.error("Firebase config is missing apiKey or appId/projectId.");
                  }
             }
         } catch (e) {
-            console.error("Failed to parse Firebase config from script tag:", e);
+            console.error("Failed to parse Firebase config:", e);
         }
     }
 
     let app;
     let auth = null;
 
-    // Initialize Firebase App
     const apps = getApps();
     if (apps.length === 0) {
         if (Object.keys(firebaseConfig).length > 0) {
            try {
                app = initializeApp(firebaseConfig);
-               console.log("Firebase App initialized.");
            } catch (error) {
                console.error("Firebase initialization failed:", error);
            }
-        } else {
-            console.warn("Firebase config is missing or invalid. Authentication features may not work.");
         }
     } else {
        app = getApp();
-       console.log("Firebase App already initialized.");
     }
-
-    // Get Firebase Auth service and set up Auth State Listener
+    
+    // Auth State Listener
     if (app) {
        try {
            auth = getAuth(app);
-           console.log("Firebase Auth service obtained.");
-
-           // *** Use onAuthStateChanged as the source of truth ***
            onAuthStateChanged(auth, (user) => {
+               let combinedUserData = {};
+               let profilePhotoURL = null;
+
                if (user) {
-                   // User is signed in
-                   console.log("User is logged in:", user.uid);
-
-                   // Get basic user data from Firebase Auth user object
-                   const firebaseUserData = {
-                       uid: user.uid,
-                       displayName: user.displayName,
-                       photoURL: user.photoURL,
-                       email: user.email,
+                   const firebaseUserData = { uid: user.uid, displayName: user.displayName, photoURL: user.photoURL, email: user.email };
+                   let cachedUserData = JSON.parse(localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY) || '{}');
+                   
+                   combinedUserData = {
+                       ...cachedUserData, 
+                       ...firebaseUserData, 
+                       isAdmin: cachedUserData.isAdmin || false,
+                       accountType: cachedUserData.accountType || 'normal',
+                       premiumExpiry: cachedUserData.premiumExpiry || null
                    };
 
-                   let cachedUserData = null;
-                    const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
-                    if (dataString) {
-                        try { cachedUserData = JSON.parse(dataString); } catch(e) { console.error("Failed to parse cached user data:", e); cachedUserData = null; }
-                    }
-
-                   // Combine Firebase Auth data with cached data (prioritizing Firebase data)
-                   const combinedUserData = {
-                       ...cachedUserData, // Start with cached data
-                       ...firebaseUserData, // Overwrite with fresh Firebase Auth data
-                       
-                       // جلب البيانات الهامة من الكاش (التي لا يوفرها Auth)
-                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false,
-                       accountType: cachedUserData ? cachedUserData.accountType : 'normal',
-                       premiumExpiry: cachedUserData ? cachedUserData.premiumExpiry : null
-                   };
-
-                   // Optionally update the cache with the latest auth data
                    localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(combinedUserData));
-
-
-                   // Update UI based on the authenticated user data
-                   updateUI(true, combinedUserData, combinedUserData.photoURL || user.photoURL);
-
+                   profilePhotoURL = combinedUserData.photoURL || user.photoURL;
+                   
+                   updateUI(true, combinedUserData, profilePhotoURL);
                } else {
-                   // User is signed out
-                   console.log("User is logged out.");
-                   // Clear local cache on sign out
                    localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-                   // Update UI to logged out state
                    updateUI(false, null, null);
                }
-               // Close the popup regardless of state change after load/auth check
+
                if (loginCheckbox) {
                    loginCheckbox.checked = false;
                }
            });
-
        } catch (error) {
            console.error("Failed to get Firebase Auth service:", error);
-           // If Auth service fails, ensure UI shows logged out state as a fallback
            updateUI(false, null, null);
-           if (loginCheckbox) {
-                loginCheckbox.checked = false;
-           }
+           if (loginCheckbox) loginCheckbox.checked = false;
        }
     } else {
-        console.warn("Firebase App is not initialized. Auth state listener will not be set.");
-        // If App failed, ensure UI shows logged out state
         updateUI(false, null, null);
-        if (loginCheckbox) {
-            loginCheckbox.checked = false;
-        }
+        if (loginCheckbox) loginCheckbox.checked = false;
     }
 
     // ==========================================================
     //  دالة تحديد نمط الحساب (اللون والكلاس)
     // ==========================================================
-    /**
-     * يحدد كلاس CSS واللون بناءً على بيانات المستخدم المخزنة.
-     * @param {object} userData - كائن بيانات المستخدم من localStorage.
-     * @returns {{className: string, color: string}}
-     */
     function getAccountStyle(userData) {
-        // القيم الافتراضية
         const defaultStyle = { className: 'border-normal', color: 'var(--acct-normal-col, #6c757d)' };
-
         if (!userData) return defaultStyle;
 
         const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
-        
-        // تحويل premiumExpiry (الذي قد يكون {seconds:..., nanoseconds:...}) إلى تاريخ للمقارنة
         let isPremiumActive = false;
         if (userData.premiumExpiry && userData.premiumExpiry.seconds) {
              isPremiumActive = userData.premiumExpiry.seconds * 1000 > Date.now();
         }
 
-        // 1. الأدمن (أو المالك)
         if (userData.isAdmin === true) {
-            // استخدام كلاس owner إذا كان مدعومًا، وإلا admin
             return { className: 'border-admin', color: 'var(--acct-admin-col, blue)' };
         }
-        // 2. العضوية الدائمة (VIPP)
         if (accountTypeLower === 'vipp') {
             return { className: 'border-vipp', color: 'var(--acct-vip-col, purple)' };
         }
-        // 3. العضوية المميزة (Premium) النشطة
         if (accountTypeLower === 'premium' || isPremiumActive) {
             return { className: 'border-premium', color: 'var(--acct-premium-col, gold)' };
         }
         
-        // 4. الحساب العادي
         return defaultStyle;
     }
 
@@ -193,191 +138,165 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         if (belumLogDiv && sudahLogDiv) {
             if (isLoggedIn) {
-                // --- [1] إظهار وإخفاء القوائم ---
+                // إظهار وإخفاء القوائم
                 belumLogDiv.classList.add('hidden');
                 sudahLogDiv.classList.remove('hidden');
 
-                // Handle Admin element visibility
+                const isAdmin = userData && userData.isAdmin === true;
+
+                // إظهار وإخفاء عنصر الادمن
                 if (adminElement) {
-                    if (userData && userData.isAdmin === true) {
-                        adminElement.classList.remove('hidden');
-                    } else {
-                        adminElement.classList.add('hidden');
-                    }
+                    adminElement.classList.toggle('hidden', !isAdmin);
                 }
 
-                // **[تنفيذ طلب المستخدم]** إخفاء "نقاطي" للمشرف/المالك
-                if (pointsElement) {
-                     if (userData && userData.isAdmin === true) {
-                         pointsElement.classList.add('hidden'); 
-                     } else {
-                         pointsElement.classList.remove('hidden'); 
-                     }
+                // **[تنفيذ طلب المستخدم]** إخفاء "منتجاتي" و "نقاطي" للمشرف/المالك
+                if (productsElement) {
+                     productsElement.classList.toggle('hidden', isAdmin);
+                }
+                 if (pointsElement) {
+                     pointsElement.classList.toggle('hidden', isAdmin);
                 }
 
-                // --- [2] تطبيق البوردر والموجات وعرض الصورة ---
+
+                // تطبيق البوردر والموجات وعرض الصورة
                 if (userIconLabel) {
                     const style = getAccountStyle(userData);
-                    const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal', 'border-owner'];
+                    const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal'];
 
-                    // 1. إزالة كلاسات البوردر القديمة من الحاوية
-                    userIconLabel.classList.remove(...borderClasses);
-                    
-                    // 2. إنشاء أو تحديث عنصر الموجات (Ripple)
+                    // 1. تنظيف الـ DOM وإضافة الموجة
+                    userIconLabel.innerHTML = ''; // إفراغ المحتوى القديم
                     let ripple = userIconLabel.querySelector('.ripple-effect');
                     if (!ripple) {
                         ripple = document.createElement('span');
                         ripple.className = 'ripple-effect';
-                        userIconLabel.appendChild(ripple);
                     }
                     ripple.style.borderColor = style.color;
                     ripple.style.display = 'block';
-
-                    // 3. إفراغ محتوى الحاوية (logReg) وإعادة بنائه بالترتيب
-                    userIconLabel.innerHTML = '';
                     userIconLabel.appendChild(ripple);
-
+                    
+                    // 2. إزالة كلاسات البوردر القديمة من الحاوية
+                    userIconLabel.classList.remove(...borderClasses);
+                    
                     if (profileImageUrl) {
                         // (أ) في حال وجود صورة بروفايل:
                         const profileImg = document.createElement('img');
                         profileImg.src = profileImageUrl;
                         profileImg.alt = 'Profile Image';
                         profileImg.classList.add('profileUser', 'current-profile-image'); 
-                        profileImg.classList.add(style.className); // **[تطبيق البوردر على الصورة]**
                         
+                        // تطبيق كلاس البوردر على الصورة لتلوين البوردر الداخلي
+                        profileImg.classList.add(style.className); 
                         userIconLabel.appendChild(profileImg);
                         
                     } else {
                         // (ب) في حال عدم وجود صورة (الأيقونة الافتراضية):
                         
-                        // إعادة المحتوى الأصلي (الأيقونة الافتراضية)
+                        // إضافة المحتوى الأصلي (SVG)
                         userIconLabel.insertAdjacentHTML('beforeend', originalIconHtml);
                         
-                        userIconLabel.classList.add(style.className); // **[تطبيق البوردر على الحاوية]**
+                        // تطبيق كلاس البوردر على الحاوية لتلوين البوردر الخارجي
+                        userIconLabel.classList.add(style.className); 
                     }
                 }
 
             } else { // Not logged in
-                // --- [3] حالة تسجيل الخروج ---
+                // حالة تسجيل الخروج
                 
-                // إظهار وإخفاء القوائم
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
-                 if (adminElement) adminElement.classList.add('hidden');
-                 if (pointsElement) pointsElement.classList.add('hidden');
+                if (adminElement) adminElement.classList.add('hidden');
+                if (productsElement) productsElement.classList.add('hidden');
+                if (pointsElement) pointsElement.classList.add('hidden');
 
                  // تنظيف الواجهة عند تسجيل الخروج
                  if (userIconLabel) {
-                      const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal', 'border-owner'];
+                      const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal'];
                       
-                      // 1. إزالة عنصر الموجات
                       const ripple = userIconLabel.querySelector('.ripple-effect');
                       if (ripple) ripple.remove();
                       
-                      // 2. إزالة كلاسات البوردر
                       userIconLabel.classList.remove(...borderClasses);
-
-                      // 3. إرجاع الأيقونة الأصلية
                       userIconLabel.innerHTML = originalIconHtml;
                  }
             }
         }
     }
 
-    // Handle Logout
-    // (باقي منطق الخروج كما هو)
+    // منطق تسجيل الخروج (بقي كما هو)
     function logOut() {
         const performLogoutActions = () => {
-            console.log("Performing post-logout cleanup and navigation.");
-            if (loginCheckbox) {
-                loginCheckbox.checked = false;
-            }
+            if (loginCheckbox) loginCheckbox.checked = false;
             window.location.href = "/p/login.html";
         };
 
         if (!auth) {
-            console.warn("Firebase Auth not available. Clearing local state and navigating.");
             localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-            updateUI(false, null, null); // Update UI manually
-            performLogoutActions(); // Navigate
+            updateUI(false, null, null); 
+            performLogoutActions(); 
             return;
         }
 
-        console.log("Attempting Firebase signOut...");
         signOut(auth)
             .then(() => {
-                console.log("Firebase signOut successful.");
-                performLogoutActions(); // onAuthStateChanged سيهتم بالباقي
+                performLogoutActions(); 
             })
             .catch((error) => {
                  console.error("Logout failed:", error);
-                 performLogoutActions(); // تنظيف احتياطي
+                 performLogoutActions(); 
             });
     }
 
     // --- Event Listeners ---
 
-    // Logout button listener
+    // **[تصحيح النقر]** السماح لسلوك الـ <label> بالعمل بشكل طبيعي
+    // إزالة مُستمع النقر من userIconLabel لأن العنصر هو <label for="forlogPop"> 
+    // وبذلك يفتح الـ popup تلقائياً.
+
+    // Logout listener
     if (logoutElement) {
-        if (logoutElement.getAttribute('onclick')) {
-            logoutElement.removeAttribute('onclick');
-        }
+        if (logoutElement.getAttribute('onclick')) logoutElement.removeAttribute('onclick');
         logoutElement.addEventListener('click', logOut);
-        console.log("Logout listener added.");
     }
 
-    // Admin element click listener (navigation only)
+    // Admin listener
     if (adminElement) {
         adminElement.style.cursor = 'pointer'; 
-        if (adminElement.getAttribute('onclick')) {
-             adminElement.removeAttribute('onclick');
-         }
+        if (adminElement.getAttribute('onclick')) adminElement.removeAttribute('onclick');
         adminElement.addEventListener('click', () => {
-            console.log("Admin element clicked. Redirecting...");
             window.location.href = '/p/admin.html';
         });
-        console.log("Admin listener added.");
     }
 
-     // Points element click listener
+    // Points listener
     if (pointsElement) {
          pointsElement.style.cursor = 'pointer'; 
-         if (pointsElement.getAttribute('onclick')) {
-              pointsElement.removeAttribute('onclick');
-          }
+         if (pointsElement.getAttribute('onclick')) pointsElement.removeAttribute('onclick');
          pointsElement.addEventListener('click', (event) => {
              event.preventDefault();
-             console.log("Points element clicked. Redirecting...");
              window.location.href = '/p/points.html'; 
          });
-         console.log("Points listener added.");
      }
 
-
-    // User icon click listener to toggle the popup checkbox
-    if (userIconLabel && loginCheckbox) {
-        userIconLabel.style.cursor = 'pointer'; 
-        userIconLabel.addEventListener('click', (event) => {
-            event.preventDefault();
-            loginCheckbox.checked = !loginCheckbox.checked;
-            console.log("User icon clicked. Popup checkbox state:", loginCheckbox.checked);
-        });
-        console.log("User icon listener added.");
-    }
+    // Products listener
+    if (productsElement) {
+         productsElement.style.cursor = 'pointer'; 
+         if (productsElement.getAttribute('onclick')) productsElement.removeAttribute('onclick');
+         productsElement.addEventListener('click', (event) => {
+             event.preventDefault();
+             window.location.href = '/p/my-products.html'; 
+         });
+     }
 
     // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
-            // قم بتضمين عنصر الموجة ripple-effect في عملية التحقق
+            // التحقق من أن النقر ليس على الأيقونة/الصورة نفسها أو داخل النافذة المنبثقة
             const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
 
             if (isClickOutside) {
                 loginCheckbox.checked = false;
-                console.log("Clicked outside popup. Closing popup.");
             }
         }
     });
-    console.log("Document click listener for popup closing added.");
-
 });
