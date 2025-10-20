@@ -5,23 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginCheckbox = document.getElementById('forlogPop');
     const userIconLabel = document.querySelector('.logReg');
     const popupWrapper = document.querySelector('.logPop-wrp');
-    const belumLogDiv = document.querySelector('.NotLog'); // Not Logged In section
-    const sudahLogDiv = document.querySelector('.DonLog'); // Logged In section
+    const belumLogDiv = document.querySelector('.NotLog'); 
+    const sudahLogDiv = document.querySelector('.DonLog'); 
 
-    // Select elements within the logged-in section using aria-label
+    // تحديد عناصر الروابط
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
-    // Select the "نقاطي" element
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
-    const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
-
+    const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
+    // الصورة الافتراضية المطلوبة
+    const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
 
-    // Store the original HTML of the user icon label to revert if no profile image
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
+    let colorToggleInterval = null; // متغير لتخزين مؤقت التناوب اللوني
 
-    // Read Firebase config from script tag
+    // --- Firebase Initialization (As Original) ---
     const firebaseConfigScript = document.getElementById('json:firebaseconfig');
     let firebaseConfig = {};
 
@@ -39,8 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
                      messagingSenderId: configData.messagingSenderId,
                      appId: configData.appId,
                  };
-
-                 // Basic validation
                  if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
                       firebaseConfig = {};
                       console.error("Firebase config is missing apiKey or appId/projectId.");
@@ -54,13 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let app;
     let auth = null;
 
-    // Initialize Firebase App
     const apps = getApps();
     if (apps.length === 0) {
         if (Object.keys(firebaseConfig).length > 0) {
            try {
                app = initializeApp(firebaseConfig);
-               console.log("Firebase App initialized.");
            } catch (error) {
                console.error("Firebase initialization failed:", error);
            }
@@ -69,66 +65,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
        app = getApp();
-       console.log("Firebase App already initialized.");
     }
+    // --- End Firebase Init ---
 
-    // Get Firebase Auth service and set up Auth State Listener
     if (app) {
        try {
            auth = getAuth(app);
-           console.log("Firebase Auth service obtained.");
 
-           // *** Use onAuthStateChanged as the source of truth ***
            onAuthStateChanged(auth, (user) => {
                if (user) {
-                   // User is signed in
-                   console.log("User is logged in:", user.uid);
-
-                   // Get basic user data from Firebase Auth user object
                    const firebaseUserData = {
                        uid: user.uid,
                        displayName: user.displayName,
                        photoURL: user.photoURL,
                        email: user.email,
-                       // Add any custom claims if available (more secure for roles)
-                       // Example: isAdmin: user.customClaims ? user.customClaims.admin : false
-                       // For this example, we will try to read isAdmin from the local cache
                    };
 
-                   // Try to get additional profile data (like isAdmin) from local cache
-                   // NOTE: Relying on localStorage for isAdmin is INSECURE for access control.
-                   // This is only used here to potentially show/hide UI elements.
-                   // True admin checks must be server-side or via Security Rules.
                    let cachedUserData = null;
                     const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
                     if (dataString) {
-                        try { cachedUserData = JSON.parse(dataString); } catch(e) { console.error("Failed to parse cached user data:", e); cachedUserData = null; }
+                        try { cachedUserData = JSON.parse(dataString); } catch(e) { cachedUserData = null; }
                     }
 
-                   // Combine Firebase Auth data with cached data (prioritizing Firebase data)
+                   // دمج بيانات الأدوار من التخزين المحلي (لأغراض العرض فقط، وليس للتحكم في الوصول)
                    const combinedUserData = {
-                       ...cachedUserData, // Start with cached data
-                       ...firebaseUserData, // Overwrite with fresh Firebase Auth data
-                       // Explicitly merge isAdmin if exists in cache (still insecure for enforcement!)
-                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false // Default to false if no cache
+                       // افتراض أن هذه القيم تأتي من مكان آخر ويتم تخزينها مؤقتاً هنا
+                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false, // مدير
+                       isOwner: cachedUserData ? cachedUserData.isOwner : false, // مالك (أو مشرف)
+                       isVIP: cachedUserData ? cachedUserData.isVIP : false, // VIP
+                       isPremium: cachedUserData ? cachedUserData.isPremium : false, // بريميوم
+                       isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // إعفاء من الإعلانات
+                       ...firebaseUserData, 
                    };
 
-                   // Optionally update the cache with the latest auth data (but keep isAdmin if fetched securely elsewhere)
                    localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(combinedUserData));
 
-
-                   // Update UI based on the authenticated user data
-                   updateUI(true, combinedUserData, combinedUserData.photoURL || user.photoURL);
+                   const finalPhotoURL = combinedUserData.photoURL || user.photoURL;
+                   updateUI(true, combinedUserData, finalPhotoURL);
 
                } else {
-                   // User is signed out
-                   console.log("User is logged out.");
-                   // Clear local cache on sign out
                    localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-                   // Update UI to logged out state
                    updateUI(false, null, null);
                }
-               // Close the popup regardless of state change after load/auth check
                if (loginCheckbox) {
                    loginCheckbox.checked = false;
                }
@@ -136,15 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
        } catch (error) {
            console.error("Failed to get Firebase Auth service:", error);
-           // If Auth service fails, ensure UI shows logged out state as a fallback
            updateUI(false, null, null);
            if (loginCheckbox) {
                 loginCheckbox.checked = false;
            }
        }
     } else {
-        console.warn("Firebase App is not initialized. Auth state listener will not be set.");
-        // If App failed, ensure UI shows logged out state
         updateUI(false, null, null);
         if (loginCheckbox) {
             loginCheckbox.checked = false;
@@ -152,198 +127,229 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Modified updateUI function to accept state and data
+    /**
+     * وظيفة تحديد الدور وتطبيق فئات الألوان والريبل، مع منطق التناوب.
+     * @param {HTMLElement} element - الـ label (.logReg)
+     * @param {Object} userData - بيانات المستخدم المدمجة
+     */
+    function applyRoleClasses(element, userData) {
+        // قائمة بالأدوار حسب الأولوية (الأعلى إلى الأدنى)
+        const roles = [
+            { check: userData.isOwner, className: 'owner' },
+            { check: userData.isAdmin, className: 'admin' },
+            { check: userData.isVIP, className: 'vipp' },
+            { check: userData.isPremium, className: 'premium' },
+        ];
+
+        // قائمة بجميع فئات الأدوار لضمان مسحها
+        const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'normal'].flatMap(r => [`border-${r}`, `ripple-${r}`, `role-${r}`]);
+
+        // 1. مسح جميع فئات الدور الحالية
+        const classesToRemove = element.className.split(' ').filter(c => allRoleClasses.some(roleClass => c.startsWith(roleClass.substring(0, roleClass.indexOf('-') + 1))));
+        element.classList.remove(...classesToRemove);
+
+        const profileImage = element.querySelector('.current-profile-image');
+        if (profileImage) {
+            profileImage.classList.remove(...allRoleClasses.filter(c => c.startsWith('border-')));
+        }
+
+        // 2. تحديد الدور الرئيسي (الأعلى أولوية)
+        let primaryRole = 'normal';
+        for (const role of roles) {
+            if (role.check) {
+                primaryRole = role.className;
+                break; 
+            }
+        }
+        
+        // 3. تطبيق اللون الأساسي على الإطار والأيقونة/الريبل
+        const primaryBorderClass = `border-${primaryRole}`;
+        const primaryRoleClass = `role-${primaryRole}`;
+        const primaryRippleClass = `ripple-${primaryRole}`;
+
+        if (profileImage) {
+            profileImage.classList.add(primaryBorderClass);
+        }
+        element.classList.add(primaryRoleClass, primaryRippleClass); 
+        
+        // 4. منطق التناوب اللوني (Premium + AdFree)
+        const hasAdFree = userData.isAdFree;
+        const hasPremium = userData.isPremium;
+
+        // مسح أي مؤقت سابق للتناوب
+        if (colorToggleInterval) {
+            clearInterval(colorToggleInterval);
+            colorToggleInterval = null;
+        }
+
+        if (hasPremium && hasAdFree) {
+            // التناوب بين Premium (ذهبي) و Owner/Admin (الأخضر/الأحمر الداكن)
+            const toggleRoles = ['premium', 'owner']; // استخدمنا 'owner' كبديل لـ 'AdFree' لون خاص
+            let colorIndex = 0;
+
+            colorToggleInterval = setInterval(() => {
+                const currentRole = toggleRoles[colorIndex % toggleRoles.length];
+                colorIndex++;
+                
+                const currentBorderClass = `border-${currentRole}`;
+                const currentRippleClass = `ripple-${currentRole}`;
+
+                // إزالة فئات التناوب القديمة
+                if (profileImage) {
+                     profileImage.classList.remove(...toggleRoles.map(r => `border-${r}`));
+                }
+                element.classList.remove(...toggleRoles.map(r => `ripple-${r}`));
+                
+                // تطبيق فئات التناوب الجديدة
+                if (profileImage) {
+                     profileImage.classList.add(currentBorderClass);
+                }
+                element.classList.add(currentRippleClass);
+                
+            }, 5000); // 5 ثواني للتناوب
+        }
+    }
+
+
+    // Modified updateUI function
     function updateUI(isLoggedIn, userData, profileImageUrl) {
-        if (belumLogDiv && sudahLogDiv) {
+        
+        // إزالة فئات الدور والريبل عند التحديث أو الخروج
+        if (userIconLabel) {
+             userIconLabel.classList.remove('logged-in');
+             // مسح جميع فئات الدور
+             userIconLabel.className = userIconLabel.className.split(' ').filter(c => !c.startsWith('role-') && !c.startsWith('ripple-')).join(' ');
+        }
+        if (colorToggleInterval) {
+            clearInterval(colorToggleInterval);
+            colorToggleInterval = null;
+        }
+
+
+        if (belumLogDiv && sudahLogDiv && userIconLabel) {
             if (isLoggedIn) {
                 belumLogDiv.classList.add('hidden');
                 sudahLogDiv.classList.remove('hidden');
 
-                // Handle Admin element visibility (UI hint - not secure access control)
+                // تفعيل فئة الدخول لتشغيل الريبل في الـ CSS
+                userIconLabel.classList.add('logged-in');
+
+                // الصورة النهائية (مع الصورة الافتراضية إذا لزم الأمر)
+                const finalImageUrl = profileImageUrl || DEFAULT_PROFILE_IMAGE;
+
+                // تحديث الصورة
+                let profileImg = userIconLabel.querySelector('.current-profile-image');
+                if (!profileImg) {
+                    profileImg = document.createElement('img');
+                    profileImg.classList.add('profileUser', 'current-profile-image');
+                    userIconLabel.innerHTML = '';
+                    userIconLabel.appendChild(profileImg);
+                }
+                profileImg.src = finalImageUrl;
+                
+                // منطق إخفاء/إظهار الروابط للمدراء/المشرفين
+                const isAdminOrOwner = (userData && (userData.isAdmin === true || userData.isOwner === true));
+
+                // 1. إظهار/إخفاء زر الإدمن
                 if (adminElement) {
-                    if (userData && userData.isAdmin === true) {
+                    if (isAdminOrOwner) { 
                         adminElement.classList.remove('hidden');
                     } else {
                         adminElement.classList.add('hidden');
                     }
                 }
-
-                // Handle Points element visibility (Hide if Admin)
+                
+                // 2. إخفاء زر النقاط (Points) و المنتجات (Products) للمدير/المالك
                 if (pointsElement) {
-                     if (userData && userData.isAdmin === true) {
-                         pointsElement.classList.add('hidden'); // Hide points for admin
+                     if (isAdminOrOwner) {
+                         pointsElement.classList.add('hidden');
                      } else {
-                         pointsElement.classList.remove('hidden'); // Show points for non-admin
+                         pointsElement.classList.remove('hidden');
                      }
                 }
-
-
-                // Update user icon with profile image or original icon
-                if (userIconLabel) {
-                    // Remove any existing profile image to prevent duplicates
-                     const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                     if (existingProfileImg) {
-                         existingProfileImg.remove();
+                if (productsElement) {
+                     if (isAdminOrOwner) {
+                         productsElement.classList.add('hidden');
+                     } else {
+                         productsElement.classList.remove('hidden');
                      }
-
-                    if (profileImageUrl) {
-                        const profileImg = document.createElement('img');
-                        profileImg.src = profileImageUrl;
-                        profileImg.alt = 'Profile Image';
-                        profileImg.classList.add('profileUser');
-                        profileImg.classList.add('current-profile-image'); // Add class for easy removal
-                        userIconLabel.appendChild(profileImg);
-                        // Hide original icon HTML if added as text somehow
-                        if (userIconLabel.innerHTML.includes(originalIconHtml)) {
-                             userIconLabel.innerHTML = ''; // Clear if original HTML is still text
-                             userIconLabel.appendChild(profileImg); // Add image again
-                         }
-                    } else {
-                         // If no profile image, ensure original icon is there
-                        if (!userIconLabel.innerHTML.includes(originalIconHtml)) {
-                             userIconLabel.innerHTML = originalIconHtml;
-                        }
-                    }
                 }
+                
+                // تطبيق فئات الألوان والريبل والتناوب
+                applyRoleClasses(userIconLabel, userData);
+
 
             } else { // Not logged in
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
 
-                 // Ensure admin and points elements are hidden when logged out
-                 if (adminElement) {
-                     adminElement.classList.add('hidden');
-                 }
-                 if (pointsElement) {
-                      pointsElement.classList.add('hidden');
-                 }
+                 // إخفاء جميع الروابط الخاصة بتسجيل الدخول
+                 if (adminElement) { adminElement.classList.add('hidden'); }
+                 if (pointsElement) { pointsElement.classList.add('hidden'); }
+                 if (productsElement) { productsElement.classList.add('hidden'); }
 
-                 // Restore original user icon HTML
-                 if (userIconLabel) {
-                      const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                      if (existingProfileImg) {
-                          existingProfileImg.remove();
-                      }
-                      if (!userIconLabel.innerHTML.includes(originalIconHtml)) {
-                         userIconLabel.innerHTML = originalIconHtml;
-                     }
+                 // استعادة أيقونة المستخدم الأصلية (SVG)
+                 const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
+                 if (existingProfileImg) {
+                      existingProfileImg.remove();
+                 }
+                 if (!userIconLabel.querySelector('svg')) {
+                     userIconLabel.innerHTML = originalIconHtml;
                  }
             }
         }
     }
 
-    // Handle Logout
+    // --- Event Listeners (As Original) ---
     function logOut() {
-        // Actions to perform after sign out is complete (or fails)
         const performLogoutActions = () => {
-            console.log("Performing post-logout cleanup and navigation.");
-            // onAuthStateChanged listener will handle clearing localStorage and updateUI
-            // Close the popup
-            if (loginCheckbox) {
-                loginCheckbox.checked = false;
-            }
-            // Navigate to login page
+            if (loginCheckbox) { loginCheckbox.checked = false; }
             window.location.href = "/p/login.html";
         };
 
         if (!auth) {
-            console.warn("Firebase Auth not available. Cannot perform Firebase signOut. Clearing local state and navigating.");
-            // Fallback: Clear local state and navigate even if auth is not available
             localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-            updateUI(false, null, null); // Update UI manually if listener isn't active
-            performLogoutActions(); // Navigate
+            updateUI(false, null, null);
+            performLogoutActions();
             return;
         }
 
-        console.log("Attempting Firebase signOut...");
         signOut(auth)
-            .then(() => {
-                console.log("Firebase signOut successful.");
-                // onAuthStateChanged listener will be triggered and call updateUI
-                performLogoutActions(); // Cleanup and navigate
-            })
-            .catch((error) => {
-                 console.error("Logout failed:", error);
-                 // Even if Firebase signOut fails, clean up local state and navigate as a fallback
-                 performLogoutActions(); // Cleanup and navigate
-            });
+            .then(() => { performLogoutActions(); })
+            .catch((error) => { performLogoutActions(); });
     }
 
-    // --- Event Listeners ---
-
-    // Logout button listener
     if (logoutElement) {
-        // Ensure no inline onclick handler interferes
-        if (logoutElement.getAttribute('onclick')) {
-            logoutElement.removeAttribute('onclick');
-        }
+        if (logoutElement.getAttribute('onclick')) { logoutElement.removeAttribute('onclick'); }
         logoutElement.addEventListener('click', logOut);
-        console.log("Logout listener added.");
     }
-
-    // Admin element click listener (navigation only)
     if (adminElement) {
-        adminElement.style.cursor = 'pointer'; // Change cursor to indicate clickable
-        // Ensure no inline onclick handler interferes
-        if (adminElement.getAttribute('onclick')) {
-             adminElement.removeAttribute('onclick');
-         }
-        adminElement.addEventListener('click', () => {
-            console.log("Admin element clicked. Redirecting...");
-            // Note: Actual access control for /p/admin.html must be secured separately.
-            window.location.href = '/p/admin.html';
-        });
-        console.log("Admin listener added.");
+        adminElement.style.cursor = 'pointer';
+        if (adminElement.getAttribute('onclick')) { adminElement.removeAttribute('onclick'); }
+        adminElement.addEventListener('click', () => { window.location.href = '/p/admin.html'; });
     }
-
-     // Points element click listener (navigation only) - Assuming it just navigates
-    if (pointsElement) {
-         pointsElement.style.cursor = 'pointer'; // Change cursor
-         // Ensure no inline onclick handler
-         if (pointsElement.getAttribute('onclick')) {
-              pointsElement.removeAttribute('onclick');
-          }
+     if (pointsElement) {
+         pointsElement.style.cursor = 'pointer';
+         if (pointsElement.getAttribute('onclick')) { pointsElement.removeAttribute('onclick'); }
          pointsElement.addEventListener('click', (event) => {
-             // Prevent default if it's an <a> tag with href="#"
              event.preventDefault();
-             console.log("Points element clicked. Redirecting...");
-             window.location.href = '/p/points.html'; // Navigate to points page
+             window.location.href = '/p/points.html';
          });
-         console.log("Points listener added.");
      }
-
-
-    // User icon click listener to toggle the popup checkbox
     if (userIconLabel && loginCheckbox) {
-        userIconLabel.style.cursor = 'pointer'; // Change cursor
-        // Prevent default if the label is part of a form or has a default action
+        userIconLabel.style.cursor = 'pointer';
         userIconLabel.addEventListener('click', (event) => {
             event.preventDefault();
-            // Toggle the checkbox checked state
             loginCheckbox.checked = !loginCheckbox.checked;
-            console.log("User icon clicked. Popup checkbox state:", loginCheckbox.checked);
         });
-        console.log("User icon listener added.");
     }
-
-    // Close the popup when clicking outside of it
     document.addEventListener('click', (event) => {
         const target = event.target;
-        // Check if the checkbox is currently checked (popup is open)
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
-            // Check if the click was outside the user icon trigger AND outside the popup wrapper
             const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
-
             if (isClickOutside) {
-                // Uncheck the checkbox to close the popup
                 loginCheckbox.checked = false;
-                console.log("Clicked outside popup. Closing popup.");
             }
         }
     });
-    console.log("Document click listener for popup closing added.");
-
-    // Initial UI update will happen automatically when onAuthStateChanged fires on page load
-    // (It fires even if the user is initially signed out)
-
 });
