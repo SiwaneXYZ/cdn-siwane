@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
     // Select the "نقاطي" element
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
+    const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
 
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
