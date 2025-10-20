@@ -3,7 +3,7 @@ import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/fi
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginCheckbox = document.getElementById('forlogPop');
-    const userIconLabel = document.querySelector('.logReg'); // هذا هو الـ <label for="forlogPop">
+    const userIconLabel = document.querySelector('.logReg');
     const popupWrapper = document.querySelector('.logPop-wrp');
     const belumLogDiv = document.querySelector('.NotLog'); 
     const sudahLogDiv = document.querySelector('.DonLog'); 
@@ -26,19 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (firebaseConfigScript) {
         try {
             const configData = JSON.parse(firebaseConfigScript.textContent);
-            if (configData && typeof configData === 'object') {
+             if (configData && typeof configData === 'object') {
                  firebaseConfig = {
                      apiKey: configData.apiKey, authDomain: configData.authDomain, projectId: configData.projectId,
                      databaseURL: configData.databaseURL, storageBucket: configData.storageBucket,
                      messagingSenderId: configData.messagingSenderId, appId: configData.appId,
                  };
-                 if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
-                      firebaseConfig = {};
-                 }
+                 if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) { firebaseConfig = {}; }
             }
-        } catch (e) {
-            console.error("Failed to parse Firebase config:", e);
-        }
+        } catch (e) { console.error("Failed to parse Firebase config:", e); }
     }
 
     let app;
@@ -47,15 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const apps = getApps();
     if (apps.length === 0) {
         if (Object.keys(firebaseConfig).length > 0) {
-           try {
-               app = initializeApp(firebaseConfig);
-           } catch (error) {
-               console.error("Firebase initialization failed:", error);
-           }
+           try { app = initializeApp(firebaseConfig); } catch (error) { console.error("Firebase initialization failed:", error); }
         }
-    } else {
-       app = getApp();
-    }
+    } else { app = getApp(); }
     
     // Auth State Listener
     if (app) {
@@ -87,7 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
                }
 
                if (loginCheckbox) {
-                   loginCheckbox.checked = false;
+                   // تأكد من بقاء الـ checkbox مغلقاً عند التحديث الأولي
+                   loginCheckbox.checked = false; 
                }
            });
        } catch (error) {
@@ -100,17 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    //  دالة تحديد نمط الحساب
+    //  دالة تحديد نمط الحساب (للبوردر الملون)
     // ==========================================================
     function getAccountStyle(userData) {
         const defaultStyle = { className: 'border-normal', color: 'var(--acct-normal-col, #6c757d)' };
         if (!userData) return defaultStyle;
 
         const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
-        let isPremiumActive = false;
-        if (userData.premiumExpiry && userData.premiumExpiry.seconds) {
-             isPremiumActive = userData.premiumExpiry.seconds * 1000 > Date.now();
-        }
+        let isPremiumActive = userData.premiumExpiry && userData.premiumExpiry.seconds ? 
+            userData.premiumExpiry.seconds * 1000 > Date.now() : false;
 
         if (userData.isAdmin === true) {
             return { className: 'border-admin', color: 'var(--acct-admin-col, blue)' };
@@ -138,47 +127,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const isAdmin = userData && userData.isAdmin === true;
 
-                // إظهار وإخفاء عنصر الادمن
-                if (adminElement) {
-                    adminElement.classList.toggle('hidden', !isAdmin);
-                }
-
                 // إخفاء "منتجاتي" و "نقاطي" للمشرف/المالك
-                if (productsElement) {
-                     productsElement.classList.toggle('hidden', isAdmin);
-                }
-                 if (pointsElement) {
-                     pointsElement.classList.toggle('hidden', isAdmin);
-                }
+                if (productsElement) { productsElement.classList.toggle('hidden', isAdmin); }
+                if (pointsElement) { pointsElement.classList.toggle('hidden', isAdmin); }
+                if (adminElement) { adminElement.classList.toggle('hidden', !isAdmin); }
 
 
                 // تطبيق البوردر والموجات وعرض الصورة
                 if (userIconLabel) {
                     const style = getAccountStyle(userData);
                     const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal'];
+                    
+                    // 1. تنظيف كلاسات البوردر القديمة من الحاوية
+                    userIconLabel.classList.remove(...borderClasses);
 
-                    // 1. تنظيف الـ DOM وإضافة الموجة
-                    userIconLabel.innerHTML = ''; 
+                    // 2. إزالة الصورة القديمة والأيقونة الافتراضية
+                    const existingImg = userIconLabel.querySelector('img.profileUser');
+                    if (existingImg) existingImg.remove();
+                    // حذف الأيقونة الافتراضية (SVG) مؤقتاً لتجنب التكرار في حالة الصورة الجديدة
+                    userIconLabel.innerHTML = userIconLabel.querySelector('.ripple-effect')?.outerHTML || '';
+
+
+                    // 3. إنشاء أو تحديث عنصر الموجات (Ripple)
                     let ripple = userIconLabel.querySelector('.ripple-effect');
                     if (!ripple) {
                         ripple = document.createElement('span');
                         ripple.className = 'ripple-effect';
+                        userIconLabel.appendChild(ripple);
                     }
                     ripple.style.borderColor = style.color;
                     ripple.style.display = 'block';
-                    userIconLabel.appendChild(ripple);
-                    
-                    // 2. إزالة كلاسات البوردر القديمة من الحاوية
-                    userIconLabel.classList.remove(...borderClasses);
+
                     
                     if (profileImageUrl) {
                         // (أ) في حال وجود صورة بروفايل:
                         const profileImg = document.createElement('img');
                         profileImg.src = profileImageUrl;
                         profileImg.alt = 'Profile Image';
-                        profileImg.classList.add('profileUser', 'current-profile-image'); 
+                        profileImg.classList.add('profileUser', style.className); 
                         
-                        profileImg.classList.add(style.className); 
                         userIconLabel.appendChild(profileImg);
                         
                     } else {
@@ -186,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         userIconLabel.insertAdjacentHTML('beforeend', originalIconHtml);
                         
+                        // تطبيق كلاس البوردر على الحاوية لتلوين البوردر الخارجي
                         userIconLabel.classList.add(style.className); 
                     }
                 }
@@ -195,18 +183,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
-                if (adminElement) adminElement.classList.add('hidden');
-                if (productsElement) productsElement.classList.add('hidden');
-                if (pointsElement) pointsElement.classList.add('hidden');
-
-                 // تنظيف الواجهة عند تسجيل الخروج
-                 if (userIconLabel) {
+                
+                if (userIconLabel) {
                       const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal'];
-                      
                       const ripple = userIconLabel.querySelector('.ripple-effect');
-                      if (ripple) ripple.remove();
                       
+                      if (ripple) ripple.remove();
                       userIconLabel.classList.remove(...borderClasses);
+                      
+                      // إعادة الأيقونة الأصلية وضمان عدم وجود صورة
                       userIconLabel.innerHTML = originalIconHtml;
                  }
             }
@@ -228,16 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         signOut(auth)
-            .then(() => {
-                performLogoutActions(); 
-            })
-            .catch((error) => {
-                 console.error("Logout failed:", error);
-                 performLogoutActions(); 
-            });
+            .then(() => { performLogoutActions(); })
+            .catch((error) => { console.error("Logout failed:", error); performLogoutActions(); });
     }
 
-    // --- Event Listeners (بقي كما هو) ---
+    // --- Event Listeners ---
 
     // Logout listener
     if (logoutElement) {
@@ -245,36 +225,24 @@ document.addEventListener('DOMContentLoaded', () => {
         logoutElement.addEventListener('click', logOut);
     }
 
-    // Admin listener
-    if (adminElement) {
-        adminElement.style.cursor = 'pointer'; 
-        if (adminElement.getAttribute('onclick')) adminElement.removeAttribute('onclick');
-        adminElement.addEventListener('click', () => {
-            window.location.href = '/p/admin.html';
-        });
-    }
+    // Admin, Points, Products listeners
+    [adminElement, pointsElement, productsElement].forEach(element => {
+        if (element) {
+            element.style.cursor = 'pointer';
+            if (element.getAttribute('onclick')) element.removeAttribute('onclick');
+            element.addEventListener('click', (event) => {
+                event.preventDefault();
+                const targetUrl = element.getAttribute('href') || (element === adminElement ? '/p/admin.html' : null);
+                if (targetUrl) window.location.href = targetUrl;
+            });
+        }
+    });
 
-    // Points listener
-    if (pointsElement) {
-         pointsElement.style.cursor = 'pointer'; 
-         if (pointsElement.getAttribute('onclick')) pointsElement.removeAttribute('onclick');
-         pointsElement.addEventListener('click', (event) => {
-             event.preventDefault();
-             window.location.href = '/p/points.html'; 
-         });
-     }
+    // **[تصحيح النقر]** إزالة مُستمع النقر من userIconLabel
+    // بما أن userIconLabel هو <label for="forlogPop">، فإن النقر يعمل تلقائياً.
+    // إزالة المُستمع يمنع أي تعارض في طبقات النقر.
 
-    // Products listener
-    if (productsElement) {
-         productsElement.style.cursor = 'pointer'; 
-         if (productsElement.getAttribute('onclick')) productsElement.removeAttribute('onclick');
-         productsElement.addEventListener('click', (event) => {
-             event.preventDefault();
-             window.location.href = '/p/my-products.html'; 
-         });
-     }
-
-    // Close the popup when clicking outside of it
+    // Close the popup when clicking outside of it (بقي كما هو)
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
