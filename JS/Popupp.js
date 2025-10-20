@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const belumLogDiv = document.querySelector('.NotLog'); 
     const sudahLogDiv = document.querySelector('.DonLog'); 
 
-    // تحديد عناصر القائمة (منتجاتي، نقاطي، ادمن، الخروج)
+    // تحديد عناصر القائمة
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
     const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
@@ -17,25 +17,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
 
-    // المحتوى الأصلي لـ userIconLabel (وهو أيقونة SVG الافتراضية)
+    // المحتوى الأصلي لـ userIconLabel (أيقونة SVG الافتراضية)
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
 
-    // منطق جلب وتهيئة Firebase (بقي كما هو)
+    // منطق جلب وتهيئة Firebase (مختصر)
     const firebaseConfigScript = document.getElementById('json:firebaseconfig');
     let firebaseConfig = {};
     if (firebaseConfigScript) {
-        // ... (منطق جلب config)
         try {
             const configData = JSON.parse(firebaseConfigScript.textContent);
             if (configData && typeof configData === 'object') {
                  firebaseConfig = {
-                     apiKey: configData.apiKey,
-                     authDomain: configData.authDomain,
-                     projectId: configData.projectId,
-                     databaseURL: configData.databaseURL,
-                     storageBucket: configData.storageBucket,
-                     messagingSenderId: configData.messagingSenderId,
-                     appId: configData.appId,
+                     apiKey: configData.apiKey, authDomain: configData.authDomain, projectId: configData.projectId,
+                     databaseURL: configData.databaseURL, storageBucket: configData.storageBucket,
+                     messagingSenderId: configData.messagingSenderId, appId: configData.appId,
                  };
                  if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
                       firebaseConfig = {};
@@ -96,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
                }
            });
        } catch (error) {
-           console.error("Failed to get Firebase Auth service:", error);
            updateUI(false, null, null);
            if (loginCheckbox) loginCheckbox.checked = false;
        }
@@ -106,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    //  دالة تحديد نمط الحساب (اللون والكلاس)
+    //  دالة تحديد نمط الحساب
     // ==========================================================
     function getAccountStyle(userData) {
         const defaultStyle = { className: 'border-normal', color: 'var(--acct-normal-col, #6c757d)' };
@@ -133,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================================
-    //  دالة تحديث الواجهة (لتطبيق البوردر والموجات)
+    //  دالة تحديث الواجهة
     // ==========================================================
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         if (belumLogDiv && sudahLogDiv) {
@@ -149,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     adminElement.classList.toggle('hidden', !isAdmin);
                 }
 
-                // **[تنفيذ طلب المستخدم]** إخفاء "منتجاتي" و "نقاطي" للمشرف/المالك
+                // إخفاء "منتجاتي" و "نقاطي" للمشرف/المالك
                 if (productsElement) {
                      productsElement.classList.toggle('hidden', isAdmin);
                 }
@@ -164,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal'];
 
                     // 1. تنظيف الـ DOM وإضافة الموجة
-                    userIconLabel.innerHTML = ''; // إفراغ المحتوى القديم
+                    userIconLabel.innerHTML = ''; 
                     let ripple = userIconLabel.querySelector('.ripple-effect');
                     if (!ripple) {
                         ripple = document.createElement('span');
@@ -184,17 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         profileImg.alt = 'Profile Image';
                         profileImg.classList.add('profileUser', 'current-profile-image'); 
                         
-                        // تطبيق كلاس البوردر على الصورة لتلوين البوردر الداخلي
                         profileImg.classList.add(style.className); 
                         userIconLabel.appendChild(profileImg);
                         
                     } else {
                         // (ب) في حال عدم وجود صورة (الأيقونة الافتراضية):
                         
-                        // إضافة المحتوى الأصلي (SVG)
                         userIconLabel.insertAdjacentHTML('beforeend', originalIconHtml);
                         
-                        // تطبيق كلاس البوردر على الحاوية لتلوين البوردر الخارجي
                         userIconLabel.classList.add(style.className); 
                     }
                 }
@@ -246,11 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // --- Event Listeners ---
-
-    // **[تصحيح النقر]** السماح لسلوك الـ <label> بالعمل بشكل طبيعي
-    // إزالة مُستمع النقر من userIconLabel لأن العنصر هو <label for="forlogPop"> 
-    // وبذلك يفتح الـ popup تلقائياً.
+    // --- Event Listeners (بقي كما هو) ---
 
     // Logout listener
     if (logoutElement) {
@@ -291,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
-            // التحقق من أن النقر ليس على الأيقونة/الصورة نفسها أو داخل النافذة المنبثقة
             const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
 
             if (isClickOutside) {
