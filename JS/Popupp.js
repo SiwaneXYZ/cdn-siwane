@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Select elements within the logged-in section using aria-label
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
-    // Select the "نقاطي" element
+    // Select the "نقاطي" element (assuming 'منتجاتي' is referenced by 'نقاطي' in your JS)
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
 
 
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================
-    //  [إضافة] دالة تحديد نمط الحساب (اللون والكلاس)
+    //  دالة تحديد نمط الحساب (اللون والكلاس)
     // ==========================================================
     /**
      * يحدد كلاس CSS واللون بناءً على بيانات المستخدم المخزنة.
@@ -168,8 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
              isPremiumActive = userData.premiumExpiry.seconds * 1000 > Date.now();
         }
 
-        // 1. الأدمن (أو المالك، لأن ملف البروفايل يضع isAdmin:true للمالك في الكاش)
+        // 1. الأدمن (أو المالك)
         if (userData.isAdmin === true) {
+            // استخدام كلاس owner إذا كان مدعومًا، وإلا admin
             return { className: 'border-admin', color: 'var(--acct-admin-col, blue)' };
         }
         // 2. العضوية الدائمة (VIPP)
@@ -187,12 +188,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ==========================================================
-    //  [تعديل] دالة تحديث الواجهة (لتطبيق البوردر والموجات)
+    //  دالة تحديث الواجهة (لتطبيق البوردر والموجات)
     // ==========================================================
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         if (belumLogDiv && sudahLogDiv) {
             if (isLoggedIn) {
-                // --- [1] (منطق موجود) إظهار وإخفاء القوائم ---
+                // --- [1] إظهار وإخفاء القوائم ---
                 belumLogDiv.classList.add('hidden');
                 sudahLogDiv.classList.remove('hidden');
 
@@ -205,98 +206,86 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Handle Points element visibility (Hide if Admin)
+                // **[تنفيذ طلب المستخدم]** إخفاء "نقاطي" للمشرف/المالك
                 if (pointsElement) {
                      if (userData && userData.isAdmin === true) {
-                         pointsElement.classList.add('hidden'); // Hide points for admin
+                         pointsElement.classList.add('hidden'); 
                      } else {
-                         pointsElement.classList.remove('hidden'); // Show points for non-admin
+                         pointsElement.classList.remove('hidden'); 
                      }
                 }
 
-                // --- [2] (منطق جديد) تطبيق البوردر والموجات ---
+                // --- [2] تطبيق البوردر والموجات وعرض الصورة ---
                 if (userIconLabel) {
-                    // 1. الحصول على النمط (اللون والكلاس) بناءً على بيانات المستخدم
                     const style = getAccountStyle(userData);
+                    const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal', 'border-owner'];
 
-                    // 2. تنظيف أي كلاسات بوردر قديمة من الحاوية
-                    userIconLabel.className = 'logReg'; // إعادة تعيين الكلاسات
-
-                    // 3. إنشاء أو تحديث عنصر الموجات (Ripple)
+                    // 1. إزالة كلاسات البوردر القديمة من الحاوية
+                    userIconLabel.classList.remove(...borderClasses);
+                    
+                    // 2. إنشاء أو تحديث عنصر الموجات (Ripple)
                     let ripple = userIconLabel.querySelector('.ripple-effect');
                     if (!ripple) {
                         ripple = document.createElement('span');
                         ripple.className = 'ripple-effect';
-                        userIconLabel.appendChild(ripple); // إضافته داخل الحاوية
+                        userIconLabel.appendChild(ripple);
                     }
-                    ripple.style.borderColor = style.color; // تطبيق لون الموجة
-                    ripple.style.display = 'block';         // إظهار الموجة
+                    ripple.style.borderColor = style.color;
+                    ripple.style.display = 'block';
 
-                    // 4. (منطق موجود) إزالة الصورة القديمة إن وجدت
-                     const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                     if (existingProfileImg) {
-                         existingProfileImg.remove();
-                     }
+                    // 3. إفراغ محتوى الحاوية (logReg) وإعادة بنائه بالترتيب
+                    userIconLabel.innerHTML = '';
+                    userIconLabel.appendChild(ripple);
 
-                    // 5. (منطق معدل) عرض الصورة الجديدة أو الأيقونة الافتراضية
                     if (profileImageUrl) {
                         // (أ) في حال وجود صورة بروفايل:
                         const profileImg = document.createElement('img');
                         profileImg.src = profileImageUrl;
                         profileImg.alt = 'Profile Image';
-                        profileImg.classList.add('profileUser');
-                        profileImg.classList.add('current-profile-image'); 
+                        profileImg.classList.add('profileUser', 'current-profile-image'); 
+                        profileImg.classList.add(style.className); // **[تطبيق البوردر على الصورة]**
                         
-                        profileImg.classList.add(style.className); // <-- تطبيق كلاس البوردر على الصورة
-
                         userIconLabel.appendChild(profileImg);
-                        if (userIconLabel.innerHTML.includes(originalIconHtml)) {
-                             userIconLabel.innerHTML = ''; 
-                             userIconLabel.appendChild(ripple); // إعادة إضافة الموجة
-                             userIconLabel.appendChild(profileImg);
-                         }
+                        
                     } else {
-                        // (ب) في حال عدم وجود صورة (أيقونة افتراضية):
-                        if (!userIconLabel.innerHTML.includes(originalIconHtml)) {
-                             userIconLabel.innerHTML = originalIconHtml;
-                             userIconLabel.appendChild(ripple); // إعادة إضافة الموجة
-                        }
-                        userIconLabel.classList.add(style.className); // <-- تطبيق كلاس البوردر على الحاوية نفسها
+                        // (ب) في حال عدم وجود صورة (الأيقونة الافتراضية):
+                        
+                        // إعادة المحتوى الأصلي (الأيقونة الافتراضية)
+                        userIconLabel.insertAdjacentHTML('beforeend', originalIconHtml);
+                        
+                        userIconLabel.classList.add(style.className); // **[تطبيق البوردر على الحاوية]**
                     }
                 }
 
             } else { // Not logged in
-                // --- [3] (منطق معدل) حالة تسجيل الخروج ---
+                // --- [3] حالة تسجيل الخروج ---
                 
-                // (منطق موجود) إظهار وإخفاء القوائم
+                // إظهار وإخفاء القوائم
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
                  if (adminElement) adminElement.classList.add('hidden');
                  if (pointsElement) pointsElement.classList.add('hidden');
 
-                 // (منطق معدل) تنظيف الواجهة عند تسجيل الخروج
+                 // تنظيف الواجهة عند تسجيل الخروج
                  if (userIconLabel) {
+                      const borderClasses = ['border-admin', 'border-vipp', 'border-premium', 'border-normal', 'border-owner'];
+                      
                       // 1. إزالة عنصر الموجات
                       const ripple = userIconLabel.querySelector('.ripple-effect');
                       if (ripple) ripple.remove();
                       
                       // 2. إزالة كلاسات البوردر
-                      userIconLabel.className = 'logReg';
+                      userIconLabel.classList.remove(...borderClasses);
 
-                      // 3. (منطق موجود) إزالة الصورة وإرجاع الأيقونة الأصلية
-                      const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                      if (existingProfileImg) {
-                          existingProfileImg.remove();
-                      }
-                      if (!userIconLabel.innerHTML.includes(originalIconHtml)) {
-                         userIconLabel.innerHTML = originalIconHtml;
-                     }
+                      // 3. إرجاع الأيقونة الأصلية
+                      userIconLabel.innerHTML = originalIconHtml;
                  }
             }
         }
     }
 
     // Handle Logout
+    // (باقي منطق الخروج كما هو)
     function logOut() {
         const performLogoutActions = () => {
             console.log("Performing post-logout cleanup and navigation.");
@@ -380,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
+            // قم بتضمين عنصر الموجة ripple-effect في عملية التحقق
             const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
 
             if (isClickOutside) {
