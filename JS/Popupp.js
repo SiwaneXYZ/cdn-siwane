@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
                }
 
                if (loginCheckbox) {
-                   // تأكد من بقاء الـ checkbox مغلقاً عند التحديث الأولي
                    loginCheckbox.checked = false; 
                }
            });
@@ -237,10 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-
-    // **[تصحيح النقر]** إزالة مُستمع النقر من userIconLabel
-    // بما أن userIconLabel هو <label for="forlogPop">، فإن النقر يعمل تلقائياً.
-    // إزالة المُستمع يمنع أي تعارض في طبقات النقر.
 
     // Close the popup when clicking outside of it (بقي كما هو)
     document.addEventListener('click', (event) => {
