@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
     let colorToggleInterval = null; // متغير لتخزين مؤقت التناوب اللوني
 
-    // --- Firebase Initialization (As Original) ---
+    // --- Firebase Initialization ---
     const firebaseConfigScript = document.getElementById('json:firebaseconfig');
     let firebaseConfig = {};
 
@@ -87,11 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         try { cachedUserData = JSON.parse(dataString); } catch(e) { cachedUserData = null; }
                     }
 
-                   // دمج بيانات الأدوار من التخزين المحلي (لأغراض العرض فقط، وليس للتحكم في الوصول)
+                   // دمج بيانات الأدوار من التخزين المحلي (يجب أن يتم تحديث هذه البيانات من مصدر موثوق)
                    const combinedUserData = {
-                       // افتراض أن هذه القيم تأتي من مكان آخر ويتم تخزينها مؤقتاً هنا
+                       // افتراض أن هذه القيم تأتي من مكان آخر (مثل Firebase Firestore/Realtime DB)
                        isAdmin: cachedUserData ? cachedUserData.isAdmin : false, // مدير
-                       isOwner: cachedUserData ? cachedUserData.isOwner : false, // مالك (أو مشرف)
+                       isOwner: cachedUserData ? cachedUserData.isOwner : false, // مالك
                        isVIP: cachedUserData ? cachedUserData.isVIP : false, // VIP
                        isPremium: cachedUserData ? cachedUserData.isPremium : false, // بريميوم
                        isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // إعفاء من الإعلانات
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Object} userData - بيانات المستخدم المدمجة
      */
     function applyRoleClasses(element, userData) {
-        // قائمة بالأدوار حسب الأولوية (الأعلى إلى الأدنى)
+        // قائمة بالأدوار حسب الأولوية
         const roles = [
             { check: userData.isOwner, className: 'owner' },
             { check: userData.isAdmin, className: 'admin' },
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             profileImage.classList.remove(...allRoleClasses.filter(c => c.startsWith('border-')));
         }
 
-        // 2. تحديد الدور الرئيسي (الأعلى أولوية)
+        // 2. تحديد الدور الرئيسي
         let primaryRole = 'normal';
         for (const role of roles) {
             if (role.check) {
@@ -169,6 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (profileImage) {
             profileImage.classList.add(primaryBorderClass);
+            // ضمان الخصائص التي تمنع الإزاحة (مهم جداً للتمركز فوق الريبل)
+            profileImage.style.position = 'relative'; 
+            profileImage.style.zIndex = '3';
+        } else {
+             // إذا كانت الأيقونة الافتراضية هي المستخدمة (SVG)
+             const defaultIcon = element.querySelector('svg');
+             if (defaultIcon) {
+                 defaultIcon.style.position = 'relative';
+                 defaultIcon.style.zIndex = '3';
+             }
         }
         element.classList.add(primaryRoleClass, primaryRippleClass); 
         
@@ -183,8 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (hasPremium && hasAdFree) {
-            // التناوب بين Premium (ذهبي) و Owner/Admin (الأخضر/الأحمر الداكن)
-            const toggleRoles = ['premium', 'owner']; // استخدمنا 'owner' كبديل لـ 'AdFree' لون خاص
+            const toggleRoles = ['premium', 'owner']; // التناوب بين بريميوم والمالك/الأدمن
             let colorIndex = 0;
 
             colorToggleInterval = setInterval(() => {
@@ -211,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Modified updateUI function
+    /**
+     * تحديث واجهة المستخدم بناءً على حالة تسجيل الدخول.
+     */
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         
         // إزالة فئات الدور والريبل عند التحديث أو الخروج
@@ -242,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!profileImg) {
                     profileImg = document.createElement('img');
                     profileImg.classList.add('profileUser', 'current-profile-image');
-                    userIconLabel.innerHTML = '';
+                    // إزالة محتوى الأيقونة الافتراضية وإضافة الصورة
+                    userIconLabel.innerHTML = ''; 
                     userIconLabel.appendChild(profileImg);
                 }
                 profileImg.src = finalImageUrl;
@@ -293,14 +305,15 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (existingProfileImg) {
                       existingProfileImg.remove();
                  }
-                 if (!userIconLabel.querySelector('svg')) {
+                 // استعادة الأيقونة الأصلية مع عنصر الريبل الوهمي (إذا وجد)
+                 if (userIconLabel.innerHTML.trim() === '') {
                      userIconLabel.innerHTML = originalIconHtml;
                  }
             }
         }
     }
 
-    // --- Event Listeners (As Original) ---
+    // --- Event Listeners ---
     function logOut() {
         const performLogoutActions = () => {
             if (loginCheckbox) { loginCheckbox.checked = false; }
@@ -337,12 +350,13 @@ document.addEventListener('DOMContentLoaded', () => {
          });
      }
     if (userIconLabel && loginCheckbox) {
+        // التحكم في فتح القائمة المنبثقة عند النقر
         userIconLabel.style.cursor = 'pointer';
         userIconLabel.addEventListener('click', (event) => {
-            event.preventDefault();
-            loginCheckbox.checked = !loginCheckbox.checked;
+            // يتم التحكم في عرض/إخفاء الريبل بشكل أساسي عبر :checked في CSS، لذا لا حاجة لتغيير الفئة هنا
         });
     }
+    // إغلاق القائمة عند النقر خارجها
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
