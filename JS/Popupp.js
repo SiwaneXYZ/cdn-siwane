@@ -87,14 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         try { cachedUserData = JSON.parse(dataString); } catch(e) { cachedUserData = null; }
                     }
 
-                   // دمج بيانات الأدوار من التخزين المحلي (لأغراض العرض فقط، وليس للتحكم في الوصول)
+                   // دمج بيانات الأدوار من التخزين المحلي
                    const combinedUserData = {
-                       // افتراض أن هذه القيم تأتي من مكان آخر ويتم تخزينها مؤقتاً هنا
-                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false, // مدير
-                       isOwner: cachedUserData ? cachedUserData.isOwner : false, // مالك (أو مشرف)
-                       isVIP: cachedUserData ? cachedUserData.isVIP : false, // VIP
-                       isPremium: cachedUserData ? cachedUserData.isPremium : false, // بريميوم
-                       isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // إعفاء من الإعلانات
+                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false, 
+                       isOwner: cachedUserData ? cachedUserData.isOwner : false, 
+                       isVIP: cachedUserData ? cachedUserData.isVIP : false, 
+                       isPremium: cachedUserData ? cachedUserData.isPremium : false, 
+                       isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // <-- التأكد من قراءة هذا الدور
                        ...firebaseUserData, 
                    };
 
@@ -127,89 +126,114 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // =================================================================
+    //  --- الدالة الأساسية المُحسَّنة ---
+    // =================================================================
+    
     /**
      * وظيفة تحديد الدور وتطبيق فئات الألوان والريبل، مع منطق التناوب.
      * @param {HTMLElement} element - الـ label (.logReg)
      * @param {Object} userData - بيانات المستخدم المدمجة
      */
     function applyRoleClasses(element, userData) {
-        // قائمة بالأدوار حسب الأولوية (الأعلى إلى الأدنى)
-        const roles = [
-            { check: userData.isOwner, className: 'owner' },
-            { check: userData.isAdmin, className: 'admin' },
-            { check: userData.isVIP, className: 'vipp' },
-            { check: userData.isPremium, className: 'premium' },
-        ];
-
-        // قائمة بجميع فئات الأدوار لضمان مسحها
-        const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'normal'].flatMap(r => [`border-${r}`, `ripple-${r}`, `role-${r}`]);
-
-        // 1. مسح جميع فئات الدور الحالية
-        const classesToRemove = element.className.split(' ').filter(c => allRoleClasses.some(roleClass => c.startsWith(roleClass.substring(0, roleClass.indexOf('-') + 1))));
-        element.classList.remove(...classesToRemove);
-
-        const profileImage = element.querySelector('.current-profile-image');
-        if (profileImage) {
-            profileImage.classList.remove(...allRoleClasses.filter(c => c.startsWith('border-')));
-        }
-
-        // 2. تحديد الدور الرئيسي (الأعلى أولوية)
-        let primaryRole = 'normal';
-        for (const role of roles) {
-            if (role.check) {
-                primaryRole = role.className;
-                break; 
-            }
-        }
+        // قائمة بكل فئات الأدوار الممكنة لمسحها
+        const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'adfree', 'normal'];
         
-        // 3. تطبيق اللون الأساسي على الإطار والأيقونة/الريبل
-        const primaryBorderClass = `border-${primaryRole}`;
-        const primaryRoleClass = `role-${primaryRole}`;
-        const primaryRippleClass = `ripple-${primaryRole}`;
+        // 1. تجميع كل الفئات (border, ripple, role)
+        const allClassesToRemove = allRoleClasses.flatMap(r => [`border-${r}`, `ripple-${r}`, `role-${r}`]);
+        const allBorderClasses = allRoleClasses.map(r => `border-${r}`);
+        const allRippleClasses = allRoleClasses.map(r => `ripple-${r}`);
+        const allRoleClassesSvg = allRoleClasses.map(r => `role-${r}`);
 
-        if (profileImage) {
-            profileImage.classList.add(primaryBorderClass);
-        }
-        element.classList.add(primaryRoleClass, primaryRippleClass); 
-        
-        // 4. منطق التناوب اللوني (Premium + AdFree)
-        const hasAdFree = userData.isAdFree;
-        const hasPremium = userData.isPremium;
 
-        // مسح أي مؤقت سابق للتناوب
+        // 2. مسح المؤقت السابق (للتناوب) إذا كان موجوداً
         if (colorToggleInterval) {
             clearInterval(colorToggleInterval);
             colorToggleInterval = null;
         }
 
+        // 3. مسح جميع فئات الدور الحالية من الأيقونة والإطار
+        element.classList.remove(...allRippleClasses, ...allRoleClassesSvg);
+        
+        const profileImage = element.querySelector('.current-profile-image');
+        if (profileImage) {
+            profileImage.classList.remove(...allBorderClasses);
+        }
+
+        // 4. التحقق من حالة التناوب الخاصة (Premium + AdFree)
+        const hasPremium = userData.isPremium;
+        const hasAdFree = userData.isAdFree;
+
         if (hasPremium && hasAdFree) {
-            // التناوب بين Premium (ذهبي) و Owner/Admin (الأخضر/الأحمر الداكن)
-            const toggleRoles = ['premium', 'owner']; // استخدمنا 'owner' كبديل لـ 'AdFree' لون خاص
+            // --- حالة خاصة: تناوب ---
+            const toggleRoles = ['premium', 'adfree']; // الأدوار للتناوب
+            const toggleBorderClasses = toggleRoles.map(r => `border-${r}`);
+            const toggleRippleClasses = toggleRoles.map(r => `ripple-${r}`);
             let colorIndex = 0;
 
-            colorToggleInterval = setInterval(() => {
+            // تطبيق لون SVG الأساسي (ليكن بريميوم)
+            element.classList.add('role-premium'); 
+
+            // دالة التبديل
+            const toggleColors = () => {
                 const currentRole = toggleRoles[colorIndex % toggleRoles.length];
                 colorIndex++;
                 
                 const currentBorderClass = `border-${currentRole}`;
                 const currentRippleClass = `ripple-${currentRole}`;
 
-                // إزالة فئات التناوب القديمة
+                // إزالة *جميع* فئات التناوب (لضمان عدم التداخل)
                 if (profileImage) {
-                     profileImage.classList.remove(...toggleRoles.map(r => `border-${r}`));
+                     profileImage.classList.remove(...toggleBorderClasses);
                 }
-                element.classList.remove(...toggleRoles.map(r => `ripple-${r}`));
+                element.classList.remove(...toggleRippleClasses);
                 
                 // تطبيق فئات التناوب الجديدة
                 if (profileImage) {
                      profileImage.classList.add(currentBorderClass);
                 }
                 element.classList.add(currentRippleClass);
-                
-            }, 5000); // 5 ثواني للتناوب
+            };
+
+            // تشغيل التبديل فوراً عند التحميل
+            toggleColors(); 
+            // بدء المؤقت (كل 3 ثواني، يطابق تقريباً "موجتين" من الريبل)
+            colorToggleInterval = setInterval(toggleColors, 3000); 
+
+        } else {
+            // --- 5. حالة عادية: تطبيق الدور الأعلى أولوية ---
+            const rolesPriority = [
+                { check: userData.isOwner, className: 'owner' },
+                { check: userData.isAdmin, className: 'admin' },
+                { check: userData.isVIP, className: 'vipp' },
+                { check: userData.isPremium, className: 'premium' },
+                { check: userData.isAdFree, className: 'adfree' }, // <-- تمت إضافته للأولوية
+            ];
+
+            let primaryRole = 'normal'; // افتراضي
+            for (const role of rolesPriority) {
+                if (role.check) {
+                    primaryRole = role.className;
+                    break; // توقف عند العثور على أعلى دور
+                }
+            }
+            
+            // 6. تطبيق اللون الأساسي الثابت
+            const primaryBorderClass = `border-${primaryRole}`;
+            const primaryRoleClass = `role-${primaryRole}`;
+            const primaryRippleClass = `ripple-${primaryRole}`;
+
+            if (profileImage) {
+                profileImage.classList.add(primaryBorderClass);
+            }
+            element.classList.add(primaryRoleClass, primaryRippleClass); 
         }
     }
 
+
+    // =================================================================
+    //  --- باقي الدوال (بدون تغيير) ---
+    // =================================================================
 
     // Modified updateUI function
     function updateUI(isLoggedIn, userData, profileImageUrl) {
@@ -217,14 +241,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // إزالة فئات الدور والريبل عند التحديث أو الخروج
         if (userIconLabel) {
              userIconLabel.classList.remove('logged-in');
-             // مسح جميع فئات الدور
-             userIconLabel.className = userIconLabel.className.split(' ').filter(c => !c.startsWith('role-') && !c.startsWith('ripple-')).join(' ');
         }
+        
+        // مسح المؤقت عند تحديث الواجهة (مهم جداً عند تسجيل الخروج)
         if (colorToggleInterval) {
             clearInterval(colorToggleInterval);
             colorToggleInterval = null;
         }
-
 
         if (belumLogDiv && sudahLogDiv && userIconLabel) {
             if (isLoggedIn) {
@@ -276,6 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 // تطبيق فئات الألوان والريبل والتناوب
+                // (هذه الدالة ستقوم بالمسح والتطبيق)
                 applyRoleClasses(userIconLabel, userData);
 
 
@@ -296,6 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (!userIconLabel.querySelector('svg')) {
                      userIconLabel.innerHTML = originalIconHtml;
                  }
+                 
+                 // مسح أي فئات ألوان متبقية من الأيقونة
+                 applyRoleClasses(userIconLabel, {}); // استدعاء الدالة ببيانات فارغة لمسح الألوان
             }
         }
     }
