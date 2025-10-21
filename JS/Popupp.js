@@ -2,56 +2,43 @@ import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebase
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // --- عناصر الواجهة ---
     const loginCheckbox = document.getElementById('forlogPop');
     const userIconLabel = document.querySelector('.logReg');
     const popupWrapper = document.querySelector('.logPop-wrp');
     const belumLogDiv = document.querySelector('.NotLog'); 
     const sudahLogDiv = document.querySelector('.DonLog'); 
 
-    // تحديد عناصر الروابط
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
     const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
-    const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
-    // الصورة الافتراضية المطلوبة
+    // --- متغيرات عامة ---
+    const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData'; // المفتاح الصحيح كما في profile.js
     const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
-
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
-    let colorToggleInterval = null; // متغير لتخزين مؤقت التناوب اللوني
+    let colorToggleInterval = null;
 
-    // --- Firebase Initialization (As Original) ---
-    const firebaseConfigScript = document.getElementById('json:firebaseconfig');
+    // =================================================================
+    //  --- [تحديث احترافي] جلب الإعدادات كما في profile.js ---
+    // =================================================================
     let firebaseConfig = {};
+    let ownerAdminEmail = ''; // <-- مهم لتمييز المالك
 
-    if (firebaseConfigScript) {
-        const configText = firebaseConfigScript.textContent;
-        try {
-            const configData = JSON.parse(configText);
-            if (configData && typeof configData === 'object') {
-                 firebaseConfig = {
-                     apiKey: configData.apiKey,
-                     authDomain: configData.authDomain,
-                     projectId: configData.projectId,
-                     databaseURL: configData.databaseURL,
-                     storageBucket: configData.storageBucket,
-                     messagingSenderId: configData.messagingSenderId,
-                     appId: configData.appId,
-                 };
-                 if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
-                      firebaseConfig = {};
-                      console.error("Firebase config is missing apiKey or appId/projectId.");
-                 }
-            }
-        } catch (e) {
-            console.error("Failed to parse Firebase config from script tag:", e);
-        }
+    // افتراض أن 'encryptedBase64' مُعرف في HTML كما في profile.js
+    if (typeof encryptedBase64 !== 'undefined' && encryptedBase64.customSettings) {
+        firebaseConfig = encryptedBase64.customSettings.firebase;
+        ownerAdminEmail = encryptedBase64.customSettings.ownerAdminEmail;
+    } else {
+        console.error("Popup.js: Custom settings (encryptedBase64) not found. Firebase/Owner features will fail.");
     }
+    // =================================================================
 
     let app;
     let auth = null;
 
+    // --- تهيئة Firebase ---
     const apps = getApps();
     if (apps.length === 0) {
         if (Object.keys(firebaseConfig).length > 0) {
@@ -66,85 +53,148 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
        app = getApp();
     }
-    // --- End Firebase Init ---
+    // --- نهاية تهيئة Firebase ---
+
+    
+    // =================================================================
+    //  --- [إضافة احترافية] دالة حساب الأدوار (تحاكي profile.js) ---
+    // =================================================================
+    /**
+     * يحسب أدوار المستخدم الحقيقية بناءً على البيانات المخزنة من profile.js.
+     * @param {object | null} storedData - البيانات المفككة من 'firebaseUserProfileData'.
+     * @param {object | null} currentUser - كائن المستخدم الحالي من Auth.
+     * @returns {object} كائن يحتوي على أدوار boolean (isOwner, isAdmin, isVIP, isPremium, isAdFree).
+     */
+    function getCalculatedRoles(storedData, currentUser) {
+        const roles = {
+            isOwner: false,
+            isAdmin: false,
+            isVIP: false,
+            isPremium: false,
+            isAdFree: false,
+        };
+
+        if (!storedData || !currentUser) {
+            return roles;
+        }
+
+        // 1. المالك والمدير (isOwner, isAdmin)
+        // (يجب أن يكون ownerAdminEmail متاحاً)
+        const isEmailOwner = currentUser.email && ownerAdminEmail &&
+                             currentUser.email.toLowerCase() === ownerAdminEmail.toLowerCase();
+        
+        if (isEmailOwner) {
+            roles.isOwner = true;
+            roles.isAdmin = true; // المالك هو مدير أيضاً
+        } else if (storedData.isAdmin === true) {
+            roles.isAdmin = true;
+        }
+
+        // 2. العضوية المميزة (isVIP)
+        const accountType = (storedData.accountType || 'normal').toLowerCase();
+        if (accountType === 'vipp') {
+            roles.isVIP = true;
+        }
+
+        // 3. البريميوم (isPremium) - يعتمد على تاريخ الانتهاء
+        const premiumExpiry = storedData.premiumExpiry; // { seconds, nanoseconds }
+        const isPremiumActive = premiumExpiry && (premiumExpiry.seconds * 1000) > Date.now();
+        
+        if (accountType === 'premium' || isPremiumActive) {
+            roles.isPremium = true;
+        }
+
+        // 4. معفي من الإعلانات (isAdFree) - يعتمد على تاريخ الانتهاء
+        const adFreeExpiry = storedData.adFreeExpiry; // null (دائم), أو { seconds, ... }
+        const isAdFreePermanent = (adFreeExpiry === null);
+        const isAdFreeTemporary = adFreeExpiry && (adFreeExpiry.seconds * 1000) > Date.now();
+
+        if (isAdFreePermanent || isAdFreeTemporary) {
+            roles.isAdFree = true;
+        }
+        
+        // 5. [قاعدة من profile.js] عضوية VIP تشمل البريميوم والإعفاء
+        if (roles.isVIP) {
+            roles.isPremium = true;
+            roles.isAdFree = true;
+        }
+
+        return roles;
+    }
+    // =================================================================
+
 
     if (app) {
        try {
            auth = getAuth(app);
 
+           // =================================================================
+           //  --- [تحديث احترافي] onAuthStateChanged يقرأ ولا يكتب localStorage ---
+           // =================================================================
            onAuthStateChanged(auth, (user) => {
                if (user) {
-                   const firebaseUserData = {
-                       uid: user.uid,
-                       displayName: user.displayName,
-                       photoURL: user.photoURL,
-                       email: user.email,
-                   };
-
+                   // 1. جلب البيانات المخزنة التي وضعها profile.js
                    let cachedUserData = null;
                     const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
                     if (dataString) {
                         try { cachedUserData = JSON.parse(dataString); } catch(e) { cachedUserData = null; }
                     }
 
-                   // دمج بيانات الأدوار من التخزين المحلي
-                   const combinedUserData = {
-                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false, 
-                       isOwner: cachedUserData ? cachedUserData.isOwner : false, 
-                       isVIP: cachedUserData ? cachedUserData.isVIP : false, 
-                       isPremium: cachedUserData ? cachedUserData.isPremium : false, 
-                       isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // <-- التأكد من قراءة هذا الدور
-                       ...firebaseUserData, 
+                   // 2. [النقطة الأهم] حساب الأدوار الحقيقية
+                   const calculatedRoles = getCalculatedRoles(cachedUserData, user);
+
+                   // 3. دمج البيانات للعرض (بيانات Auth + الأدوار المحسوبة)
+                   const displayData = {
+                       uid: user.uid,
+                       displayName: user.displayName,
+                       photoURL: user.photoURL,
+                       email: user.email,
+                       ...calculatedRoles // <-- إضافة الأدوار الصحيحة (isOwner, isAdmin, etc.)
                    };
 
-                   localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(combinedUserData));
+                   // 4. [تصحيح] لا تقم بحفظ البيانات من popup.js. profile.js هو المصدر.
+                   // localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, ...); // <-- تم الحذف
 
-                   const finalPhotoURL = combinedUserData.photoURL || user.photoURL;
-                   updateUI(true, combinedUserData, finalPhotoURL);
+                   // 5. تحديث الواجهة بالصورة من الكاش (الأحدث) أو من Auth
+                   const finalPhotoURL = cachedUserData?.photoURL || user.photoURL;
+                   updateUI(true, displayData, finalPhotoURL);
 
                } else {
+                   // مسح الكاش عند تسجيل الخروج
                    localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
                    updateUI(false, null, null);
                }
+               
                if (loginCheckbox) {
                    loginCheckbox.checked = false;
                }
            });
+           // =================================================================
 
        } catch (error) {
            console.error("Failed to get Firebase Auth service:", error);
            updateUI(false, null, null);
-           if (loginCheckbox) {
-                loginCheckbox.checked = false;
-           }
+           if (loginCheckbox) loginCheckbox.checked = false;
        }
     } else {
         updateUI(false, null, null);
-        if (loginCheckbox) {
-            loginCheckbox.checked = false;
-        }
+        if (loginCheckbox) loginCheckbox.checked = false;
     }
 
 
-    // =================================================================
-    //  --- الدالة الأساسية المُحسَّنة ---
-    // =================================================================
-    
     /**
+     * (دالة محسنة)
      * وظيفة تحديد الدور وتطبيق فئات الألوان والريبل، مع منطق التناوب.
      * @param {HTMLElement} element - الـ label (.logReg)
-     * @param {Object} userData - بيانات المستخدم المدمجة
+     * @param {Object} userData - بيانات المستخدم (تحتوي على الأدوار المحسوبة)
      */
     function applyRoleClasses(element, userData) {
         // قائمة بكل فئات الأدوار الممكنة لمسحها
         const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'adfree', 'normal'];
         
-        // 1. تجميع كل الفئات (border, ripple, role)
-        const allClassesToRemove = allRoleClasses.flatMap(r => [`border-${r}`, `ripple-${r}`, `role-${r}`]);
         const allBorderClasses = allRoleClasses.map(r => `border-${r}`);
         const allRippleClasses = allRoleClasses.map(r => `ripple-${r}`);
         const allRoleClassesSvg = allRoleClasses.map(r => `role-${r}`);
-
 
         // 2. مسح المؤقت السابق (للتناوب) إذا كان موجوداً
         if (colorToggleInterval) {
@@ -160,21 +210,29 @@ document.addEventListener('DOMContentLoaded', () => {
             profileImage.classList.remove(...allBorderClasses);
         }
 
+        // [تعديل] التحقق إذا كان المستخدم مسجلاً للخروج
+        const isLoggedOut = !userData || !userData.uid;
+        if (isLoggedOut) {
+            return; // لا تقم بتطبيق أي فئات (للحفاظ على لون SVG الأصلي)
+        }
+
         // 4. التحقق من حالة التناوب الخاصة (Premium + AdFree)
+        // (الآن هذه القيم صحيحة 100% لأنها محسوبة)
         const hasPremium = userData.isPremium;
         const hasAdFree = userData.isAdFree;
+        
+        // (يجب ألا يكون مالك أو مدير، لأن لهم أولوية أعلى)
+        const isSpecialToggleCase = hasPremium && hasAdFree && !userData.isOwner && !userData.isAdmin;
 
-        if (hasPremium && hasAdFree) {
+        if (isSpecialToggleCase) {
             // --- حالة خاصة: تناوب ---
             const toggleRoles = ['premium', 'adfree']; // الأدوار للتناوب
             const toggleBorderClasses = toggleRoles.map(r => `border-${r}`);
             const toggleRippleClasses = toggleRoles.map(r => `ripple-${r}`);
             let colorIndex = 0;
 
-            // تطبيق لون SVG الأساسي (ليكن بريميوم)
-            element.classList.add('role-premium'); 
+            element.classList.add('role-premium'); // لون SVG الافتراضي
 
-            // دالة التبديل
             const toggleColors = () => {
                 const currentRole = toggleRoles[colorIndex % toggleRoles.length];
                 colorIndex++;
@@ -182,39 +240,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentBorderClass = `border-${currentRole}`;
                 const currentRippleClass = `ripple-${currentRole}`;
 
-                // إزالة *جميع* فئات التناوب (لضمان عدم التداخل)
-                if (profileImage) {
-                     profileImage.classList.remove(...toggleBorderClasses);
-                }
+                if (profileImage) profileImage.classList.remove(...toggleBorderClasses);
                 element.classList.remove(...toggleRippleClasses);
                 
-                // تطبيق فئات التناوب الجديدة
-                if (profileImage) {
-                     profileImage.classList.add(currentBorderClass);
-                }
+                if (profileImage) profileImage.classList.add(currentBorderClass);
                 element.classList.add(currentRippleClass);
             };
 
-            // تشغيل التبديل فوراً عند التحميل
-            toggleColors(); 
-            // بدء المؤقت (كل 3 ثواني، يطابق تقريباً "موجتين" من الريبل)
-            colorToggleInterval = setInterval(toggleColors, 3000); 
+            toggleColors(); // شغلها فوراً
+            colorToggleInterval = setInterval(toggleColors, 3000); // كرر كل 3 ثوان
 
         } else {
             // --- 5. حالة عادية: تطبيق الدور الأعلى أولوية ---
             const rolesPriority = [
-                { check: userData.isOwner, className: 'owner' },
-                { check: userData.isAdmin, className: 'admin' },
-                { check: userData.isVIP, className: 'vipp' },
-                { check: userData.isPremium, className: 'premium' },
-                { check: userData.isAdFree, className: 'adfree' }, // <-- تمت إضافته للأولوية
+                { check: userData.isOwner, className: 'owner' },     // <-- (أحمر)
+                { check: userData.isAdmin, className: 'admin' },    // <-- (أخضر)
+                { check: userData.isVIP, className: 'vipp' },       // <-- (بنفسجي)
+                { check: userData.isPremium, className: 'premium' },  // <-- (ذهبي)
+                { check: userData.isAdFree, className: 'adfree' },    // <-- (أزرق)
             ];
 
-            let primaryRole = 'normal'; // افتراضي
+            let primaryRole = 'normal'; // افتراضي (رمادي)
             for (const role of rolesPriority) {
                 if (role.check) {
                     primaryRole = role.className;
-                    break; // توقف عند العثور على أعلى دور
+                    break; 
                 }
             }
             
@@ -223,44 +273,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const primaryRoleClass = `role-${primaryRole}`;
             const primaryRippleClass = `ripple-${primaryRole}`;
 
-            if (profileImage) {
-                profileImage.classList.add(primaryBorderClass);
-            }
+            if (profileImage) profileImage.classList.add(primaryBorderClass);
             element.classList.add(primaryRoleClass, primaryRippleClass); 
         }
     }
 
 
-    // =================================================================
-    //  --- باقي الدوال (بدون تغيير) ---
-    // =================================================================
-
-    // Modified updateUI function
+    /**
+     * (دالة محدثة) - تحديث الواجهة بناءً على حالة تسجيل الدخول
+     */
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         
-        // إزالة فئات الدور والريبل عند التحديث أو الخروج
         if (userIconLabel) {
              userIconLabel.classList.remove('logged-in');
         }
         
-        // مسح المؤقت عند تحديث الواجهة (مهم جداً عند تسجيل الخروج)
         if (colorToggleInterval) {
             clearInterval(colorToggleInterval);
             colorToggleInterval = null;
         }
 
         if (belumLogDiv && sudahLogDiv && userIconLabel) {
-            if (isLoggedIn) {
+            if (isLoggedIn && userData) {
                 belumLogDiv.classList.add('hidden');
                 sudahLogDiv.classList.remove('hidden');
-
-                // تفعيل فئة الدخول لتشغيل الريبل في الـ CSS
                 userIconLabel.classList.add('logged-in');
 
-                // الصورة النهائية (مع الصورة الافتراضية إذا لزم الأمر)
                 const finalImageUrl = profileImageUrl || DEFAULT_PROFILE_IMAGE;
 
-                // تحديث الصورة
                 let profileImg = userIconLabel.querySelector('.current-profile-image');
                 if (!profileImg) {
                     profileImg = document.createElement('img');
@@ -270,49 +310,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 profileImg.src = finalImageUrl;
                 
-                // منطق إخفاء/إظهار الروابط للمدراء/المشرفين
-                const isAdminOrOwner = (userData && (userData.isAdmin === true || userData.isOwner === true));
+                // (userData.isAdmin يتضمن الآن المالك أيضاً)
+                const isAdminOrOwner = (userData.isAdmin === true); 
 
-                // 1. إظهار/إخفاء زر الإدمن
                 if (adminElement) {
-                    if (isAdminOrOwner) { 
-                        adminElement.classList.remove('hidden');
-                    } else {
-                        adminElement.classList.add('hidden');
-                    }
+                    adminElement.classList.toggle('hidden', !isAdminOrOwner);
                 }
-                
-                // 2. إخفاء زر النقاط (Points) و المنتجات (Products) للمدير/المالك
                 if (pointsElement) {
-                     if (isAdminOrOwner) {
-                         pointsElement.classList.add('hidden');
-                     } else {
-                         pointsElement.classList.remove('hidden');
-                     }
+                     pointsElement.classList.toggle('hidden', isAdminOrOwner);
                 }
                 if (productsElement) {
-                     if (isAdminOrOwner) {
-                         productsElement.classList.add('hidden');
-                     } else {
-                         productsElement.classList.remove('hidden');
-                     }
+                     productsElement.classList.toggle('hidden', isAdminOrOwner);
                 }
                 
-                // تطبيق فئات الألوان والريبل والتناوب
-                // (هذه الدالة ستقوم بالمسح والتطبيق)
+                // تطبيق الألوان بناءً على الأدوار المحسوبة
                 applyRoleClasses(userIconLabel, userData);
-
 
             } else { // Not logged in
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
 
-                 // إخفاء جميع الروابط الخاصة بتسجيل الدخول
-                 if (adminElement) { adminElement.classList.add('hidden'); }
-                 if (pointsElement) { pointsElement.classList.add('hidden'); }
-                 if (productsElement) { productsElement.classList.add('hidden'); }
+                 if (adminElement) adminElement.classList.add('hidden');
+                 if (pointsElement) pointsElement.classList.add('hidden');
+                 if (productsElement) productsElement.classList.add('hidden');
 
-                 // استعادة أيقونة المستخدم الأصلية (SVG)
                  const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
                  if (existingProfileImg) {
                       existingProfileImg.remove();
@@ -321,16 +342,18 @@ document.addEventListener('DOMContentLoaded', () => {
                      userIconLabel.innerHTML = originalIconHtml;
                  }
                  
-                 // مسح أي فئات ألوان متبقية من الأيقونة
-                 applyRoleClasses(userIconLabel, {}); // استدعاء الدالة ببيانات فارغة لمسح الألوان
+                 // مسح الألوان عند تسجيل الخروج
+                 applyRoleClasses(userIconLabel, null); 
             }
         }
     }
 
-    // --- Event Listeners (As Original) ---
+    // --- (باقي مستمعي الأحداث كما هم) ---
+
     function logOut() {
         const performLogoutActions = () => {
             if (loginCheckbox) { loginCheckbox.checked = false; }
+            // لا حاجة لمسح localStorage يدوياً هنا، onAuthStateChanged سيتكفل بذلك
             window.location.href = "/p/login.html";
         };
 
@@ -342,22 +365,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         signOut(auth)
-            .then(() => { performLogoutActions(); })
-            .catch((error) => { performLogoutActions(); });
+            .then(() => { /* onAuthStateChanged سيقوم بالباقي */ })
+            .catch((error) => { /* حتى لو فشل، أعد التوجيه */ })
+            .finally(() => {
+                performLogoutActions();
+            });
     }
 
     if (logoutElement) {
-        if (logoutElement.getAttribute('onclick')) { logoutElement.removeAttribute('onclick'); }
         logoutElement.addEventListener('click', logOut);
     }
     if (adminElement) {
         adminElement.style.cursor = 'pointer';
-        if (adminElement.getAttribute('onclick')) { adminElement.removeAttribute('onclick'); }
         adminElement.addEventListener('click', () => { window.location.href = '/p/admin.html'; });
     }
      if (pointsElement) {
          pointsElement.style.cursor = 'pointer';
-         if (pointsElement.getAttribute('onclick')) { pointsElement.removeAttribute('onclick'); }
          pointsElement.addEventListener('click', (event) => {
              event.preventDefault();
              window.location.href = '/p/points.html';
