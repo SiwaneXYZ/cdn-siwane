@@ -1,270 +1,306 @@
+
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // العناصر الأساسية
-    const elements = {
-        loginCheckbox: document.getElementById('forlogPop'),
-        userIconLabel: document.querySelector('.logReg'),
-        popupWrapper: document.querySelector('.logPop-wrp'),
-        belumLogDiv: document.querySelector('.NotLog'),
-        sudahLogDiv: document.querySelector('.DonLog')
-    };
+    const loginCheckbox = document.getElementById('forlogPop');
+    const userIconLabel = document.querySelector('.logReg');
+    const popupWrapper = document.querySelector('.logPop-wrp');
+    const belumLogDiv = document.querySelector('.NotLog');
+    const sudahLogDiv = document.querySelector('.DonLog');
 
-    if (!validateElements(elements)) return;
+    // تحديد العناصر باستخدام aria-label كما في الكود الأصلي
+    const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
+    const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
+    const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
+    const myProductsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
-    // الثوابت
-    const CONSTANTS = {
-        STORAGE_KEY: 'firebaseUserProfileData',
-        DEFAULT_IMAGE: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-        PATHS: {
-            login: '/p/login.html',
-            admin: '/p/admin.html', 
-            points: '/p/points.html',
-            products: '/p/my-products.html'
+    const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
+    const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+
+    const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
+
+    // قراءة إعدادات Firebase
+    const firebaseConfigScript = document.getElementById('json:firebaseconfig');
+    let firebaseConfig = {};
+
+    if (firebaseConfigScript) {
+        const configText = firebaseConfigScript.textContent;
+        try {
+            const configData = JSON.parse(configText);
+            if (configData && typeof configData === 'object') {
+                 firebaseConfig = {
+                     apiKey: configData.apiKey,
+                     authDomain: configData.authDomain,
+                     projectId: configData.projectId,
+                     databaseURL: configData.databaseURL,
+                     storageBucket: configData.storageBucket,
+                     messagingSenderId: configData.messagingSenderId,
+                     appId: configData.appId,
+                 };
+
+                 if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
+                      firebaseConfig = {};
+                      console.error("Firebase config is missing apiKey or appId/projectId.");
+                 }
+            }
+        } catch (e) {
+            console.error("Failed to parse Firebase config from script tag:", e);
         }
-    };
-
-    const originalIconHtml = elements.userIconLabel.innerHTML;
-    const firebaseConfig = getFirebaseConfig();
-    
-    if (!firebaseConfig) {
-        console.warn("Firebase config missing - auth features disabled");
-        updateUI(false, elements, CONSTANTS, originalIconHtml);
-        return;
     }
+
+    let app;
+    let auth = null;
 
     // تهيئة Firebase
-    const app = initializeFirebase(firebaseConfig);
-    if (!app) {
-        updateUI(false, elements, CONSTANTS, originalIconHtml);
-        return;
-    }
-
-    const auth = getAuth(app);
-    setupAuthListener(auth, elements, CONSTANTS, originalIconHtml);
-    setupEventListeners(elements, auth, CONSTANTS);
-});
-
-// الدوال المساعدة
-function validateElements(elements) {
-    const required = ['userIconLabel', 'belumLogDiv', 'sudahLogDiv', 'popupWrapper', 'loginCheckbox'];
-    return required.every(key => {
-        if (!elements[key]) {
-            console.warn(`Element ${key} not found`);
-            return false;
-        }
-        return true;
-    });
-}
-
-function getFirebaseConfig() {
-    const script = document.getElementById('json:firebaseconfig');
-    if (!script) return null;
-
-    try {
-        const config = JSON.parse(script.textContent);
-        if (!config.apiKey || (!config.appId && !config.projectId)) {
-            throw new Error("Missing required Firebase config fields");
-        }
-        return config;
-    } catch (error) {
-        console.error("Invalid Firebase config:", error);
-        return null;
-    }
-}
-
-function initializeFirebase(config) {
-    try {
-        return getApps().length === 0 ? initializeApp(config) : getApp();
-    } catch (error) {
-        console.error("Firebase initialization failed:", error);
-        return null;
-    }
-}
-
-function setupAuthListener(auth, elements, CONSTANTS, originalIconHtml) {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            handleUserLogin(user, CONSTANTS);
+    const apps = getApps();
+    if (apps.length === 0) {
+        if (Object.keys(firebaseConfig).length > 0) {
+           try {
+               app = initializeApp(firebaseConfig);
+               console.log("Firebase App initialized.");
+           } catch (error) {
+               console.error("Firebase initialization failed:", error);
+           }
         } else {
-            handleUserLogout(CONSTANTS);
+            console.warn("Firebase config is missing or invalid. Authentication features may not work.");
         }
-        updateAuthUI(user, elements, CONSTANTS, originalIconHtml);
-        if (elements.loginCheckbox) elements.loginCheckbox.checked = false;
-    });
-}
-
-function handleUserLogin(user, CONSTANTS) {
-    const cachedData = getCachedUserData(CONSTANTS.STORAGE_KEY);
-    const userData = {
-        uid: user.uid,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        email: user.email,
-        isAdmin: cachedData?.isAdmin || false
-    };
-    
-    localStorage.setItem(CONSTANTS.STORAGE_KEY, JSON.stringify(userData));
-    return userData;
-}
-
-function handleUserLogout(CONSTANTS) {
-    localStorage.removeItem(CONSTANTS.STORAGE_KEY);
-}
-
-function getCachedUserData(storageKey) {
-    try {
-        return JSON.parse(localStorage.getItem(storageKey));
-    } catch {
-        return null;
-    }
-}
-
-function updateAuthUI(user, elements, CONSTANTS, originalIconHtml) {
-    const isLoggedIn = !!user;
-    const userData = getCachedUserData(CONSTANTS.STORAGE_KEY);
-    
-    elements.belumLogDiv.classList.toggle('hidden', isLoggedIn);
-    elements.sudahLogDiv.classList.toggle('hidden', !isLoggedIn);
-
-    if (isLoggedIn) {
-        setupLoggedInUI(elements, userData, CONSTANTS);
-        updateUserIcon(elements.userIconLabel, userData?.photoURL || CONSTANTS.DEFAULT_IMAGE, true);
     } else {
-        setupLoggedOutUI(elements);
-        updateUserIcon(elements.userIconLabel, null, false, originalIconHtml);
+       app = getApp();
+       console.log("Firebase App already initialized.");
     }
-}
 
-function setupLoggedInUI(elements, userData, CONSTANTS) {
-    const { adminElement, pointsElement, myProductsElement } = getMenuElements(elements.sudahLogDiv);
-    const isAdmin = userData?.isAdmin === true;
+    // الحصول على خدمة المصادقة
+    if (app) {
+       try {
+           auth = getAuth(app);
+           console.log("Firebase Auth service obtained.");
 
-    // إظهار/إخفاء العناصر بناءً على صلاحية المشرف
-    [pointsElement, myProductsElement].forEach(el => el?.classList.toggle('hidden', isAdmin));
-    adminElement?.classList.toggle('hidden', !isAdmin);
-}
+           onAuthStateChanged(auth, (user) => {
+               if (user) {
+                   console.log("User is logged in:", user.uid);
 
-function setupLoggedOutUI(elements) {
-    const { adminElement, pointsElement, myProductsElement } = getMenuElements(elements.sudahLogDiv);
-    [adminElement, pointsElement, myProductsElement].forEach(el => el?.classList.add('hidden'));
-}
+                   const firebaseUserData = {
+                       uid: user.uid,
+                       displayName: user.displayName,
+                       photoURL: user.photoURL,
+                       email: user.email,
+                   };
 
-function getMenuElements(container) {
-    return {
-        adminElement: container?.querySelector('div.loginS[aria-label="ادمن"]'),
-        logoutElement: container?.querySelector('div.loginS[aria-label="الخروج"]'),
-        pointsElement: container?.querySelector('a.loginS[aria-label="نقاطي"]'),
-        myProductsElement: container?.querySelector('a.loginS[aria-label="منتجاتي"]')
-    };
-}
+                   let cachedUserData = null;
+                    const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
+                    if (dataString) {
+                        try { 
+                            cachedUserData = JSON.parse(dataString); 
+                        } catch(e) { 
+                            console.error("Failed to parse cached user data:", e); 
+                            cachedUserData = null; 
+                        }
+                    }
 
-function updateUserIcon(iconLabel, imageUrl, isLoggedIn, originalHtml = '') {
-    const existingImg = iconLabel.querySelector('.current-profile-image');
-    if (existingImg) existingImg.remove();
+                   const combinedUserData = {
+                       ...cachedUserData,
+                       ...firebaseUserData,
+                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false
+                   };
 
-    if (isLoggedIn) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = 'Profile Image';
-        img.className = 'profileUser current-profile-image';
-        img.onerror = () => { img.src = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; };
-        
-        iconLabel.innerHTML = '';
-        iconLabel.appendChild(img);
-        iconLabel.classList.add('logged-in');
+                   localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(combinedUserData));
+
+                   updateUI(true, combinedUserData, combinedUserData.photoURL || user.photoURL);
+
+               } else {
+                   console.log("User is logged out.");
+                   localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
+                   updateUI(false, null, null);
+               }
+               
+               if (loginCheckbox) {
+                   loginCheckbox.checked = false;
+               }
+           });
+
+       } catch (error) {
+           console.error("Failed to get Firebase Auth service:", error);
+           updateUI(false, null, null);
+           if (loginCheckbox) {
+                loginCheckbox.checked = false;
+           }
+       }
     } else {
-        iconLabel.innerHTML = originalHtml;
-        iconLabel.classList.remove('logged-in');
+        console.warn("Firebase App is not initialized. Auth state listener will not be set.");
+        updateUI(false, null, null);
+        if (loginCheckbox) {
+            loginCheckbox.checked = false;
+        }
     }
-}
 
-function setupEventListeners(elements, auth, CONSTANTS) {
-    const menuElements = getMenuElements(elements.sudahLogDiv);
-    
-    // مستمعي الأحداث للقائمة
-    Object.entries({
-        [menuElements.logoutElement]: () => handleLogout(auth, elements.loginCheckbox, CONSTANTS.PATHS.login),
-        [menuElements.adminElement]: () => navigateTo(CONSTANTS.PATHS.admin),
-        [menuElements.pointsElement]: () => navigateTo(CONSTANTS.PATHS.points),
-        [menuElements.myProductsElement]: () => navigateTo(CONSTANTS.PATHS.products)
-    }).forEach(([element, handler]) => {
-        if (element) {
-            element.style.cursor = 'pointer';
-            element.removeAttribute('onclick');
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                handler();
-                // إغلاق القائمة بعد النقر على أي عنصر
-                if (elements.loginCheckbox) {
-                    elements.loginCheckbox.checked = false;
+    // تحديث واجهة المستخدم
+    function updateUI(isLoggedIn, userData, profileImageUrl) {
+        if (belumLogDiv && sudahLogDiv) {
+            if (isLoggedIn) {
+                belumLogDiv.classList.add('hidden');
+                sudahLogDiv.classList.remove('hidden');
+
+                // التحكم في عنصر المشرف
+                if (adminElement) {
+                    if (userData && userData.isAdmin === true) {
+                        adminElement.classList.remove('hidden');
+                    } else {
+                        adminElement.classList.add('hidden');
+                    }
                 }
+
+                // التحكم في عنصر "منتجاتي" (إخفاء إذا كان مشرف)
+                if (myProductsElement) {
+                     if (userData && userData.isAdmin === true) {
+                         myProductsElement.classList.add('hidden');
+                     } else {
+                         myProductsElement.classList.remove('hidden');
+                     }
+                }
+
+                // التحكم في عنصر "نقاطي" (إخفاء إذا كان مشرف)
+                if (pointsElement) {
+                     if (userData && userData.isAdmin === true) {
+                         pointsElement.classList.add('hidden');
+                     } else {
+                         pointsElement.classList.remove('hidden');
+                     }
+                }
+
+                // تحديث صورة المستخدم
+                if (userIconLabel) {
+                    const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
+                    if (existingProfileImg) {
+                        existingProfileImg.remove();
+                    }
+
+                    const imageUrl = profileImageUrl || DEFAULT_PROFILE_IMAGE;
+                    
+                    const profileImg = document.createElement('img');
+                    profileImg.src = imageUrl;
+                    profileImg.alt = 'Profile Image';
+                    profileImg.classList.add('profileUser');
+                    profileImg.classList.add('current-profile-image');
+                    
+                    profileImg.onerror = function() {
+                        this.src = DEFAULT_PROFILE_IMAGE;
+                    };
+                    
+                    userIconLabel.innerHTML = '';
+                    userIconLabel.appendChild(profileImg);
+
+                    // تفعيل تأثير الريبل للمستخدمين المسجلين
+                    userIconLabel.classList.add('logged-in');
+                }
+
+            } else {
+                belumLogDiv.classList.remove('hidden');
+                sudahLogDiv.classList.add('hidden');
+
+                 if (adminElement) adminElement.classList.add('hidden');
+                 if (pointsElement) pointsElement.classList.add('hidden');
+                 if (myProductsElement) myProductsElement.classList.add('hidden');
+
+                 if (userIconLabel) {
+                      const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
+                      if (existingProfileImg) {
+                          existingProfileImg.remove();
+                      }
+                      userIconLabel.innerHTML = originalIconHtml;
+                      userIconLabel.classList.remove('logged-in');
+                 }
+            }
+        }
+    }
+
+    // تسجيل الخروج
+    function logOut() {
+        const performLogoutActions = () => {
+            console.log("Performing post-logout cleanup and navigation.");
+            if (loginCheckbox) {
+                loginCheckbox.checked = false;
+            }
+            window.location.href = "/p/login.html";
+        };
+
+        if (!auth) {
+            console.warn("Firebase Auth not available. Cannot perform Firebase signOut.");
+            localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
+            updateUI(false, null, null);
+            performLogoutActions();
+            return;
+        }
+
+        console.log("Attempting Firebase signOut...");
+        signOut(auth)
+            .then(() => {
+                console.log("Firebase signOut successful.");
+                performLogoutActions();
+            })
+            .catch((error) => {
+                 console.error("Logout failed:", error);
+                 performLogoutActions();
             });
+    }
+
+    // إضافة مستمعي الأحداث
+    if (logoutElement) {
+        if (logoutElement.getAttribute('onclick')) {
+            logoutElement.removeAttribute('onclick');
+        }
+        logoutElement.addEventListener('click', logOut);
+    }
+
+    if (adminElement) {
+        adminElement.style.cursor = 'pointer';
+        if (adminElement.getAttribute('onclick')) {
+             adminElement.removeAttribute('onclick');
+         }
+        adminElement.addEventListener('click', () => {
+            window.location.href = '/p/admin.html';
+        });
+    }
+
+    if (pointsElement) {
+         pointsElement.style.cursor = 'pointer';
+         if (pointsElement.getAttribute('onclick')) {
+              pointsElement.removeAttribute('onclick');
+          }
+         pointsElement.addEventListener('click', (event) => {
+             event.preventDefault();
+             window.location.href = '/p/points.html';
+         });
+     }
+
+    if (myProductsElement) {
+         myProductsElement.style.cursor = 'pointer';
+         if (myProductsElement.getAttribute('onclick')) {
+              myProductsElement.removeAttribute('onclick');
+          }
+         myProductsElement.addEventListener('click', (event) => {
+             event.preventDefault();
+             window.location.href = '/p/my-products.html';
+         });
+     }
+
+    if (userIconLabel && loginCheckbox) {
+        userIconLabel.style.cursor = 'pointer';
+        userIconLabel.addEventListener('click', (event) => {
+            event.preventDefault();
+            loginCheckbox.checked = !loginCheckbox.checked;
+        });
+    }
+
+    document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
+            const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
+
+            if (isClickOutside) {
+                loginCheckbox.checked = false;
+            }
         }
     });
 
-    // فتح/إغلاق البوب أب
-    if (elements.userIconLabel && elements.loginCheckbox) {
-        elements.userIconLabel.style.cursor = 'pointer';
-        elements.userIconLabel.addEventListener('click', (e) => {
-            e.preventDefault();
-            elements.loginCheckbox.checked = !elements.loginCheckbox.checked;
-        });
-    }
-
-    // إغلاق البوب أب عند النقر في أي مكان في الصفحة
-    document.addEventListener('click', (e) => {
-        if (elements.loginCheckbox && elements.loginCheckbox.checked) {
-            elements.loginCheckbox.checked = false;
-        }
-    });
-
-    // منع إغلاق البوب أب عند النقر على أيقونة المستخدم نفسه
-    if (elements.userIconLabel) {
-        elements.userIconLabel.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-
-    // منع إغلاق البوب أب عند النقر داخل القائمة نفسها (اختياري - إذا أردت أن تغلق حتى عند النقر داخلها)
-    // إذا أردت أن تغلق حتى عند النقر داخل القائمة، احذف هذا الجزء
-    if (elements.popupWrapper) {
-        elements.popupWrapper.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-}
-
-function handleLogout(auth, loginCheckbox, loginPath) {
-    const logoutActions = () => {
-        if (loginCheckbox) loginCheckbox.checked = false;
-        window.location.href = loginPath;
-    };
-
-    if (!auth) {
-        localStorage.removeItem('firebaseUserProfileData');
-        logoutActions();
-        return;
-    }
-
-    signOut(auth).then(logoutActions).catch(logoutActions);
-}
-
-function navigateTo(path) {
-    window.location.href = path;
-}
-
-// وظيفة مساعدة للتحديث من الخارج إذا لزم الأمر
-function updateUI(isLoggedIn, elements, CONSTANTS, originalIconHtml) {
-    if (!elements) return;
-    
-    elements.belumLogDiv.classList.toggle('hidden', isLoggedIn);
-    elements.sudahLogDiv.classList.toggle('hidden', !isLoggedIn);
-    
-    if (isLoggedIn) {
-        updateUserIcon(elements.userIconLabel, CONSTANTS.DEFAULT_IMAGE, true);
-    } else {
-        updateUserIcon(elements.userIconLabel, null, false, originalIconHtml);
-    }
-}
+});
