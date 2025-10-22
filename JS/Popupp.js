@@ -1,256 +1,243 @@
-// 1. قائمة الاستيراد: فقط Firebase App و Auth
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- عناصر الواجهة (كما هي) ---
     const loginCheckbox = document.getElementById('forlogPop');
     const userIconLabel = document.querySelector('.logReg');
     const popupWrapper = document.querySelector('.logPop-wrp');
     const belumLogDiv = document.querySelector('.NotLog'); 
     const sudahLogDiv = document.querySelector('.DonLog'); 
 
+    // تحديد عناصر الروابط
     const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
     const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
     const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
-    // --- متغيرات عامة (كما هي) ---
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
+    // الصورة الافتراضية المطلوبة
     const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
+
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
-    let colorToggleInterval = null;
+    let colorToggleInterval = null; // متغير لتخزين مؤقت التناوب اللوني
 
-    // ⚠️ يجب تعريف هذا يدوياً لأنه كان يتم جلبه سابقاً من إعدادات مُعقّدة
-    // تأكد من أن هذا البريد الإلكتروني هو البريد الفعلي للمالك في نظامك.
-    let ownerAdminEmail = 'siwane.tutorials@gmail.com'; 
+    // --- Firebase Initialization (As Original) ---
+    const firebaseConfigScript = document.getElementById('json:firebaseconfig');
+    let firebaseConfig = {};
 
-    // --- تهيئة Firebase (المعتادة) ---
+    if (firebaseConfigScript) {
+        const configText = firebaseConfigScript.textContent;
+        try {
+            const configData = JSON.parse(configText);
+            if (configData && typeof configData === 'object') {
+                 firebaseConfig = {
+                     apiKey: configData.apiKey,
+                     authDomain: configData.authDomain,
+                     projectId: configData.projectId,
+                     databaseURL: configData.databaseURL,
+                     storageBucket: configData.storageBucket,
+                     messagingSenderId: configData.messagingSenderId,
+                     appId: configData.appId,
+                 };
+                 if (!firebaseConfig.apiKey || (!firebaseConfig.appId && !firebaseConfig.projectId)) {
+                      firebaseConfig = {};
+                      console.error("Firebase config is missing apiKey or appId/projectId.");
+                 }
+            }
+        } catch (e) {
+            console.error("Failed to parse Firebase config from script tag:", e);
+        }
+    }
+
     let app;
     let auth = null;
 
     const apps = getApps();
     if (apps.length === 0) {
-       console.warn("Firebase App is not initialized. Assuming another script will handle it or using minimal Auth.");
+        if (Object.keys(firebaseConfig).length > 0) {
+           try {
+               app = initializeApp(firebaseConfig);
+           } catch (error) {
+               console.error("Firebase initialization failed:", error);
+           }
+        } else {
+            console.warn("Firebase config is missing or invalid. Authentication features may not work.");
+        }
     } else {
        app = getApp();
     }
+    // --- End Firebase Init ---
 
     if (app) {
        try {
            auth = getAuth(app);
+
+           onAuthStateChanged(auth, (user) => {
+               if (user) {
+                   const firebaseUserData = {
+                       uid: user.uid,
+                       displayName: user.displayName,
+                       photoURL: user.photoURL,
+                       email: user.email,
+                   };
+
+                   let cachedUserData = null;
+                    const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
+                    if (dataString) {
+                        try { cachedUserData = JSON.parse(dataString); } catch(e) { cachedUserData = null; }
+                    }
+
+                   // دمج بيانات الأدوار من التخزين المحلي (لأغراض العرض فقط، وليس للتحكم في الوصول)
+                   const combinedUserData = {
+                       // افتراض أن هذه القيم تأتي من مكان آخر ويتم تخزينها مؤقتاً هنا
+                       isAdmin: cachedUserData ? cachedUserData.isAdmin : false, // مدير
+                       isOwner: cachedUserData ? cachedUserData.isOwner : false, // مالك (أو مشرف)
+                       isVIP: cachedUserData ? cachedUserData.isVIP : false, // VIP
+                       isPremium: cachedUserData ? cachedUserData.isPremium : false, // بريميوم
+                       isAdFree: cachedUserData ? cachedUserData.isAdFree : false, // إعفاء من الإعلانات
+                       ...firebaseUserData, 
+                   };
+
+                   localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(combinedUserData));
+
+                   const finalPhotoURL = combinedUserData.photoURL || user.photoURL;
+                   updateUI(true, combinedUserData, finalPhotoURL);
+
+               } else {
+                   localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
+                   updateUI(false, null, null);
+               }
+               if (loginCheckbox) {
+                   loginCheckbox.checked = false;
+               }
+           });
+
        } catch (error) {
            console.error("Failed to get Firebase Auth service:", error);
+           updateUI(false, null, null);
+           if (loginCheckbox) {
+                loginCheckbox.checked = false;
+           }
        }
-    }
-    // --- نهاية التهيئة ---
-
-    
-    /**
-     * [مهم جداً] دالة حساب الأدوار (مستخدمة الآن فقط للكاش)
-     * تحسب الأدوار بناءً على البيانات المخزنة في localStorage.
-     */
-    function getCalculatedRoles(storedData, currentUser) {
-        const roles = { isOwner: false, isAdmin: false, isVIP: false, isPremium: false, isAdFree: false, };
-
-        if (!storedData || !currentUser) return roles;
-
-        // ⚠️ يجب تحويل حقول تاريخ الانتهاء من FireStore Timestamp (إن وجدت في الكاش) 
-        // إلى Date أو قيم قابلة للمقارنة إذا كان سكربت profile.js يحفظها ككائن.
-        // نفترض هنا أن البيانات المخزنة في LocalStorage قابلة للمقارنة مباشرة.
-        
-        // 1. المالك والمدير
-        const isEmailOwner = currentUser.email && ownerAdminEmail &&
-                             currentUser.email.toLowerCase() === ownerAdminEmail.toLowerCase();
-        
-        if (isEmailOwner) { roles.isOwner = true; roles.isAdmin = true; } 
-        else if (storedData.isAdmin === true) { roles.isAdmin = true; }
-
-        // 2. العضوية
-        const accountType = (storedData.accountType || 'normal').toLowerCase();
-        if (accountType === 'vipp') { roles.isVIP = true; }
-
-        // 3. البريميوم (يعتمد على تاريخ الانتهاء)
-        const premiumExpiry = storedData.premiumExpiry; 
-        // إذا كان الكاش يحفظ كائن Timestamp، نحتاج إلى الوصول إلى seconds
-        const premiumExpiryMillis = premiumExpiry && premiumExpiry.seconds ? premiumExpiry.seconds * 1000 : (typeof premiumExpiry === 'number' ? premiumExpiry : null);
-
-        const isPremiumActive = premiumExpiryMillis && premiumExpiryMillis > Date.now();
-        
-        if (accountType === 'premium' || isPremiumActive) { roles.isPremium = true; }
-
-        // 4. معفي من الإعلانات (يعتمد على تاريخ الانتهاء)
-        const adFreeExpiry = storedData.adFreeExpiry; 
-        const adFreeExpiryMillis = adFreeExpiry && adFreeExpiry.seconds ? adFreeExpiry.seconds * 1000 : (typeof adFreeExpiry === 'number' ? adFreeExpiry : null);
-
-        const isAdFreePermanent = (adFreeExpiry === null);
-        const isAdFreeTemporary = adFreeExpiryMillis && adFreeExpiryMillis > Date.now();
-
-        if (isAdFreePermanent || isAdFreeTemporary) { roles.isAdFree = true; }
-        
-        // 5. VIP يشمل البريميوم والإعفاء
-        if (roles.isVIP) { roles.isPremium = true; roles.isAdFree = true; }
-
-        return roles;
-    }
-
-
-    // =================================================================
-    //  --- onAuthStateChanged (الآن يعتمد فقط على LocalStorage) ---
-    // =================================================================
-    if (auth) { 
-        onAuthStateChanged(auth, (user) => { 
-            let cachedUserData = null;
-            let finalPhotoURL = DEFAULT_PROFILE_IMAGE;
-            let displayData = null;
-
-            if (user) {
-                // 1. محاولة القراءة من localStorage (المسار السريع)
-                const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
-                if (dataString) {
-                    try { cachedUserData = JSON.parse(dataString); } catch (e) { cachedUserData = null; }
-                }
-
-                // 2. التحقق من صلاحية الكاش وتطبيقه
-                const isCacheValid = cachedUserData && cachedUserData.uid === user.uid;
-                
-                if (isCacheValid) {
-                    console.log("Popup.js: تم استخدام بيانات الكاش الصالحة.");
-                    const rolesData = getCalculatedRoles(cachedUserData, user);
-                    displayData = {
-                        uid: user.uid,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL,
-                        email: user.email,
-                        ...rolesData 
-                    };
-                    finalPhotoURL = cachedUserData.photoURL || user.photoURL || DEFAULT_PROFILE_IMAGE;
-
-                } else {
-                     console.warn("Popup.js: لا يوجد كاش صالح للأدوار. سيتم استخدام بيانات Auth الأساسية.");
-                     // في حالة عدم وجود كاش صالح، نعتمد على بيانات Auth فقط (بدون أدوار معقدة/ريبل)
-                     displayData = {
-                        uid: user.uid,
-                        displayName: user.displayName,
-                        photoURL: user.photoURL,
-                        email: user.email,
-                        isOwner: false, isAdmin: false, isVIP: false, isPremium: false, isAdFree: false,
-                     };
-                     // فحص المالك الأساسي
-                     if (user.email && ownerAdminEmail && user.email.toLowerCase() === ownerAdminEmail.toLowerCase()) {
-                         displayData.isOwner = true;
-                         displayData.isAdmin = true;
-                     }
-                     finalPhotoURL = user.photoURL || DEFAULT_PROFILE_IMAGE;
-                }
-                
-                updateUI(true, displayData, finalPhotoURL);
-
-            } else {
-                // مستخدم غير مسجل الدخول
-                localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-                updateUI(false, null, null);
-            }
-            if (loginCheckbox) loginCheckbox.checked = false;
-        });
     } else {
-        // فشل تهيئة Auth، عرض حالة تسجيل الخروج
         updateUI(false, null, null);
-        if (loginCheckbox) loginCheckbox.checked = false;
+        if (loginCheckbox) {
+            loginCheckbox.checked = false;
+        }
     }
-    // =================================================================
 
 
     /**
-     * دالة تطبيق الأدوار (تشمل الريبل) - (كما هي)
+     * وظيفة تحديد الدور وتطبيق فئات الألوان والريبل، مع منطق التناوب.
+     * @param {HTMLElement} element - الـ label (.logReg)
+     * @param {Object} userData - بيانات المستخدم المدمجة
      */
     function applyRoleClasses(element, userData) {
-        const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'adfree', 'normal'];
-        const allBorderClasses = allRoleClasses.map(r => `border-${r}`);
-        const allRippleClasses = allRoleClasses.map(r => `ripple-${r}`);
-        const allRoleClassesSvg = allRoleClasses.map(r => `role-${r}`);
+        // قائمة بالأدوار حسب الأولوية (الأعلى إلى الأدنى)
+        const roles = [
+            { check: userData.isOwner, className: 'owner' },
+            { check: userData.isAdmin, className: 'admin' },
+            { check: userData.isVIP, className: 'vipp' },
+            { check: userData.isPremium, className: 'premium' },
+        ];
 
+        // قائمة بجميع فئات الأدوار لضمان مسحها
+        const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'normal'].flatMap(r => [`border-${r}`, `ripple-${r}`, `role-${r}`]);
+
+        // 1. مسح جميع فئات الدور الحالية
+        const classesToRemove = element.className.split(' ').filter(c => allRoleClasses.some(roleClass => c.startsWith(roleClass.substring(0, roleClass.indexOf('-') + 1))));
+        element.classList.remove(...classesToRemove);
+
+        const profileImage = element.querySelector('.current-profile-image');
+        if (profileImage) {
+            profileImage.classList.remove(...allRoleClasses.filter(c => c.startsWith('border-')));
+        }
+
+        // 2. تحديد الدور الرئيسي (الأعلى أولوية)
+        let primaryRole = 'normal';
+        for (const role of roles) {
+            if (role.check) {
+                primaryRole = role.className;
+                break; 
+            }
+        }
+        
+        // 3. تطبيق اللون الأساسي على الإطار والأيقونة/الريبل
+        const primaryBorderClass = `border-${primaryRole}`;
+        const primaryRoleClass = `role-${primaryRole}`;
+        const primaryRippleClass = `ripple-${primaryRole}`;
+
+        if (profileImage) {
+            profileImage.classList.add(primaryBorderClass);
+        }
+        element.classList.add(primaryRoleClass, primaryRippleClass); 
+        
+        // 4. منطق التناوب اللوني (Premium + AdFree)
+        const hasAdFree = userData.isAdFree;
+        const hasPremium = userData.isPremium;
+
+        // مسح أي مؤقت سابق للتناوب
         if (colorToggleInterval) {
             clearInterval(colorToggleInterval);
             colorToggleInterval = null;
         }
 
-        element.classList.remove(...allRippleClasses, ...allRoleClassesSvg);
-        const profileImage = element.querySelector('.current-profile-image');
-        if (profileImage) {
-            profileImage.classList.remove(...allBorderClasses);
-        }
-
-        const isLoggedOut = !userData || !userData.uid;
-        if (isLoggedOut) {
-            return; 
-        }
-
-        const hasPremium = userData.isPremium;
-        const hasAdFree = userData.isAdFree;
-        const isSpecialToggleCase = hasPremium && hasAdFree && !userData.isOwner && !userData.isAdmin;
-
-        if (isSpecialToggleCase) {
-            const toggleRoles = ['premium', 'adfree'];
-            const toggleBorderClasses = toggleRoles.map(r => `border-${r}`);
-            const toggleRippleClasses = toggleRoles.map(r => `ripple-${r}`);
+        if (hasPremium && hasAdFree) {
+            // التناوب بين Premium (ذهبي) و Owner/Admin (الأخضر/الأحمر الداكن)
+            const toggleRoles = ['premium', 'owner']; // استخدمنا 'owner' كبديل لـ 'AdFree' لون خاص
             let colorIndex = 0;
-            element.classList.add('role-premium'); 
 
-            const toggleColors = () => {
+            colorToggleInterval = setInterval(() => {
                 const currentRole = toggleRoles[colorIndex % toggleRoles.length];
                 colorIndex++;
+                
                 const currentBorderClass = `border-${currentRole}`;
                 const currentRippleClass = `ripple-${currentRole}`;
-                if (profileImage) profileImage.classList.remove(...toggleBorderClasses);
-                element.classList.remove(...toggleRippleClasses);
-                if (profileImage) profileImage.classList.add(currentBorderClass);
-                element.classList.add(currentRippleClass);
-            };
-            toggleColors();
-            colorToggleInterval = setInterval(toggleColors, 3000);
-        } else {
-            const rolesPriority = [
-                { check: userData.isOwner, className: 'owner' },
-                { check: userData.isAdmin, className: 'admin' },
-                { check: userData.isVIP, className: 'vipp' },
-                { check: userData.isPremium, className: 'premium' },
-                { check: userData.isAdFree, className: 'adfree' },
-            ];
-            let primaryRole = 'normal';
-            for (const role of rolesPriority) {
-                if (role.check) {
-                    primaryRole = role.className;
-                    break; 
+
+                // إزالة فئات التناوب القديمة
+                if (profileImage) {
+                     profileImage.classList.remove(...toggleRoles.map(r => `border-${r}`));
                 }
-            }
-            const primaryBorderClass = `border-${primaryRole}`;
-            const primaryRoleClass = `role-${primaryRole}`;
-            const primaryRippleClass = `ripple-${primaryRole}`;
-            if (profileImage) profileImage.classList.add(primaryBorderClass);
-            element.classList.add(primaryRoleClass, primaryRippleClass); 
+                element.classList.remove(...toggleRoles.map(r => `ripple-${r}`));
+                
+                // تطبيق فئات التناوب الجديدة
+                if (profileImage) {
+                     profileImage.classList.add(currentBorderClass);
+                }
+                element.classList.add(currentRippleClass);
+                
+            }, 5000); // 5 ثواني للتناوب
         }
     }
 
 
-    /**
-     * دالة تحديث الواجهة (كما هي)
-     */
+    // Modified updateUI function
     function updateUI(isLoggedIn, userData, profileImageUrl) {
-        if (userIconLabel) userIconLabel.classList.remove('logged-in');
+        
+        // إزالة فئات الدور والريبل عند التحديث أو الخروج
+        if (userIconLabel) {
+             userIconLabel.classList.remove('logged-in');
+             // مسح جميع فئات الدور
+             userIconLabel.className = userIconLabel.className.split(' ').filter(c => !c.startsWith('role-') && !c.startsWith('ripple-')).join(' ');
+        }
         if (colorToggleInterval) {
             clearInterval(colorToggleInterval);
             colorToggleInterval = null;
         }
 
+
         if (belumLogDiv && sudahLogDiv && userIconLabel) {
-            if (isLoggedIn && userData) {
+            if (isLoggedIn) {
                 belumLogDiv.classList.add('hidden');
                 sudahLogDiv.classList.remove('hidden');
+
+                // تفعيل فئة الدخول لتشغيل الريبل في الـ CSS
                 userIconLabel.classList.add('logged-in');
+
+                // الصورة النهائية (مع الصورة الافتراضية إذا لزم الأمر)
                 const finalImageUrl = profileImageUrl || DEFAULT_PROFILE_IMAGE;
 
+                // تحديث الصورة
                 let profileImg = userIconLabel.querySelector('.current-profile-image');
                 if (!profileImg) {
                     profileImg = document.createElement('img');
@@ -260,60 +247,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 profileImg.src = finalImageUrl;
                 
-                const isAdminOrOwner = (userData.isAdmin === true); 
+                // منطق إخفاء/إظهار الروابط للمدراء/المشرفين
+                const isAdminOrOwner = (userData && (userData.isAdmin === true || userData.isOwner === true));
 
-                if (adminElement) adminElement.classList.toggle('hidden', !isAdminOrOwner);
-                if (pointsElement) pointsElement.classList.toggle('hidden', isAdminOrOwner);
-                if (productsElement) productsElement.classList.toggle('hidden', isAdminOrOwner);
+                // 1. إظهار/إخفاء زر الإدمن
+                if (adminElement) {
+                    if (isAdminOrOwner) { 
+                        adminElement.classList.remove('hidden');
+                    } else {
+                        adminElement.classList.add('hidden');
+                    }
+                }
                 
-                applyRoleClasses(userIconLabel, userData); 
+                // 2. إخفاء زر النقاط (Points) و المنتجات (Products) للمدير/المالك
+                if (pointsElement) {
+                     if (isAdminOrOwner) {
+                         pointsElement.classList.add('hidden');
+                     } else {
+                         pointsElement.classList.remove('hidden');
+                     }
+                }
+                if (productsElement) {
+                     if (isAdminOrOwner) {
+                         productsElement.classList.add('hidden');
+                     } else {
+                         productsElement.classList.remove('hidden');
+                     }
+                }
+                
+                // تطبيق فئات الألوان والريبل والتناوب
+                applyRoleClasses(userIconLabel, userData);
+
 
             } else { // Not logged in
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
-                 if (adminElement) adminElement.classList.add('hidden');
-                 if (pointsElement) pointsElement.classList.add('hidden');
-                 if (productsElement) productsElement.classList.add('hidden');
 
+                 // إخفاء جميع الروابط الخاصة بتسجيل الدخول
+                 if (adminElement) { adminElement.classList.add('hidden'); }
+                 if (pointsElement) { pointsElement.classList.add('hidden'); }
+                 if (productsElement) { productsElement.classList.add('hidden'); }
+
+                 // استعادة أيقونة المستخدم الأصلية (SVG)
                  const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                 if (existingProfileImg) existingProfileImg.remove();
+                 if (existingProfileImg) {
+                      existingProfileImg.remove();
+                 }
                  if (!userIconLabel.querySelector('svg')) {
                      userIconLabel.innerHTML = originalIconHtml;
                  }
-                 applyRoleClasses(userIconLabel, null); 
             }
         }
     }
 
-    // --- (مستمعي الأحداث وتسجيل الخروج) - (كما هي) ---
+    // --- Event Listeners (As Original) ---
     function logOut() {
         const performLogoutActions = () => {
             if (loginCheckbox) { loginCheckbox.checked = false; }
             window.location.href = "/p/login.html";
         };
+
         if (!auth) {
             localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
             updateUI(false, null, null);
             performLogoutActions();
             return;
         }
+
         signOut(auth)
-            .finally(() => {
-                performLogoutActions();
-            });
+            .then(() => { performLogoutActions(); })
+            .catch((error) => { performLogoutActions(); });
     }
 
-    if (logoutElement) logoutElement.addEventListener('click', logOut);
-    if (adminElement) adminElement.addEventListener('click', () => { window.location.href = '/p/admin.html'; });
-    if (pointsElement) pointsElement.addEventListener('click', (e) => { e.preventDefault(); window.location.href = '/p/points.html'; });
-    if (productsElement) productsElement.addEventListener('click', (e) => { e.preventDefault(); window.location.href = '/p/products.html'; });
-    
-    if (userIconLabel && loginCheckbox) {
-        userIconLabel.addEventListener('click', (e) => { e.preventDefault(); loginCheckbox.checked = !loginCheckbox.checked; });
+    if (logoutElement) {
+        if (logoutElement.getAttribute('onclick')) { logoutElement.removeAttribute('onclick'); }
+        logoutElement.addEventListener('click', logOut);
     }
-    document.addEventListener('click', (e) => {
+    if (adminElement) {
+        adminElement.style.cursor = 'pointer';
+        if (adminElement.getAttribute('onclick')) { adminElement.removeAttribute('onclick'); }
+        adminElement.addEventListener('click', () => { window.location.href = '/p/admin.html'; });
+    }
+     if (pointsElement) {
+         pointsElement.style.cursor = 'pointer';
+         if (pointsElement.getAttribute('onclick')) { pointsElement.removeAttribute('onclick'); }
+         pointsElement.addEventListener('click', (event) => {
+             event.preventDefault();
+             window.location.href = '/p/points.html';
+         });
+     }
+    if (userIconLabel && loginCheckbox) {
+        userIconLabel.style.cursor = 'pointer';
+        userIconLabel.addEventListener('click', (event) => {
+            event.preventDefault();
+            loginCheckbox.checked = !loginCheckbox.checked;
+        });
+    }
+    document.addEventListener('click', (event) => {
+        const target = event.target;
         if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
-            if (!userIconLabel.contains(e.target) && !popupWrapper.contains(e.target)) {
+            const isClickOutside = !userIconLabel.contains(target) && !popupWrapper.contains(target);
+            if (isClickOutside) {
                 loginCheckbox.checked = false;
             }
         }
