@@ -30,14 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!firebaseConfig) {
         console.warn("Firebase config missing - auth features disabled");
-        updateUI(false);
+        updateUI(false, elements, CONSTANTS, originalIconHtml);
         return;
     }
 
     // تهيئة Firebase
     const app = initializeFirebase(firebaseConfig);
     if (!app) {
-        updateUI(false);
+        updateUI(false, elements, CONSTANTS, originalIconHtml);
         return;
     }
 
@@ -48,8 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // الدوال المساعدة
 function validateElements(elements) {
-    const required = ['userIconLabel', 'belumLogDiv', 'sudahLogDiv'];
-    return required.every(key => elements[key]);
+    const required = ['userIconLabel', 'belumLogDiv', 'sudahLogDiv', 'popupWrapper', 'loginCheckbox'];
+    return required.every(key => {
+        if (!elements[key]) {
+            console.warn(`Element ${key} not found`);
+            return false;
+        }
+        return true;
+    });
 }
 
 function getFirebaseConfig() {
@@ -90,12 +96,13 @@ function setupAuthListener(auth, elements, CONSTANTS, originalIconHtml) {
 }
 
 function handleUserLogin(user, CONSTANTS) {
+    const cachedData = getCachedUserData(CONSTANTS.STORAGE_KEY);
     const userData = {
         uid: user.uid,
         displayName: user.displayName,
         photoURL: user.photoURL,
         email: user.email,
-        isAdmin: getCachedUserData(CONSTANTS.STORAGE_KEY)?.isAdmin || false
+        isAdmin: cachedData?.isAdmin || false
     };
     
     localStorage.setItem(CONSTANTS.STORAGE_KEY, JSON.stringify(userData));
@@ -162,7 +169,7 @@ function updateUserIcon(iconLabel, imageUrl, isLoggedIn, originalHtml = '') {
         img.src = imageUrl;
         img.alt = 'Profile Image';
         img.className = 'profileUser current-profile-image';
-        img.onerror = () => { img.src = CONSTANTS.DEFAULT_IMAGE; };
+        img.onerror = () => { img.src = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; };
         
         iconLabel.innerHTML = '';
         iconLabel.appendChild(img);
@@ -186,7 +193,14 @@ function setupEventListeners(elements, auth, CONSTANTS) {
         if (element) {
             element.style.cursor = 'pointer';
             element.removeAttribute('onclick');
-            element.addEventListener('click', handler);
+            element.addEventListener('click', (e) => {
+                e.preventDefault();
+                handler();
+                // إغلاق القائمة بعد النقر على أي عنصر
+                if (elements.loginCheckbox) {
+                    elements.loginCheckbox.checked = false;
+                }
+            });
         }
     });
 
@@ -195,18 +209,30 @@ function setupEventListeners(elements, auth, CONSTANTS) {
         elements.userIconLabel.style.cursor = 'pointer';
         elements.userIconLabel.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // منع انتشار الحدث لتجنب الإغلاق الفوري
             elements.loginCheckbox.checked = !elements.loginCheckbox.checked;
         });
     }
 
-    // إغلاق البوب أب عند النقر خارجها
+    // إغلاق البوب أب عند النقر خارجها - الإصدار المصحح
     document.addEventListener('click', (e) => {
-        if (elements.loginCheckbox?.checked && 
-            !elements.userIconLabel.contains(e.target) && 
-            !elements.popupWrapper.contains(e.target)) {
+        if (!elements.loginCheckbox || !elements.popupWrapper || !elements.userIconLabel) return;
+        
+        const isClickOnIcon = elements.userIconLabel.contains(e.target);
+        const isClickOnPopup = elements.popupWrapper.contains(e.target);
+        const isPopupOpen = elements.loginCheckbox.checked;
+
+        if (isPopupOpen && !isClickOnIcon && !isClickOnPopup) {
             elements.loginCheckbox.checked = false;
         }
     });
+
+    // منع إغلاق البوب أب عند النقر داخلها
+    if (elements.popupWrapper) {
+        elements.popupWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
 }
 
 function handleLogout(auth, loginCheckbox, loginPath) {
@@ -216,7 +242,7 @@ function handleLogout(auth, loginCheckbox, loginPath) {
     };
 
     if (!auth) {
-        localStorage.removeItem(CONSTANTS.STORAGE_KEY);
+        localStorage.removeItem('firebaseUserProfileData');
         logoutActions();
         return;
     }
@@ -229,6 +255,15 @@ function navigateTo(path) {
 }
 
 // وظيفة مساعدة للتحديث من الخارج إذا لزم الأمر
-function updateUI(isLoggedIn) {
-    // يمكن استخدامها للتحديث اليدوي إذا needed
+function updateUI(isLoggedIn, elements, CONSTANTS, originalIconHtml) {
+    if (!elements) return;
+    
+    elements.belumLogDiv.classList.toggle('hidden', isLoggedIn);
+    elements.sudahLogDiv.classList.toggle('hidden', !isLoggedIn);
+    
+    if (isLoggedIn) {
+        updateUserIcon(elements.userIconLabel, CONSTANTS.DEFAULT_IMAGE, true);
+    } else {
+        updateUserIcon(elements.userIconLabel, null, false, originalIconHtml);
+    }
 }
