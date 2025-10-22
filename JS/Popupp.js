@@ -8,11 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const belumLogDiv = document.querySelector('.NotLog');
     const sudahLogDiv = document.querySelector('.DonLog');
 
-    // تحديد العناصر باستخدام الكلاسات الجديدة
-    const adminElement = document.querySelector('.admin-link');
-    const logoutElement = document.querySelector('.logout-link');
+    // تحديد العناصر باستخدام aria-label كما في الكود الأصلي
+    const adminElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="ادمن"]') : null;
+    const logoutElement = sudahLogDiv ? sudahLogDiv.querySelector('div.loginS[aria-label="الخروج"]') : null;
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
-    const myProductsElement = document.querySelector('.my-products-link');
+    const myProductsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
     const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
@@ -89,7 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
                    let cachedUserData = null;
                     const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
                     if (dataString) {
-                        try { cachedUserData = JSON.parse(dataString); } catch(e) { 
+                        try { 
+                            cachedUserData = JSON.parse(dataString); 
+                        } catch(e) { 
                             console.error("Failed to parse cached user data:", e); 
                             cachedUserData = null; 
                         }
@@ -131,32 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // دوال تأثير الريبل
-    function activateRippleEffect() {
-        if (userIconLabel) {
-            userIconLabel.classList.remove('ripple-active');
-            void userIconLabel.offsetWidth;
-            userIconLabel.classList.add('ripple-active');
-            
-            setTimeout(() => {
-                userIconLabel.classList.remove('ripple-active');
-            }, 2000);
-        }
-    }
-
-    function startContinuousRipple() {
-        if (userIconLabel) {
-            userIconLabel.classList.add('logged-in');
-        }
-    }
-
-    function stopContinuousRipple() {
-        if (userIconLabel) {
-            userIconLabel.classList.remove('logged-in');
-            userIconLabel.classList.remove('ripple-active');
-        }
-    }
-
     // تحديث واجهة المستخدم
     function updateUI(isLoggedIn, userData, profileImageUrl) {
         if (belumLogDiv && sudahLogDiv) {
@@ -182,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      }
                 }
 
-                // التحكم في عنصر "نقاطي"
+                // التحكم في عنصر "نقاطي" (إخفاء إذا كان مشرف)
                 if (pointsElement) {
                      if (userData && userData.isAdmin === true) {
                          pointsElement.classList.add('hidden');
@@ -213,11 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     userIconLabel.innerHTML = '';
                     userIconLabel.appendChild(profileImg);
 
-                    startContinuousRipple();
-                    
-                    setTimeout(() => {
-                        activateRippleEffect();
-                    }, 100);
+                    // تفعيل تأثير الريبل للمستخدمين المسجلين
+                    userIconLabel.classList.add('logged-in');
                 }
 
             } else {
@@ -234,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           existingProfileImg.remove();
                       }
                       userIconLabel.innerHTML = originalIconHtml;
-                      stopContinuousRipple();
+                      userIconLabel.classList.remove('logged-in');
                  }
             }
         }
@@ -315,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         userIconLabel.addEventListener('click', (event) => {
             event.preventDefault();
             loginCheckbox.checked = !loginCheckbox.checked;
-            activateRippleEffect();
         });
     }
 
