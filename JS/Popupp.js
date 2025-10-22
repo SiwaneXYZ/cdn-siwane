@@ -209,25 +209,26 @@ function setupEventListeners(elements, auth, CONSTANTS) {
         elements.userIconLabel.style.cursor = 'pointer';
         elements.userIconLabel.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation(); // منع انتشار الحدث لتجنب الإغلاق الفوري
             elements.loginCheckbox.checked = !elements.loginCheckbox.checked;
         });
     }
 
-    // إغلاق البوب أب عند النقر خارجها - الإصدار المصحح
+    // إغلاق البوب أب عند النقر في أي مكان في الصفحة
     document.addEventListener('click', (e) => {
-        if (!elements.loginCheckbox || !elements.popupWrapper || !elements.userIconLabel) return;
-        
-        const isClickOnIcon = elements.userIconLabel.contains(e.target);
-        const isClickOnPopup = elements.popupWrapper.contains(e.target);
-        const isPopupOpen = elements.loginCheckbox.checked;
-
-        if (isPopupOpen && !isClickOnIcon && !isClickOnPopup) {
+        if (elements.loginCheckbox && elements.loginCheckbox.checked) {
             elements.loginCheckbox.checked = false;
         }
     });
 
-    // منع إغلاق البوب أب عند النقر داخلها
+    // منع إغلاق البوب أب عند النقر على أيقونة المستخدم نفسه
+    if (elements.userIconLabel) {
+        elements.userIconLabel.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // منع إغلاق البوب أب عند النقر داخل القائمة نفسها (اختياري - إذا أردت أن تغلق حتى عند النقر داخلها)
+    // إذا أردت أن تغلق حتى عند النقر داخل القائمة، احذف هذا الجزء
     if (elements.popupWrapper) {
         elements.popupWrapper.addEventListener('click', (e) => {
             e.stopPropagation();
