@@ -1,10 +1,10 @@
 // 1. تحديث قائمة الاستيراد: إضافة Firestore
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'; // <-- إضافة جديدة
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- عناصر الواجهة (كما هي) ---
+    // --- عناصر الواجهة (مع فحص وجودها) ---
     const loginCheckbox = document.getElementById('forlogPop');
     const userIconLabel = document.querySelector('.logReg');
     const popupWrapper = document.querySelector('.logPop-wrp');
@@ -16,13 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const pointsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="نقاطي"]') : null;
     const productsElement = sudahLogDiv ? sudahLogDiv.querySelector('a.loginS[aria-label="منتجاتي"]') : null;
 
-    // --- متغيرات عامة (كما هي) ---
+    // --- متغيرات عامة ---
     const FIREBASE_PROFILE_STORAGE_KEY = 'firebaseUserProfileData';
     const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; 
     const originalIconHtml = userIconLabel ? userIconLabel.innerHTML : '';
     let colorToggleInterval = null;
 
-    // --- جلب الإعدادات (كما هي) ---
+    // --- جلب الإعدادات ---
     let firebaseConfig = {};
     let ownerAdminEmail = ''; 
     if (typeof encryptedBase64 !== 'undefined' && encryptedBase64.customSettings) {
@@ -32,10 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Popup.js: Custom settings (encryptedBase64) not found.");
     }
 
-    // --- تهيئة Firebase (تحديث: إضافة db) ---
+    // --- تهيئة Firebase ---
     let app;
     let auth = null;
-    let db = null; // <-- إضافة جديدة
+    let db = null;
 
     const apps = getApps();
     if (apps.length === 0) {
@@ -55,17 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (app) {
        try {
            auth = getAuth(app);
-           db = getFirestore(app); // <-- تهيئة Firestore
+           db = getFirestore(app);
        } catch (error) {
            console.error("Failed to get Firebase Auth/Firestore service:", error);
        }
     }
-    // --- نهاية التهيئة ---
 
-    
     /**
-     * [مهم جداً] دالة حساب الأدوار (كما هي، مستنسخة من profile.js)
-     * تحسب الأدوار بناءً على البيانات المخزنة أو التي تم جلبها.
+     * دالة حساب الأدوار
      */
     function getCalculatedRoles(storedData, currentUser) {
         const roles = {
@@ -123,24 +120,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return roles;
     }
 
+    /**
+     * دالة التحقق من صحة البيانات المخزنة محلياً
+     */
+    function isValidCachedData(cachedData, currentUser) {
+        if (!cachedData || !currentUser) return false;
+        
+        // التحقق من تطابق UID وتواريخ الانتهاء
+        if (cachedData.uid !== currentUser.uid) return false;
+        
+        const now = Date.now();
+        
+        // التحقق من صلاحية البريميوم
+        if (cachedData.premiumExpiry && cachedData.premiumExpiry.seconds * 1000 < now) {
+            return false;
+        }
+        
+        // التحقق من صلاحية الإعفاء من الإعلانات
+        if (cachedData.adFreeExpiry && cachedData.adFreeExpiry.seconds * 1000 < now) {
+            return false;
+        }
+        
+        return true;
+    }
 
     // =================================================================
-    //  --- [تحديث جوهري] onAuthStateChanged (الآن يجلب البيانات إذا لزم الأمر) ---
+    // --- التحديث الرئيسي: العمل في جميع الصفحات ---
     // =================================================================
-    if (auth && db) { // <-- التأكد من وجود Auth و DB
-        onAuthStateChanged(auth, async (user) => { // <-- الدالة أصبحت async
+    if (auth && db) {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 let cachedUserData = null;
                 
-                // 1. محاولة القراءة من localStorage (المسار السريع)
+                // 1. محاولة القراءة من localStorage
                 const dataString = localStorage.getItem(FIREBASE_PROFILE_STORAGE_KEY);
                 if (dataString) {
-                    try { cachedUserData = JSON.parse(dataString); } catch (e) { cachedUserData = null; }
+                    try { 
+                        cachedUserData = JSON.parse(dataString); 
+                    } catch (e) { 
+                        cachedUserData = null; 
+                    }
                 }
 
-                // 2. التحقق من صحة الكاش. إذا لم يكن صالحاً، اجلبه من Firestore (المسار البطيء)
-                if (!cachedUserData || cachedUserData.uid !== user.uid) {
-                    console.log("Popup.js: لا يوجد كاش، جاري الجلب من Firestore...");
+                // 2. التحقق من صحة البيانات المخزنة
+                if (!isValidCachedData(cachedUserData, user)) {
+                    console.log("Popup.js: البيانات غير صالحة، جاري الجلب من Firestore...");
                     try {
                         const userDocRef = doc(db, 'users', user.uid);
                         const userDoc = await getDoc(userDocRef);
@@ -148,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (userDoc.exists()) {
                             const firestoreData = userDoc.data();
                             
-                            // 3. بناء كائن بيانات مطابق لما يحفظه profile.js
                             const dataToSave = {
                                 uid: user.uid,
                                 accountType: firestoreData.accountType || 'normal',
@@ -158,8 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 phoneNumber: firestoreData.phoneNumber,
                                 email: user.email,
                                 isAdmin: firestoreData.isAdmin === true,
-                                // الأولوية لصورة الحساب (Auth) لأنها أحدث
-                                photoURL: user.photoURL || firestoreData.photoURL, 
+                                photoURL: user.photoURL || firestoreData.photoURL,
                                 createdAt: firestoreData.createdAt,
                                 provider: firestoreData.provider,
                                 points: firestoreData.points,
@@ -169,26 +191,22 @@ document.addEventListener('DOMContentLoaded', () => {
                                 adFreeExpiry: firestoreData.adFreeExpiry,
                             };
 
-                            // 4. حفظ البيانات التي تم جلبها في localStorage للصفحات التالية
                             localStorage.setItem(FIREBASE_PROFILE_STORAGE_KEY, JSON.stringify(dataToSave));
-                            cachedUserData = dataToSave; // استخدام هذه البيانات الجديدة
+                            cachedUserData = dataToSave;
                         
                         } else {
-                            // حالة خطأ: المستخدم مسجل دخول ولكن ليس له ملف
                             console.error("Popup.js: المستخدم موجود في Auth ولكن غير موجود في Firestore.");
-                            updateUI(false, null, null); // التعامل معه كأنه مسجل خروج
-                            if (loginCheckbox) loginCheckbox.checked = false;
-                            return; // إيقاف التنفيذ
+                            handleLogoutState();
+                            return;
                         }
                     } catch (fetchError) {
                         console.error("Popup.js: خطأ أثناء جلب بيانات المستخدم:", fetchError);
-                        updateUI(false, null, null); // فشل الجلب، اعتبره مسجل خروج
-                        if (loginCheckbox) loginCheckbox.checked = false;
-                        return; // إيقاف التنفيذ
+                        handleLogoutState();
+                        return;
                     }
                 }
 
-                // 5. الآن، `cachedUserData` موجود (إما من الكاش أو من الجلب)
+                // 3. تحديث الواجهة بالبيانات الصالحة
                 const calculatedRoles = getCalculatedRoles(cachedUserData, user);
                 const displayData = {
                     uid: user.uid,
@@ -204,27 +222,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } else {
                 // مستخدم غير مسجل الدخول
-                localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-                updateUI(false, null, null);
+                handleLogoutState();
             }
+            
             if (loginCheckbox) {
                 loginCheckbox.checked = false;
             }
         });
     } else {
-        // فشل تهيئة Auth أو DB
+        // فشل تهيئة Firebase
+        handleLogoutState();
+        if (loginCheckbox) loginCheckbox.checked = false;
+    }
+
+    /**
+     * دالة التعامل مع حالة تسجيل الخروج
+     */
+    function handleLogoutState() {
+        localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
         updateUI(false, null, null);
         if (loginCheckbox) loginCheckbox.checked = false;
     }
-    // =================================================================
-    //           --- نهاية التحديث الجوهري ---
-    // =================================================================
-
 
     /**
-     * (دالة تطبيق الأدوار) - (كما هي، لا تغيير)
+     * دالة تطبيق الأدوار
      */
     function applyRoleClasses(element, userData) {
+        if (!element) return;
+        
         const allRoleClasses = ['owner', 'admin', 'vipp', 'premium', 'adfree', 'normal'];
         const allBorderClasses = allRoleClasses.map(r => `border-${r}`);
         const allRippleClasses = allRoleClasses.map(r => `ripple-${r}`);
@@ -243,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isLoggedOut = !userData || !userData.uid;
         if (isLoggedOut) {
-            return; // لا تطبق أي لون (للحفاظ على SVG الأصلي)
+            return;
         }
 
         const hasPremium = userData.isPremium;
@@ -251,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const isSpecialToggleCase = hasPremium && hasAdFree && !userData.isOwner && !userData.isAdmin;
 
         if (isSpecialToggleCase) {
-            // --- حالة التناوب ---
             const toggleRoles = ['premium', 'adfree'];
             const toggleBorderClasses = toggleRoles.map(r => `border-${r}`);
             const toggleRippleClasses = toggleRoles.map(r => `ripple-${r}`);
@@ -271,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleColors();
             colorToggleInterval = setInterval(toggleColors, 3000);
         } else {
-            // --- حالة اللون الثابت (الأولوية) ---
             const rolesPriority = [
                 { check: userData.isOwner, className: 'owner' },
                 { check: userData.isAdmin, className: 'admin' },
@@ -294,21 +317,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     /**
-     * (دالة تحديث الواجهة) - (كما هي، لا تغيير)
+     * دالة تحديث الواجهة (مع فحص وجود العناصر)
      */
     function updateUI(isLoggedIn, userData, profileImageUrl) {
-        if (userIconLabel) userIconLabel.classList.remove('logged-in');
-        if (colorToggleInterval) {
-            clearInterval(colorToggleInterval);
-            colorToggleInterval = null;
-        }
+        // فحص وإعادة تعيين العناصر الرئيسية
+        if (userIconLabel) {
+            userIconLabel.classList.remove('logged-in');
+            
+            if (colorToggleInterval) {
+                clearInterval(colorToggleInterval);
+                colorToggleInterval = null;
+            }
 
-        if (belumLogDiv && sudahLogDiv && userIconLabel) {
             if (isLoggedIn && userData) {
-                belumLogDiv.classList.add('hidden');
-                sudahLogDiv.classList.remove('hidden');
                 userIconLabel.classList.add('logged-in');
                 const finalImageUrl = profileImageUrl || DEFAULT_PROFILE_IMAGE;
 
@@ -321,48 +343,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 profileImg.src = finalImageUrl;
                 
-                // (userData.isAdmin يتضمن المالك)
-                const isAdminOrOwner = (userData.isAdmin === true); 
+                applyRoleClasses(userIconLabel, userData);
+            } else {
+                const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
+                if (existingProfileImg) existingProfileImg.remove();
+                if (!userIconLabel.querySelector('svg')) {
+                    userIconLabel.innerHTML = originalIconHtml;
+                }
+                applyRoleClasses(userIconLabel, null);
+            }
+        }
+
+        // فحص وإعادة تعيين عناصر البوب أب
+        if (belumLogDiv && sudahLogDiv) {
+            if (isLoggedIn && userData) {
+                belumLogDiv.classList.add('hidden');
+                sudahLogDiv.classList.remove('hidden');
+                
+                const isAdminOrOwner = (userData.isAdmin === true);
 
                 if (adminElement) adminElement.classList.toggle('hidden', !isAdminOrOwner);
                 if (pointsElement) pointsElement.classList.toggle('hidden', isAdminOrOwner);
                 if (productsElement) productsElement.classList.toggle('hidden', isAdminOrOwner);
-                
-                applyRoleClasses(userIconLabel, userData);
-
-            } else { // Not logged in
+            } else {
                 belumLogDiv.classList.remove('hidden');
                 sudahLogDiv.classList.add('hidden');
-                 if (adminElement) adminElement.classList.add('hidden');
-                 if (pointsElement) pointsElement.classList.add('hidden');
-                 if (productsElement) productsElement.classList.add('hidden');
-
-                 const existingProfileImg = userIconLabel.querySelector('.current-profile-image');
-                 if (existingProfileImg) existingProfileImg.remove();
-                 if (!userIconLabel.querySelector('svg')) {
-                     userIconLabel.innerHTML = originalIconHtml;
-                 }
-                 applyRoleClasses(userIconLabel, null); 
+                
+                if (adminElement) adminElement.classList.add('hidden');
+                if (pointsElement) pointsElement.classList.add('hidden');
+                if (productsElement) productsElement.classList.add('hidden');
             }
         }
     }
 
-    // --- (مستمعي الأحداث وتسجيل الخروج) - (كما هي، لا تغيير) ---
+    // --- مستمعي الأحداث (مع فحص وجود العناصر) ---
     function logOut() {
         const performLogoutActions = () => {
             if (loginCheckbox) { loginCheckbox.checked = false; }
             window.location.href = "/p/login.html";
         };
+        
         if (!auth) {
-            localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
-            updateUI(false, null, null);
+            handleLogoutState();
             performLogoutActions();
             return;
         }
+        
         signOut(auth)
             .catch(() => { /* سيتم إعادة التوجيه في كل الأحوال */ })
             .finally(() => {
-                // onAuthStateChanged سيهتم بمسح localStorage
                 performLogoutActions();
             });
     }
@@ -370,14 +399,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutElement) logoutElement.addEventListener('click', logOut);
     if (adminElement) adminElement.addEventListener('click', () => { window.location.href = '/p/admin.html'; });
     if (pointsElement) pointsElement.addEventListener('click', (e) => { e.preventDefault(); window.location.href = '/p/points.html'; });
+    
     if (userIconLabel && loginCheckbox) {
-        userIconLabel.addEventListener('click', (e) => { e.preventDefault(); loginCheckbox.checked = !loginCheckbox.checked; });
+        userIconLabel.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            loginCheckbox.checked = !loginCheckbox.checked; 
+        });
     }
-    document.addEventListener('click', (e) => {
-        if (loginCheckbox && loginCheckbox.checked && userIconLabel && popupWrapper) {
-            if (!userIconLabel.contains(e.target) && !popupWrapper.contains(e.target)) {
-                loginCheckbox.checked = false;
+    
+    if (loginCheckbox && userIconLabel && popupWrapper) {
+        document.addEventListener('click', (e) => {
+            if (loginCheckbox.checked) {
+                if (!userIconLabel.contains(e.target) && !popupWrapper.contains(e.target)) {
+                    loginCheckbox.checked = false;
+                }
             }
-        }
-    });
+        });
+    }
 });
