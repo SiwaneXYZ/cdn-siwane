@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 
@@ -112,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
                    console.log("User is logged out.");
                    localStorage.removeItem(FIREBASE_PROFILE_STORAGE_KEY);
                    updateUI(false, null, null);
+                   // عرض اشعار تسجيل الدخول للمستخدمين غير المسجلين
+                   showLoginPrompt();
                }
                
                if (loginCheckbox) {
@@ -122,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
        } catch (error) {
            console.error("Failed to get Firebase Auth service:", error);
            updateUI(false, null, null);
+           // عرض اشعار تسجيل الدخول في حالة الخطأ أيضاً
+           showLoginPrompt();
            if (loginCheckbox) {
                 loginCheckbox.checked = false;
            }
@@ -129,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.warn("Firebase App is not initialized. Auth state listener will not be set.");
         updateUI(false, null, null);
+        // عرض اشعار تسجيل الدخول
+        showLoginPrompt();
         if (loginCheckbox) {
             loginCheckbox.checked = false;
         }
@@ -242,6 +247,308 @@ document.addEventListener('DOMContentLoaded', () => {
                  console.error("Logout failed:", error);
                  performLogoutActions();
             });
+    }
+
+    // دالة عرض اشعار تسجيل الدخول
+    function showLoginPrompt() {
+        // التحقق من الشروط الذكية
+        function checkUserLoginStatus() {
+            return false; // افتراضي: غير مسجل الدخول
+        }
+        
+        const isLoggedIn = checkUserLoginStatus();
+        // مفتاح جديد لهذا الإصدار مع تتبع الوقت
+        const promptDismissedData = localStorage.getItem('prompt_dismissed_v13');
+        const delayDuration = 5000;
+        const transitionDuration = 400;
+        
+        // التحقق من الوقت المنقضي منذ آخر ظهور (مرتين في الأسبوع كحد أدنى)
+        if (promptDismissedData) {
+            try {
+                const dismissedData = JSON.parse(promptDismissedData);
+                const lastDismissed = dismissedData.timestamp;
+                const now = Date.now();
+                const daysSinceLastShow = (now - lastDismissed) / (1000 * 60 * 60 * 24);
+                
+                // إذا مر أقل من 3.5 أيام (نصف أسبوع) منذ آخر ظهور، لا تعرض الإشعار
+                if (daysSinceLastShow < 3.5) {
+                    return;
+                }
+            } catch (e) {
+                console.error("Error parsing prompt dismissal data:", e);
+            }
+        }
+
+        if (isLoggedIn) {
+            return;
+        }
+
+        // **متغيرات بلوجر:**
+        const blogTitle = typeof data !== 'undefined' && data.blog && data.blog.title ? data.blog.title : 'صوانˣʸᶻ';
+        const faviconUrl = typeof data !== 'undefined' && data.blog && data.blog.blogspotFaviconUrl ? data.blog.blogspotFaviconUrl : 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh80X00Lvdk3ZJBmgQFmGd1SmDZvqHpPf8D6YhmW7QsWYXyo_Cbo6BFHHdv1r1ocOe4gr5OexjPYYi-9Tp6QFQsfci2WPbFDu6DGFFr4UzhyphenhyphenkbTKFEBEQyPPbuYDM08v9-OU4ySBsI4bNOPtqr-U1fKMmcqRL38XSVE_XvVjFcblgVffq1j18GvYQTZEM8/s1600/favicon.png';
+
+        // 2. **تعريف الـ HTML و CSS كوحدة واحدة**
+        const promptHTML = `
+            <div id="login-signup-prompt-dynamic" class="browser-notification-bar">
+                <div class="prompt-content">
+                    <div class="site-info">
+                        <img src="${faviconUrl}" alt="${blogTitle} icon" class="site-icon"/>
+                        <div class="text-block">
+                            <p class="site-name">${blogTitle}</p>
+                            <p class="prompt-message">هل أنت جديد هنا؟ سجل الدخول أو أنشئ حسابًا.</p>
+                        </div>
+                    </div>
+                    <div dir="ltr" class="prompt-actions">
+                        <a href="/p/login.html" class="action-button">تسجيل الدخول</a>
+                        <button id="dismiss-prompt-dynamic" class="secondary-button">ليس الآن</button> 
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 3. **تعريف الـ CSS المخصص مع دعم .drk**
+        const promptCSS = `
+            /* **1. متغيرات الألوان العامة** */
+            :root { 
+                --clr-action-primary: var(--linkC, #007aff);
+                --clr-text-secondary: #6a6a6a;
+            }
+
+            /* **2. تنسيق الوضع الفاتح الافتراضي (إذا لم يكن .drk موجوداً)** */
+            .browser-notification-bar {
+                --clr-bg: rgba(255, 255, 255, 0.98);
+                --clr-text: #1a1a1a;
+                --clr-border: rgba(0, 0, 0, 0.1); 
+                
+                background-color: var(--clr-bg);
+                box-shadow: none;
+                border: 1px solid var(--clr-border); 
+                color: var(--clr-text);
+            }
+
+            /* **3. تنسيق الوضع الغامق (عند وجود .drk على <body>)** */
+            .drK .browser-notification-bar {
+                --clr-bg: rgba(30, 30, 30, 0.98);
+                --clr-text: #f0f0f0;
+                --clr-border: rgba(255, 255, 255, 0.15); 
+                
+                background-color: var(--clr-bg);
+                box-shadow: none; 
+                border: 1px solid var(--clr-border);
+                color: var(--clr-text);
+            }
+            
+            /* ---------------------------------------------------- */
+            /* **4. التنسيق الثابت والهيكلي لجميع الأجهزة (صف واحد)** */
+            /* ---------------------------------------------------- */
+            
+            .browser-notification-bar {
+                position: fixed;
+                top: 58px;
+                
+                /* التوسيط المضمون */
+                left: 0;
+                right: 0;
+                margin-left: auto;
+                margin-right: auto;
+
+                z-index: 10000;
+                max-width: 650px;
+                width: 95%; 
+                
+                /* خصائص الشكل */
+                -webkit-backdrop-filter: blur(12px);
+                backdrop-filter: blur(12px);
+                border-radius: 8px; 
+                /* التباعد الداخلي المتساوي على اليمين واليسار (18px) */
+                padding: 18px 18px; 
+                display: none;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+                
+                /* 🛠️ دعم RTL: يضمن أن المحتوى يمينًا والأزرار يسارًا */
+                direction: rtl; 
+                
+                /* الحركة */
+                transform: translate(0, -100%);
+                opacity: 0;
+                transition: opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            }
+            .browser-notification-bar.show {
+                opacity: 1;
+                transform: translate(0, 0);
+            }
+            .prompt-content {
+                /* 🛠️ مفتاح التقابل: يضمن أن المحتوى والأزرار على أقصى الأطراف مع وجود كل الفراغ في الوسط مهما كان حجم الشاشة */
+                display: flex;
+                justify-content: space-between; 
+                align-items: center;
+            }
+            .site-info {
+                /* المحتوى (الأيقونة والنص) في اليمين - يلتصق بالحافة اليمنى الداخلية */
+                display: flex;
+                flex-direction: row; 
+                align-items: center; 
+                
+                /* ❌ لا يوجد margin إضافي هنا. المساحة المتوفرة بينه وبين الأزرار هي الفراغ المركزي */
+                flex-grow: 1; 
+                min-width: 0;
+                flex-shrink: 1; 
+            }
+            .site-name {
+                font-size: 0.95em;
+                font-weight: 600;
+                margin: 0 0 2px 0;
+                color: var(--clr-text);
+                white-space: nowrap; 
+                overflow: hidden; 
+                text-overflow: ellipsis;
+            }
+            .site-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+                /* المسافة بين الأيقونة والنص */
+                margin-inline-end: 12px;
+                object-fit: contain; 
+                flex-shrink: 0;
+            }
+            .text-block {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+                text-align: right;
+            }
+            .prompt-message {
+                font-size: 0.85em; 
+                color: var(--clr-text-secondary);
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden; 
+                text-overflow: ellipsis;
+                line-height: 1.35;
+            }
+            .prompt-actions {
+                display: flex;
+                justify-content: flex-start;  /* الأزرار تلتصق باليسار */
+                align-items: center;         /* ترتيب رأسي في المنتصف */
+                gap: 10px;
+                flex-shrink: 0;
+            }
+            .action-button {
+                background-color: var(--clr-action-primary);
+                color: white;
+                padding: 9px 16px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.9em;
+                flex-shrink: 0;
+                white-space: nowrap;
+                transition: background-color 0.2s;
+            }
+            .secondary-button {
+                background: none;
+                border: none;
+                color: var(--clr-text-secondary);
+                padding: 9px 16px;  /* نفس padding للزر الأول عشان يتوازن */
+                font-size: 0.9em;
+                cursor: pointer;
+                transition: all 0.3s ease; /* إضافة transition لجميع الخصائص */
+                opacity: 0.8;
+                white-space: nowrap;
+                border-radius: 8px;  /* إضافة border-radius للتوافق */
+                line-height: 1;
+                position: relative;
+                overflow: hidden;
+            }
+            /* تأثير Hover للزر الثانوي */
+            .secondary-button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: var(--clr-text-secondary);
+                opacity: 0;
+                border-radius: 8px;
+                transition: opacity 0.3s ease;
+                z-index: -1;
+            }
+            .secondary-button:hover::before {
+                opacity: 0.1;
+            }
+            .secondary-button:hover {
+                opacity: 1;
+                transform: translateY(-1px); /* تأثير رفع خفيف */
+            }
+            .secondary-button:active {
+                transform: translateY(0); /* إزالة تأثير الرفع عند النقر */
+            }
+            
+            /* ---------------------------------------------------- */
+            /* **تعديل الجوال** */
+            /* ---------------------------------------------------- */
+            @media (max-width: 500px) {
+                .browser-notification-bar { 
+                    width: 98%; 
+                    padding: 10px 10px; 
+                }
+                .site-name { font-size: 0.85em; }
+                .prompt-message { font-size: 0.75em; }
+                .action-button { 
+                    padding: 7px 10px; 
+                    font-size: 0.8em; 
+                }
+                .secondary-button { 
+                    font-size: 0.8em; 
+                    padding: 7px 0; 
+                }
+            }
+        `;
+
+        // 4. **حقن الـ CSS والـ HTML في الصفحة**
+        const styleElement = document.createElement('style');
+        styleElement.textContent = promptCSS;
+        document.head.appendChild(styleElement);
+
+        const container = document.createElement('div');
+        container.innerHTML = promptHTML;
+        document.body.appendChild(container.firstElementChild);
+
+        // 5. **تطبيق المنطق على العناصر المحقونة**
+        const popup = document.getElementById('login-signup-prompt-dynamic');
+        const dismissButton = document.getElementById('dismiss-prompt-dynamic');
+
+        // منطق العرض
+        setTimeout(() => {
+            popup.style.display = 'block'; 
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 50);
+        }, delayDuration);
+
+        // منطق الإغلاق
+        dismissButton.addEventListener('click', () => {
+            // إضافة تأثير hover قبل الإغلاق
+            dismissButton.style.opacity = '1';
+            dismissButton.style.transform = 'translateY(-1px)';
+            
+            // تأخير الإغلاق لملاحظة تأثير hover
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => {
+                     popup.style.display = 'none';
+                }, transitionDuration);
+                
+                // حفظ وقت الإغلاق للتتبع (مرتين في الأسبوع)
+                const dismissalData = {
+                    timestamp: Date.now(),
+                    version: 'v13'
+                };
+                localStorage.setItem('prompt_dismissed_v13', JSON.stringify(dismissalData));
+            }, 150);
+        });
     }
 
     // إضافة مستمعي الأحداث
