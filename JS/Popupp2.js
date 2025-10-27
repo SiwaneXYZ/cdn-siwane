@@ -3,11 +3,11 @@ let auth,app,init,loginChk,userIcon,popup,notLog,logDiv,adminEl,pointsEl,logoutE
 
 function getConfig(){const e=document.getElementById("json:firebaseconfig");if(!e)return null;try{const t=JSON.parse(e.textContent);return t&&t.apiKey&&(t.appId||t.projectId)?t:null}catch(e){return null}}
 
-async function initFirebase(){if(init)return;const e=getConfig();if(!e)return updateUI(!1),showPrompt(),void(loginChk&&(loginChk.checked=!1));try{const[t,n]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FV}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FV}/firebase-auth.js`)]);const{initializeApp:i,getApps:o,getApp:r}=t,{getAuth:s,onAuthStateChanged:a,signOut:c}=n;const l=o();app=l.length?r():i(e),auth=s(app),init=!0,a(auth,e=>{e?handleLogin(e):(handleLogout(),showPrompt()),loginChk&&(loginChk.checked=!1)})}catch(e){updateUI(!1),showPrompt(),loginChk&&(loginChk.checked=!1)}}
+async function initFirebase(){if(init)return;const e=getConfig();if(!e)return updateUI(!1),showPrompt(),void(loginChk&&(loginChk.checked=!1));try{const[t,n]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${FV}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${FV}/firebase-auth.js`)]);const{initializeApp:i,getApps:o,getApp:r}=t,{getAuth:s,onAuthStateChanged:a,signOut:c}=n;const l=o();app=l.length?r():i(e),auth=s(app),init=!0,a(auth,e=>{e?handleLogin(e):handleLogout(),loginChk&&(loginChk.checked=!1)})}catch(e){updateUI(!1),showPrompt(),loginChk&&(loginChk.checked=!1)}}
 
 function handleLogin(e){const t={uid:e.uid,displayName:e.displayName,photoURL:e.photoURL,email:e.email};let n=null;try{const e=localStorage.getItem(FPK);n=e?JSON.parse(e):null}catch(e){}const i={...n,...t,isAdmin:n?n.isAdmin:!1};localStorage.setItem(FPK,JSON.stringify(i)),updateUI(!0,i,i.photoURL||e.photoURL)}
 
-function handleLogout(){localStorage.removeItem(FPK),updateUI(!1)}
+function handleLogout(){localStorage.removeItem(FPK),updateUI(!1),showPrompt()}
 
 function updateUI(e,t,n){if(!notLog||!logDiv)return;if(e){notLog.classList.add("hidden"),logDiv.classList.remove("hidden");const e=t&&!0===t.isAdmin;adminEl&&adminEl.classList.toggle("hidden",!e),pointsEl&&pointsEl.classList.toggle("hidden",e),productsEl&&productsEl.classList.toggle("hidden",e),userIcon&&updateProfileImg(n)}else{notLog.classList.remove("hidden"),logDiv.classList.add("hidden"),adminEl&&adminEl.classList.add("hidden"),pointsEl&&pointsEl.classList.add("hidden"),productsEl&&productsEl.classList.add("hidden"),userIcon&&resetProfileImg()}}
 
