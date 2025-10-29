@@ -1,4 +1,6 @@
-// ad-control.js - نظام مستقل تماماً عن onload.js
+// ad-control.js - إصدار v101 (متوافق مع admin.js v101)
+// + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
+// + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
 (function() {
     'use strict';
     
@@ -13,7 +15,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing VIP Ad Control System...');
+        console.log('Initializing Ad Control System (v101)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -61,63 +63,59 @@
     }
     
     // ==========================================================
-    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء من الإعلانات ✅✅✅
+    // ✅✅✅ [تعديل v101] الدالة المنطقية للتحقق من حالة الإعفاء ✅✅✅
     // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
         // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
-        if (userProfile.isAdmin) return false;
+        if (userProfile.isAdmin) {
+            console.log('Ad-Control: Admin user (Showing Ads for testing)');
+            return false;
+        }
         
-        // 2. التحقق من حقل الإعفاء (adFreeExpiry) - الأولوية
-        const adFreeExpiry = userProfile.adFreeExpiry;
+        // 2. التحقق من حقل 'isVip' الجديد (الأولوية القصوى)
+        if (userProfile.isVip === true) {
+            console.log('Ad-Control: Active (via isVip = true)');
+            return true;
+        }
 
-        if (adFreeExpiry !== undefined && adFreeExpiry !== null) {
-            // الحالة أ: adFreeExpiry هو كائن طابع زمني (إعفاء مؤقت أو منتهي)
-            if (typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
-                const expiryTimestampMs = adFreeExpiry.seconds * 1000;
-                
-                if (expiryTimestampMs > Date.now()) {
-                    console.log('Ad-Free: Active (Temporary via adFreeExpiry)');
-                    return true; 
-                } else {
-                    // التاريخ انتهى
-                    console.log('Ad-Free: Expired (Date has passed)');
-                    // نستمر في التحقق من VIPP قبل الإرجاع false
-                }
-            }
-        } 
-        
-        // 3. التحقق من adFreeExpiry === null (الحالة الدائمة)
-        if (adFreeExpiry === null) {
-            console.log('Ad-Free: Active (Permanent via adFreeExpiry = null)');
+        // 3. التحقق من 'adFreeExpiry' الدائم (null)
+        if (userProfile.adFreeExpiry === null) {
+            console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
-        // 4. التحقق من حالة VIPP (إعفاء الحسابات المحددة كـ VIPP)
+        // 4. التحقق من 'adFreeExpiry' المؤقت (Timestamp)
+        const adFreeExpiry = userProfile.adFreeExpiry;
+        if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
+            const expiryTimestampMs = adFreeExpiry.seconds * 1000;
+            
+            if (expiryTimestampMs > Date.now()) {
+                console.log('Ad-Control: Active (Temporary via adFreeExpiry)');
+                return true; 
+            }
+        }
+        
+        // 5. [دعم للخلف] التحقق من الحقول القديمة (vipp)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        if (accountTypeLower === 'vipp') {
-            console.log('Ad-Free: Active (via accountType = VIPP)');
+        if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
+            console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
             return true;
         }
         
-        // 5. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
-        console.log('Ad-Free: Inactive (Showing Ads)');
+        // 6. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
+        console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
     // ==========================================================
     
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
-        const userIsAdmin = userProfile.isAdmin;
         
-        console.log('Applying ad rules for user:', { 
-            accountType: userProfile.accountType,
-            isAdFree: userIsAdFree,
-            isAdmin: userIsAdmin 
-        });
+        console.log('Ad-Control: Applying rules. User is Ad-Free:', userIsAdFree);
         
-        if (userIsAdFree && !userIsAdmin) {
+        if (userIsAdFree) {
             // المستخدم المعفى: نخفي الإعلانات
             hideAllAds();
         } else {
@@ -177,7 +175,7 @@
         }
         
         document.head.appendChild(style);
-        console.log('Ads hidden for VIP user');
+        // console.log('Ads hidden for Ad-Free user'); // (تم تقليل التكرار)
     }
     
     function showAllAds() {
@@ -185,7 +183,7 @@
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
-            console.log('Ads style removed for user');
+            console.log('Ad-Control: Ads style removed (Showing Ads)');
         }
     }
 })();
