@@ -53,33 +53,31 @@
         }
     }
     
-    // ==========================================================
-    // ✅✅✅ التعديل المطلوب: الاعتماد فقط على VIPP أو adFreeExpiry ✅✅✅
-    // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // الأدمن والمشرفين يرون الإعلانات (للمراقبة)
+        // ✅ الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) return false;
 
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // 1. ✅ التحقق من حالة VIPP (الإعفاء الدائم)
+        // ✅ حساب VIP دائم (VIPP)
         if (accountTypeLower === 'vipp') return true;
         
-        // 2. ✅ التحقق من حقل الإعفاء المؤقت/الدائم (adFreeExpiry)
+        // ✅ حساب Premium نشط (حسب المنطق الأصلي الخاص بك)
+        const isPremiumActive = userProfile.premiumExpiry && 
+                              userProfile.premiumExpiry.seconds * 1000 > Date.now();
+        if ((accountTypeLower === 'premium' || isPremiumActive)) return true;
+        
+        // ✅ إعفاء مؤقت أو دائم من الإعلانات (adFreeExpiry)
         if (userProfile.adFreeExpiry) {
-            // adFreeExpiry === null يعني إعفاء دائم
+            // adFreeExpiry === null يعني دائم (كما تم الاتفاق عليه)
             if (userProfile.adFreeExpiry === null) return true; 
-            
-            // التحقق من صلاحية الإعفاء المؤقت
-            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; 
+            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; // نشط مؤقت
         }
         
-        // إذا لم يكن VIPP ولم يكن لديه adFreeExpiry نشط، فإنه يعرض الإعلانات
         return false;
     }
-    // ==========================================================
     
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
@@ -92,15 +90,19 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // المستخدم المعفى: نخفي الإعلانات
+            // ✅ المستخدم VIP: نخفي الإعلانات
             hideAllAds();
+        } else if (userIsAdmin) {
+            // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
+            showAllAds();
         } else {
-            // الأدمن أو المستخدم العادي: نضمن ظهور الإعلانات
+            // ✅ المستخدم العادي: نضمن عدم وجود نمط إخفاء
             showAllAds(); 
         }
     }
     
     function hideAllAds() {
+        // ✅✅✅ تم تحديث المحددات لتجنب التعارض مع profile.js ✅✅✅
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
