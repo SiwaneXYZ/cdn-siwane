@@ -55,13 +55,8 @@
     
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
-
-        // ✅ الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) return false;
-
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        
-        // ✅ فقط إذا كان VIP → معفي من الإعلانات
         return accountTypeLower === 'vipp';
     }
     
@@ -76,29 +71,31 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // ✅ المستخدم VIP: نخفي الإعلانات فقط
             hideAdsOnly();
         } else if (userIsAdmin) {
-            // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
             showAllAds();
         }
-        // ✅ المستخدم العادي أو بريميوم: نترك النظام الأصلي يعمل (لا نتدخل)
     }
     
     function hideAdsOnly() {
-        // طريقة آمنة لإخفاء الإعلانات فقط دون العناصر الوصفية
+        // نهج متعدد المستويات لإخفاء الإعلانات
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
-            /* إخفاء إعلانات Google التلقائية واليدوية فقط */
+            /* المستوى 1: إعلانات Google المباشرة */
             .adsbygoogle,
             ins.adsbygoogle,
-            iframe[src*="ads"],
-            iframe[src*="doubleclick"],
-            iframe[src*="googleads"],
-            [data-ad-status],
+            .ad-container,
+            .ad-unit,
+            .ad-wrapper,
+            .ad-section,
+            [id*='ad-'],
+            [id*='ads-'],
+            [class*='ad-'],
+            [class*='ads-'],
+            [data-ad-slot],
             [data-ad-client],
-            [data-ad-slot] {
+            [data-ad-status] {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
@@ -107,17 +104,51 @@
                 overflow: hidden !important;
             }
             
-            /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
-            .js-antiadblocker {
+            /* المستوى 2: iframes إعلانية */
+            iframe[src*='ads'],
+            iframe[src*='doubleclick'],
+            iframe[src*='googleads'],
+            iframe[src*='pagead'],
+            iframe[src*='adservice'] {
                 display: none !important;
             }
             
-            /* ✅ الحفاظ على العناصر الوصفية في البروفيل - مهم جداً */
+            /* المستوى 3: عناصر إعلانية عامة */
+            [id*='banner'],
+            [class*='banner'],
+            [id*='sponsor'],
+            [class*='sponsor'],
+            [id*='promo'],
+            [class*='promo'] {
+                display: none !important;
+            }
+            
+            /* المستوى 4: منع popup مانع الإعلانات */
+            .js-antiadblocker,
+            .adblock-detector,
+            .anti-adblock {
+                display: none !important;
+            }
+            
+            /* ✅ الحفاظ المطلق على عناصر البروفيل */
             #profile-ad-free-status,
             #profile-ad-free-item,
             #profile-premium-expiry,
             #profile-premium-expiry-item,
             #profile-account-type,
+            #profile-current-points,
+            #profile-current-points-item,
+            #profile-total-points-earned,
+            #profile-total-points-earned-item,
+            #profile-total-exchanges,
+            #profile-total-exchanges-item,
+            #profile-fullname,
+            #profile-username,
+            #profile-email,
+            #profile-phone,
+            #profile-created-at,
+            #profile-provider,
+            #profile-email-status,
             [class*="profile-"],
             [id*="profile-"] {
                 display: flex !important;
@@ -126,6 +157,16 @@
                 height: auto !important;
                 width: auto !important;
                 overflow: visible !important;
+            }
+            
+            /* ✅ حماية خاصة للبادج والصور */
+            #account-type-badge,
+            .profile-pic-container,
+            #pic,
+            #astat {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
         `;
         
@@ -136,15 +177,95 @@
         }
         
         document.head.appendChild(style);
-        console.log('Ads hidden for VIP user (preserving profile elements)');
+        console.log('VIP Ad Control: Ads hidden successfully');
+        
+        // ✅ تفعيل المراقبة المستمرة للإعلانات الجديدة
+        startAdMonitoring();
     }
     
     function showAllAds() {
-        // إزالة نمط الإخفاء (للأدمن فقط)
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
-            console.log('Ads style removed for admin');
+            console.log('VIP Ad Control: Ads restored for admin');
         }
+        stopAdMonitoring();
+    }
+    
+    // ✅ نظام مراقبة الإعلانات الجديدة
+    let adObserver = null;
+    
+    function startAdMonitoring() {
+        if (adObserver) return;
+        
+        adObserver = new MutationObserver((mutations) => {
+            let shouldReapply = false;
+            
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Element node
+                        if (isAdElement(node)) {
+                            shouldReapply = true;
+                        }
+                    }
+                });
+            });
+            
+            if (shouldReapply) {
+                console.log('VIP Ad Control: New ads detected, reapplying hiding...');
+                setTimeout(hideAdsOnly, 100);
+            }
+        });
+        
+        adObserver.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+        console.log('VIP Ad Control: Ad monitoring started');
+    }
+    
+    function stopAdMonitoring() {
+        if (adObserver) {
+            adObserver.disconnect();
+            adObserver = null;
+            console.log('VIP Ad Control: Ad monitoring stopped');
+        }
+    }
+    
+    function isAdElement(element) {
+        const adIndicators = [
+            'adsbygoogle',
+            'ad-container',
+            'ad-unit',
+            'ad-wrapper',
+            'ad-section',
+            'banner',
+            'sponsor',
+            'promo',
+            'ad-',
+            'ads-'
+        ];
+        
+        const tagName = element.tagName.toLowerCase();
+        const id = element.id || '';
+        const className = element.className || '';
+        
+        // التحقق من iframes إعلانية
+        if (tagName === 'iframe') {
+            const src = element.src || '';
+            return src.includes('ads') || 
+                   src.includes('doubleclick') || 
+                   src.includes('googleads') ||
+                   src.includes('pagead');
+        }
+        
+        // التحقق من العناصر بالإشارات الإعلانية
+        return adIndicators.some(indicator => 
+            id.includes(indicator) || 
+            className.includes(indicator) ||
+            element.hasAttribute('data-ad-slot') ||
+            element.hasAttribute('data-ad-client')
+        );
     }
 })();
