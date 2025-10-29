@@ -1,5 +1,5 @@
-// ad-control.js - إصدار v114 (إعادة تثبيت قائمة الهاتف)
-// + ✅ تم إزالة القاعدة التي تسبب مشاكل في position: fixed.
+// ad-control.js - إصدار v115 (تثبيت قائمة الهاتف السفلية)
+// + ✅ تم إضافة قاعدة صارمة لتثبيت الويجت TextList99.
 (function() {
     'use strict';
 
@@ -31,7 +31,7 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v114) - Fixed Position Restored...'); 
+        console.log('Initializing Ad Control System (v115) - Fixed Bar Forcefully Applied...'); 
         
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
@@ -73,9 +73,7 @@
         }
     }
     
-    // ==========================================================
-    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء (isUserAdFree) ✅✅✅
-    // ==========================================================
+    // ... (بقية الدالة isUserAdFree كما هي) ...
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
@@ -157,7 +155,15 @@
                 display: none !important;
             }
             
-            /* ملاحظة: تم إزالة قواعد body/html هنا، لكي لا تتعارض مع position: fixed */
+            /* ✅ القاعدة الجديدة: تثبيت شريط الأدوات للهاتف إجبارياً */
+            #TextList99.mobC,
+            .widget.TextList.mobC {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 99999 !important; /* أولوية عرض عالية جداً */
+            }
         `;
         
         const existingStyle = document.getElementById('vip-ad-free-style');
