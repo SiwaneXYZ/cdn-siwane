@@ -1,9 +1,26 @@
-// ad-control.js - إصدار v105 (إلغاء Toast الأصلي واعتماد تخصيص جديد)
+// ad-control.js - إصدار v106 (حل مشكلة التمرير الناجمة عن Anti-AdBlocker)
+// + ✅ [تعديل v106] إضافة دالة enableBodyScroll() واستدعائها لضمان عمل التمرير بعد إعفاء المستخدم.
 // + ✅ [تعديل v105] استخدام دالة showToast جديدة بتخصيص CSS مضمن (Inline) لحل جميع مشاكل التمرير.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
-// + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
 (function() {
     'use strict';
+
+    // ==========================================================
+    // ✅✅✅ دالة جديدة لتمكين التمرير على الجسم ✅✅✅
+    // (الحل لتعارض Anti-AdBlocker في onload.js)
+    // ==========================================================
+    function enableBodyScroll() {
+        // نستخدم document.body مباشرة لأن هذا الكود خارج نطاق onload.js
+        const bodyStyle = document.body.style;
+        if (bodyStyle.overflow === 'hidden' || bodyStyle.overflow === 'clip') {
+            bodyStyle.overflow = '';
+        }
+        // إزالة أي كلاسات قد تمنع التمرير (مثل .no-scroll) إذا كنت تستخدمها
+        // if (document.body.classList.contains('no-scroll')) {
+        //     document.body.classList.remove('no-scroll');
+        // }
+    }
+    // ==========================================================
     
     // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
@@ -16,7 +33,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing Ad Control System (v105)...');
+        console.log('Initializing Ad Control System (v106)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -84,13 +101,13 @@
         toast.style.cssText = `
             position: fixed;
             left: 50%;
-            transform: translateX(-50%) translateY(70px); /* يبدأ خارج الرؤية في الأسفل */
-            bottom: 25px; /* الموضع النهائي للظهور */
+            transform: translateX(-50%) translateY(70px); 
+            bottom: 25px; 
             display: inline-flex;
             align-items: center;
             text-align: center;
             justify-content: center;
-            z-index: 9999; /* قيمة عالية جداً لضمان الظهور فوق كل شيء */
+            z-index: 9999; 
             background: #323232;
             color: rgba(255, 255, 255, .9);
             font-size: 14px;
@@ -104,10 +121,9 @@
 
         document.body.appendChild(toast);
 
-        // تشغيل الـ animation للإظهار (بشكل أفضل وأكثر استقلالية)
+        // تشغيل الـ animation للإظهار 
         requestAnimationFrame(() => {
             toast.style.opacity = '1';
-            // نقله من الأسفل للخارج ليظهر
             toast.style.transform = 'translateX(-50%) translateY(0)'; 
         });
 
@@ -117,7 +133,6 @@
 
         setTimeout(() => {
             toast.style.opacity = '0';
-            // نقله للأسفل ليختفي
             toast.style.transform = 'translateX(-50%) translateY(70px)'; 
         }, displayDuration);
 
@@ -181,14 +196,16 @@
         
         console.log('Ad-Control: Applying rules. User is Ad-Free:', userIsAdFree);
         
-        // 🌟🌟🌟 الإضافة الجديدة: إظهار رسالة Toast 🌟🌟🌟
         let statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
         
         if (userProfile.isAdmin) {
-             // الأدمن والمشرفين يرون الإعلانات (للمراقبة) كما في منطق isUserAdFree
              statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
         } else if (userIsAdFree) {
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
+            
+            // 🌟🌟🌟 الحل الرئيسي لمشكلة التمرير 🌟🌟🌟
+            // عند التأكد من الإعفاء، نعيد تمكين التمرير.
+            enableBodyScroll(); 
         }
 
         // يتم عرض التوست فقط في أول تطبيق للقواعد
@@ -196,7 +213,6 @@
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
         }
-        // 🌟🌟🌟 نهاية الإضافة الجديدة 🌟🌟🌟
         
         if (userIsAdFree) {
             // المستخدم المعفى: نخفي الإعلانات
@@ -258,7 +274,6 @@
         }
         
         document.head.appendChild(style);
-        // console.log('Ads hidden for Ad-Free user'); // (تم تقليل التكرار)
     }
     
     function showAllAds() {
