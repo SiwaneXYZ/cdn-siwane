@@ -76,8 +76,8 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // ✅ المستخدم VIP: نخفي الإعلانات
-            hideAllAds();
+            // ✅ المستخدم VIP: نخفي الإعلانات فقط
+            hideAdsOnly();
         } else if (userIsAdmin) {
             // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
             showAllAds();
@@ -85,17 +85,20 @@
         // ✅ المستخدم العادي أو بريميوم: نترك النظام الأصلي يعمل (لا نتدخل)
     }
     
-    function hideAllAds() {
-        // طريقة آملة لإخفاء الإعلانات بدون التعارض مع onload.js
+    function hideAdsOnly() {
+        // طريقة آمنة لإخفاء الإعلانات فقط دون العناصر الوصفية
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
-            /* إخفاء إعلانات Google */
+            /* إخفاء إعلانات Google التلقائية فقط */
             .adsbygoogle,
-            [class*="ad-"],
-            [class*="ads-"],
+            ins.adsbygoogle,
             iframe[src*="ads"],
-            ins.adsbygoogle {
+            iframe[src*="doubleclick"],
+            iframe[src*="googleads"],
+            [data-ad-status],
+            [data-ad-client],
+            [data-ad-slot] {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
@@ -104,19 +107,19 @@
                 overflow: hidden !important;
             }
             
-            /* حماية إضافية من أي إعلانات قد تظهر */
-            [id*="ad-"],
-            [id*="ads-"],
-            div[id*="Ad"],
-            div[class*="banner"] {
+            /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
+            .js-antiadblocker {
                 display: none !important;
             }
             
-            /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
-            .js-antiadblocker,
-            [class*="adblock"],
-            [class*="anti-ad"] {
-                display: none !important;
+            /* ✅ الحفاظ على العناصر الوصفية في البروفيل */
+            #profile-ad-free-status,
+            #profile-ad-free-item,
+            [class*="profile-"],
+            [id*="profile-"] {
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
         `;
         
@@ -127,7 +130,7 @@
         }
         
         document.head.appendChild(style);
-        console.log('Ads hidden for VIP user');
+        console.log('Ads hidden for VIP user (preserving profile elements)');
     }
     
     function showAllAds() {
