@@ -1,7 +1,6 @@
-// ad-control.js - إصدار v107 (حل شامل لمشاكل التمرير والـ AdBlocker)
-// + ✅ [تعديل v107] إضافة إخفاء إجباري لعناصر الحظر .js-antiadblocker و .js-accessblocker.
-// + ✅ [تعديل v106] إضافة دالة enableBodyScroll() واستدعائها لضمان عمل التمرير.
-// + ✅ [تعديل v105] استخدام دالة showToast جديدة بتخصيص CSS مضمن (Inline) لحل مشاكل التمرير.
+// ad-control.js - إصدار v108 (العودة إلى Toast الأصلي للموقع)
+// + ✅ [تعديل v108] استخدام كلاس .tNtf والاعتماد على CSS الموقع الأصلي للـ Toast.
+// + ✅ [تعديل v107] حل مشكلة التمرير والـ AdBlocker عبر enableBodyScroll وإخفاء عناصر الحظر.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
 (function() {
     'use strict';
@@ -15,7 +14,6 @@
         if (bodyStyle.overflow === 'hidden' || bodyStyle.overflow === 'clip') {
             bodyStyle.overflow = '';
         }
-        // يمكن إضافة المزيد من الإجراءات هنا لإزالة كلاسات مخصصة تمنع التمرير
     }
     // ==========================================================
     
@@ -27,12 +25,9 @@
     }
     
     function initAdControl() {
-        // تشغيل فحص فوري وسريع
         checkAndApplyRules();
-
-        console.log('Initializing Ad Control System (v107)...');
+        console.log('Initializing Ad Control System (v108)...');
         
-        // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
@@ -41,7 +36,6 @@
             }
         }, 500); 
         
-        // التحقق أيضاً بعد 3 ثوانٍ (كدعم إضافي في حالة تأخر تحميل البيانات)
         setTimeout(() => {
             const userProfile = getUserProfile();
             if (userProfile) {
@@ -49,16 +43,13 @@
             }
         }, 3000); 
         
-        // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
-                // تأخير بسيط لمنح المتصفح وقتاً لمعالجة البيانات
                 setTimeout(checkAndApplyRules, 100); 
             }
         });
     }
 
-    // دالة مساعدة لتطبيق القواعد
     function checkAndApplyRules() {
         const userProfile = getUserProfile();
         if (userProfile) {
@@ -78,63 +69,46 @@
     }
     
     // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (تخصيص جديد ومستقل) ✅✅✅
+    // ✅✅✅ دالة عرض رسالة Toast (باستخدام CSS الموقع الأصلي) ✅✅✅
     // ==========================================================
     function showToast(message) {
-        const toastId = 'gemini-custom-toast'; 
+        // إنشاء الحاوية الأم باستخدام الكلاس الأصلي
+        const toastContainer = document.createElement('div');
+        // نستخدم الكلاس الأصلي الذي يجب أن يتم تنسيقه عبر CSS الموقع
+        toastContainer.className = 'tNtf'; 
+        
+        // إعداد خصائص بسيطة لضمان التغطية والسماح بالتمرير
+        // هذا ضروري إذا كان الكلاس الأصلي لا يغطي كامل الشاشة ويسمح بالتمرير
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '0';
+        toastContainer.style.left = '0';
+        toastContainer.style.width = '100%';
+        toastContainer.style.height = '100%';
+        // السماح لأحداث الماوس والتمرير بالمرور عبر هذه الطبقة
+        toastContainer.style.pointerEvents = 'none'; 
 
-        const existingToast = document.getElementById(toastId);
+        // إنشاء عنصر الرسالة الداخلي
+        const toastMessage = document.createElement('div');
+        toastMessage.textContent = message;
+        
+        // إعادة خاصية التفاعل (النقر) لعنصر الرسالة نفسه ليكون مرئياً
+        // يجب أن يظهر التوست كعنصر فرعي (قد يكون هذا هو العنصر الذي يتلقى تنسيقات .tNtf > * )
+        toastMessage.style.pointerEvents = 'auto'; 
+
+        toastContainer.appendChild(toastMessage);
+        
+        // إزالة أي توست سابق
+        const existingToast = document.querySelector('.tNtf');
         if (existingToast) {
             existingToast.remove();
         }
 
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.textContent = message;
+        document.body.appendChild(toastContainer);
 
-        // تطبيق تخصيص CSS مباشر مع pointer-events: none لضمان التمرير
-        toast.style.cssText = `
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%) translateY(70px); 
-            bottom: 25px; 
-            display: inline-flex;
-            align-items: center;
-            text-align: center;
-            justify-content: center;
-            z-index: 9999; 
-            background: #323232;
-            color: rgba(255, 255, 255, .9);
-            font-size: 14px;
-            border-radius: 3px;
-            padding: 13px 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-            pointer-events: none; /* الأهم: منع حجب التمرير */
-        `;
-
-        document.body.appendChild(toast);
-
-        // تشغيل الـ animation للإظهار 
-        requestAnimationFrame(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(-50%) translateY(0)'; 
-        });
-
-        // تشغيل الـ animation للإخفاء بعد 3 ثوانٍ
-        const displayDuration = 3000;
-        const fadeDuration = 500;
-
+        // إزالة التوست بعد 5 ثوانٍ
         setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-50%) translateY(70px)'; 
-        }, displayDuration);
-
-        // إزالة العنصر بالكامل بعد انتهاء مدة الإخفاء
-        setTimeout(() => {
-            toast.remove();
-        }, displayDuration + fadeDuration);
+            toastContainer.remove();
+        }, 5000); 
     }
     // ==========================================================
     
@@ -144,25 +118,21 @@
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) {
             console.log('Ad-Control: Admin user (Showing Ads for testing)');
             return false;
         }
         
-        // 2. التحقق من حقل 'isVip' الجديد (الأولوية القصوى)
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
             return true;
         }
 
-        // 3. التحقق من 'adFreeExpiry' الدائم (null)
         if (userProfile.adFreeExpiry === null) {
             console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
-        // 4. التحقق من 'adFreeExpiry' المؤقت (Timestamp)
         const adFreeExpiry = userProfile.adFreeExpiry;
         if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
             const expiryTimestampMs = adFreeExpiry.seconds * 1000;
@@ -173,14 +143,12 @@
             }
         }
         
-        // 5. [دعم للخلف] التحقق من الحقول القديمة (vipp)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
             console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
             return true;
         }
         
-        // 6. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
         console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
@@ -204,7 +172,6 @@
             // إخفاء عناصر الحظر القسرية التي يظهرها onload.js
             const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
             if (antiAdBlockerEl) {
-                 // استخدام !important لضمان الإخفاء
                  antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
             }
             const accessBlockerEl = document.querySelector('.js-accessblocker');
@@ -220,10 +187,8 @@
         }
         
         if (userIsAdFree) {
-            // المستخدم المعفى: نخفي الإعلانات
             hideAllAds();
         } else {
-            // الأدمن أو المستخدم العادي/الذي انتهت صلاحيته: نضمن ظهور الإعلانات
             showAllAds(); 
         }
     }
@@ -272,7 +237,6 @@
             }
         `;
         
-        // إزالة النمط السابق إذا موجود
         const existingStyle = document.getElementById('vip-ad-free-style');
         if (existingStyle) {
             existingStyle.remove();
@@ -282,7 +246,6 @@
     }
     
     function showAllAds() {
-        // إزالة نمط الإخفاء
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
