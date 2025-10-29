@@ -1,8 +1,7 @@
-// ad-control.js - نظام مستقل تماماً عن onload.js
+// ad-control.js - نظام آمن 100%
 (function() {
     'use strict';
     
-    // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
     } else {
@@ -10,33 +9,26 @@
     }
     
     function initAdControl() {
-        console.log('Initializing VIP Ad Control System...');
+        console.log('🚀 بدء نظام التحكم في الإعلانات للمستخدمين VIP...');
         
-        // التحقق من حالة المستخدم كل ثانيتين (حتى يتم تحميل البيانات)
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
                 clearInterval(checkInterval);
-                applyAdRules(userProfile);
+                applyVIPAdRules(userProfile);
             }
         }, 2000);
         
-        // التحقق أيضاً بعد 5 ثوانٍ (كدعم إضافي)
         setTimeout(() => {
             const userProfile = getUserProfile();
-            if (userProfile) {
-                applyAdRules(userProfile);
-            }
+            if (userProfile) applyVIPAdRules(userProfile);
         }, 5000);
         
-        // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
                 setTimeout(() => {
                     const userProfile = getUserProfile();
-                    if (userProfile) {
-                        applyAdRules(userProfile);
-                    }
+                    if (userProfile) applyVIPAdRules(userProfile);
                 }, 100);
             }
         });
@@ -45,92 +37,95 @@
     function getUserProfile() {
         try {
             const userDataString = localStorage.getItem('firebaseUserProfileData');
-            if (!userDataString) return null;
-            return JSON.parse(userDataString);
+            return userDataString ? JSON.parse(userDataString) : null;
         } catch (e) {
-            console.error('Failed to parse user profile data', e);
             return null;
         }
     }
     
-    function isUserAdFree(userProfile) {
-        if (!userProfile) return false;
-        if (userProfile.isAdmin) return false;
-        const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        return accountTypeLower === 'vipp';
+    function isUserVIP(userProfile) {
+        if (!userProfile || userProfile.isAdmin) return false;
+        return (userProfile.accountType || 'normal').toLowerCase() === 'vipp';
     }
     
-    function applyAdRules(userProfile) {
-        const userIsAdFree = isUserAdFree(userProfile);
-        const userIsAdmin = userProfile.isAdmin;
-        
-        console.log('Applying ad rules for user:', { 
-            accountType: userProfile.accountType,
-            isAdFree: userIsAdFree,
-            isAdmin: userIsAdmin 
-        });
-        
-        if (userIsAdFree && !userIsAdmin) {
-            hideAdsOnly();
-        } else if (userIsAdmin) {
-            showAllAds();
+    function applyVIPAdRules(userProfile) {
+        if (isUserVIP(userProfile)) {
+            console.log('✅ تطبيق إعدادات VIP - إخفاء الإعلانات');
+            activateVIPMode();
         }
     }
     
-    function hideAdsOnly() {
-        // نهج متعدد المستويات لإخفاء الإعلانات
+    function activateVIPMode() {
+        // 1. أولاً: منع تحميل إعلانات Google من الأساس
+        blockGoogleAdsLoading();
+        
+        // 2. ثانياً: إخفاء الإعلانات الموجودة باستهداف محدد جداً
+        hideExistingAdsSafely();
+        
+        // 3. ثالثاً: منع popup مانع الإعلانات
+        blockAdBlockPopup();
+        
+        // 4. رابعاً: مراقبة مستمرة للإعلانات الجديدة
+        startAggressiveAdMonitoring();
+    }
+    
+    function blockGoogleAdsLoading() {
+        // منع تحميل scripts إعلانات Google
+        const originalAppendChild = Element.prototype.appendChild;
+        Element.prototype.appendChild = function(element) {
+            if (element.tagName === 'SCRIPT') {
+                const src = element.src || '';
+                if (src.includes('adsbygoogle') || 
+                    src.includes('pagead2.googlesyndication.com') ||
+                    src.includes('doubleclick.net')) {
+                    console.log('🚫 تم منع تحميل إعلان Google:', src);
+                    return element; // لا نضيفه إلى DOM
+                }
+            }
+            return originalAppendChild.call(this, element);
+        };
+    }
+    
+    function hideExistingAdsSafely() {
         const style = document.createElement('style');
-        style.id = 'vip-ad-free-style';
+        style.id = 'vip-ad-remover-safe';
         style.textContent = `
-            /* المستوى 1: إعلانات Google المباشرة */
-            .adsbygoogle,
+            /* === استهداف الإعلانات فقط === */
+            
+            /* إعلانات Google المباشرة */
             ins.adsbygoogle,
-            .ad-container,
-            .ad-unit,
-            .ad-wrapper,
-            .ad-section,
-            [id*='ad-'],
-            [id*='ads-'],
-            [class*='ad-'],
-            [class*='ads-'],
-            [data-ad-slot],
-            [data-ad-client],
-            [data-ad-status] {
+            .adsbygoogle,
+            iframe[src*="pagead2.googlesyndication.com"],
+            iframe[src*="googleads.g.doubleclick.net"],
+            iframe[src*="adsystem.google.com"],
+            
+            /* عناصر بإشارات إعلانية واضحة */
+            [id*="-ad-"],
+            [class*="-ad-"],
+            [id*="_ad_"],
+            [class*="_ad_"],
+            [data-ad-slot]:not([id*="profile"]):not([class*="profile"]),
+            [data-ad-client]:not([id*="profile"]):not([class*="profile"]),
+            [data-ad-status]:not([id*="profile"]):not([class*="profile"]),
+            
+            /* إعلانات شائعة أخرى */
+            [id*="banner-ad"],
+            [class*="banner-ad"],
+            [id*="sponsored"],
+            [class*="sponsored"],
+            [id*="advertisement"],
+            [class*="advertisement"] {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
                 height: 0 !important;
                 width: 0 !important;
                 overflow: hidden !important;
+                position: absolute !important;
+                left: -9999px !important;
             }
             
-            /* المستوى 2: iframes إعلانية */
-            iframe[src*='ads'],
-            iframe[src*='doubleclick'],
-            iframe[src*='googleads'],
-            iframe[src*='pagead'],
-            iframe[src*='adservice'] {
-                display: none !important;
-            }
-            
-            /* المستوى 3: عناصر إعلانية عامة */
-            [id*='banner'],
-            [class*='banner'],
-            [id*='sponsor'],
-            [class*='sponsor'],
-            [id*='promo'],
-            [class*='promo'] {
-                display: none !important;
-            }
-            
-            /* المستوى 4: منع popup مانع الإعلانات */
-            .js-antiadblocker,
-            .adblock-detector,
-            .anti-adblock {
-                display: none !important;
-            }
-            
-            /* ✅ الحفاظ المطلق على عناصر البروفيل */
+            /* === حماية كاملة لعناصر البروفيل === */
             #profile-ad-free-status,
             #profile-ad-free-item,
             #profile-premium-expiry,
@@ -149,123 +144,73 @@
             #profile-created-at,
             #profile-provider,
             #profile-email-status,
-            [class*="profile-"],
-            [id*="profile-"] {
+            #account-type-badge,
+            #pic,
+            #astat,
+            .profile-pic-container,
+            [id^="profile-"],
+            [id*="profile-"],
+            [class^="profile-"],
+            [class*="profile-"] {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
                 height: auto !important;
                 width: auto !important;
                 overflow: visible !important;
+                position: static !important;
+                left: auto !important;
             }
             
-            /* ✅ حماية خاصة للبادج والصور */
-            #account-type-badge,
-            .profile-pic-container,
-            #pic,
-            #astat {
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
+            /* منع popup مانع الإعلانات */
+            .js-antiadblocker,
+            [class*="adblock"],
+            [class*="anti-ad"] {
+                display: none !important;
             }
         `;
         
-        // إزالة النمط السابق إذا موجود
-        const existingStyle = document.getElementById('vip-ad-free-style');
-        if (existingStyle) {
-            existingStyle.remove();
-        }
+        // إزالة أي أنماط سابقة
+        const existingStyle = document.getElementById('vip-ad-remover-safe');
+        if (existingStyle) existingStyle.remove();
         
         document.head.appendChild(style);
-        console.log('VIP Ad Control: Ads hidden successfully');
-        
-        // ✅ تفعيل المراقبة المستمرة للإعلانات الجديدة
-        startAdMonitoring();
     }
     
-    function showAllAds() {
-        const style = document.getElementById('vip-ad-free-style');
-        if (style) {
-            style.remove();
-            console.log('VIP Ad Control: Ads restored for admin');
-        }
-        stopAdMonitoring();
-    }
-    
-    // ✅ نظام مراقبة الإعلانات الجديدة
-    let adObserver = null;
-    
-    function startAdMonitoring() {
-        if (adObserver) return;
-        
-        adObserver = new MutationObserver((mutations) => {
-            let shouldReapply = false;
-            
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // Element node
-                        if (isAdElement(node)) {
-                            shouldReapply = true;
-                        }
-                    }
-                });
+    function blockAdBlockPopup() {
+        // تأكد من إخفاء popup مانع الإعلانات
+        const observer = new MutationObserver(() => {
+            const popups = document.querySelectorAll('.js-antiadblocker, [class*="adblock"], [class*="anti-ad"]');
+            popups.forEach(popup => {
+                popup.style.display = 'none';
+                popup.style.visibility = 'hidden';
+                popup.style.opacity = '0';
             });
-            
-            if (shouldReapply) {
-                console.log('VIP Ad Control: New ads detected, reapplying hiding...');
-                setTimeout(hideAdsOnly, 100);
-            }
         });
         
-        adObserver.observe(document.body, {
+        observer.observe(document.body, {
             childList: true,
             subtree: true
         });
-        
-        console.log('VIP Ad Control: Ad monitoring started');
     }
     
-    function stopAdMonitoring() {
-        if (adObserver) {
-            adObserver.disconnect();
-            adObserver = null;
-            console.log('VIP Ad Control: Ad monitoring stopped');
-        }
-    }
-    
-    function isAdElement(element) {
-        const adIndicators = [
-            'adsbygoogle',
-            'ad-container',
-            'ad-unit',
-            'ad-wrapper',
-            'ad-section',
-            'banner',
-            'sponsor',
-            'promo',
-            'ad-',
-            'ads-'
-        ];
-        
-        const tagName = element.tagName.toLowerCase();
-        const id = element.id || '';
-        const className = element.className || '';
-        
-        // التحقق من iframes إعلانية
-        if (tagName === 'iframe') {
-            const src = element.src || '';
-            return src.includes('ads') || 
-                   src.includes('doubleclick') || 
-                   src.includes('googleads') ||
-                   src.includes('pagead');
-        }
-        
-        // التحقق من العناصر بالإشارات الإعلانية
-        return adIndicators.some(indicator => 
-            id.includes(indicator) || 
-            className.includes(indicator) ||
-            element.hasAttribute('data-ad-slot') ||
-            element.hasAttribute('data-ad-client')
-        );
+    function startAggressiveAdMonitoring() {
+        // مراقبة مستمرة لأي إعلانات جديدة
+        setInterval(() => {
+            const ads = document.querySelectorAll(`
+                ins.adsbygoogle,
+                .adsbygoogle,
+                iframe[src*="pagead2"],
+                iframe[src*="doubleclick"],
+                [data-ad-slot]:not([id*="profile"]),
+                [data-ad-client]:not([id*="profile"])
+            `);
+            
+            ads.forEach(ad => {
+                if (ad.style.display !== 'none') {
+                    ad.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;height:0!important;width:0!important;';
+                }
+            });
+        }, 1000);
     }
 })();
