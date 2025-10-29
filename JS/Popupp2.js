@@ -10,7 +10,7 @@ function h(){const l=document.getElementById('json:firebaseconfig');if(!l)return
 function updatePingEffectColor(userData) {
     if (!o) return;
     
-    // إيقاف أي مؤتمر سابق
+    // إيقاف أي مؤقت سابق
     if (pingColorInterval) {
         clearInterval(pingColorInterval);
         pingColorInterval = null;
@@ -19,16 +19,21 @@ function updatePingEffectColor(userData) {
     // إزالة كلاسات الألوان القديمة
     o.classList.remove('account-owner', 'account-admin', 'account-vipp', 'account-premium', 'account-normal', 'account-dual');
     
-    const isCurrentUserOwnerAdmin = userData && userData.email && window.ownerAdminEmail && userData.email.toLowerCase() === window.ownerAdminEmail.toLowerCase();
+    if (!userData) {
+        o.classList.add('account-normal');
+        return;
+    }
+    
+    const isCurrentUserOwnerAdmin = userData.email && window.ownerAdminEmail && userData.email.toLowerCase() === window.ownerAdminEmail.toLowerCase();
     const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
     const isPremiumActive = userData.premiumExpiry && userData.premiumExpiry.seconds * 1000 > Date.now();
     
-    // تحديد نوع الحساب
+    // تحديد نوع الحساب مع الأولوية
     if (isCurrentUserOwnerAdmin) {
         o.classList.add('account-owner');
     } else if (userData.isAdmin) {
         o.classList.add('account-admin');
-    } else if (accountTypeLower === 'vipp' && (isPremiumActive || accountTypeLower === 'vipp')) {
+    } else if (accountTypeLower === 'vipp' && isPremiumActive) {
         // حساب VIP + Premium - تفعيل التبديل بين الألوان
         o.classList.add('account-dual');
         startDualColorAnimation();
@@ -51,7 +56,7 @@ function startDualColorAnimation() {
     pingColorInterval = setInterval(() => {
         isPremiumColor = !isPremiumColor;
         updateDualColor();
-    }, 2000); // التبديل كل 2 ثانية (بين كل نبضة ping)
+    }, 1200); // التبديل كل 1.2 ثانية (مع كل نبضة ping)
 }
 
 // دالة تحديث اللون للتبديل
@@ -77,32 +82,50 @@ function stopPingEffects() {
     }
 }
 
-function f(h,d,u){if(i&&r)if(h){
-    i.classList.add('hidden'),r.classList.remove('hidden');
-    const l=!0===d.isAdmin;
-    a&&a.classList.toggle('hidden',!l),
-    c&&c.classList.toggle('hidden',l),
-    n&&n.classList.toggle('hidden',l),
-    o&&(L=o.querySelector('.current-profile-image'),
-    L||(o.innerHTML='',L=document.createElement('img'),
-    L.alt='Profile Image',
-    L.classList.add('profileUser','current-profile-image'),
-    o.appendChild(L)),
-    L.src=u||m,
-    L.onerror=function(){this.src=m},
-    o.classList.add('logged-in'));
-    
-    // تحديث لون Ping Effect عند تسجيل الدخول
-    if (d) {
-        updatePingEffectColor(d);
+function f(h,d,u){
+    if(i&&r) {
+        if(h){
+            i.classList.add('hidden'),
+            r.classList.remove('hidden');
+            const l=!0===d.isAdmin;
+            a&&a.classList.toggle('hidden',!l),
+            c&&c.classList.toggle('hidden',l),
+            n&&n.classList.toggle('hidden',l),
+            o&&(
+                L=o.querySelector('.current-profile-image'),
+                L||(
+                    o.innerHTML='',
+                    L=document.createElement('img'),
+                    L.alt='Profile Image',
+                    L.classList.add('profileUser','current-profile-image'),
+                    o.appendChild(L)
+                ),
+                L.src=u||m,
+                L.onerror=function(){this.src=m},
+                o.classList.add('logged-in')
+            );
+            
+            // تحديث لون Ping Effect عند تسجيل الدخول
+            if (d) {
+                updatePingEffectColor(d);
+            }
+        } else {
+            i.classList.remove('hidden'),
+            r.classList.add('hidden'),
+            a&&a.classList.add('hidden'),
+            n&&n.classList.add('hidden'),
+            c&&c.classList.add('hidden'),
+            o&&(
+                o.innerHTML=t,
+                o.classList.remove('logged-in')
+            );
+            
+            // إيقاف تأثيرات Ping عند تسجيل الخروج
+            stopPingEffects();
+        }
     }
-    
-}else i.classList.remove('hidden'),r.classList.add('hidden'),a&&a.classList.add('hidden'),n&&n.classList.add('hidden'),c&&c.classList.add('hidden'),o&&(o.innerHTML=t,o.classList.remove('logged-in'));
-
-// إيقاف تأثيرات Ping عند تسجيل الخروج
-stopPingEffects();
-
-var L}
+    var L
+}
 
 function y(){const h=localStorage.getItem('prompt_dismissed_v13'),d=400;if(h)try{if((Date.now()-JSON.parse(h).timestamp)/864e5<3.5)return void console.warn("Prompt Check: الإشعار تم إغلاقه مؤخراً (أقل من 3.5 أيام). لن يظهر.")}catch(l){}if(document.getElementById('login-signup-prompt-dynamic'))return;const u="undefined"!=typeof data&&data.blog&&data.blog.title?data.blog.title:"صوانˣʸᶻ",p="undefined"!=typeof data&&data.blog&&data.blog.blogspotFaviconUrl?data.blog.blogspotFaviconUrl:"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh80X00Lvdk3ZJBmgQFmGd1SmDZvqHpPf8D6YhmW7QsWYXyo_Cbo6BFHHdv1r1ocOe4gr5OexjPYYi-9Tp6QFQsfci2WPbFDu6DGFFr4UzhyphenhyphenkbTKFEBEQyPPbuYDM08v9-OU4ySBsI4bNOPtqr-U1fKMmcqRL38XSVE_XvVjFcblgVffq1j18GvYQTZEM8/s1600/favicon.png",A=`<div id="login-signup-prompt-dynamic" class="browser-notification-bar">
                 <div class="prompt-content">
@@ -118,4 +141,49 @@ function y(){const h=localStorage.getItem('prompt_dismissed_v13'),d=400;if(h)try
                         <button id="dismiss-prompt-dynamic" class="secondary-button">ليس الآن</button> 
                     </div>
                 </div>
-            </div>`,b=document.createElement('div');b.innerHTML=A,document.body.insertBefore(b.firstElementChild,document.body.firstChild);const v=document.getElementById('login-signup-prompt-dynamic'),S=document.getElementById('dismiss-prompt-dynamic');console.log("Prompt Log: بدء محاولة الإظهار بعد",500,"مللي ثانية."),setTimeout(()=>{v.style.setProperty('display','block','important'),console.log("Prompt Log: تم تطبيق display: block !important."),setTimeout(()=>{v.classList.add('show'),console.log("Prompt Log: تم إضافة .show class. يجب أن يكون الإشعار مرئياً.")},50)},500),S.addEventListener('click',()=>{v.classList.remove('show'),setTimeout(()=>{v.parentNode&&v.parentNode.removeChild(v),localStorage.setItem('prompt_dismissed_v13',JSON.stringify({timestamp:Date.now(),version:'v13'})),console.log("Prompt Log: تم إغلاق الإشعار وحذفه.")},d)})}function k(){const h=()=>{l&&(l.checked=!1),window.location.href="/p/login.html"};u?signOut(u).then(h).catch(h):(localStorage.removeItem(g),f(!1,null,null),h())}d?u=getAuth(d):f(!1,null,null),u?onAuthStateChanged(u,h=>{if(h){const d={uid:h.uid,displayName:h.displayName,photoURL:h.photoURL,email:h.email};let u=null;const p=localStorage.getItem(g);if(p)try{u=JSON.parse(p)}catch(l){u=null}const A={...u,...d,isAdmin:u?u.isAdmin:!1};localStorage.setItem(g,JSON.stringify(A)),f(!0,A,A.photoURL||h.photoURL)}else localStorage.removeItem(g),f(!1,null,null),y();l&&(l.checked=!1)}):(f(!1,null,null),y()),s&&s.addEventListener('click',k),a&&a.addEventListener('click',()=>{window.location.href='/p/admin.html'}),n&&n.addEventListener('click',l=>{l.preventDefault(),window.location.href='/p/points.html'}),c&&c.addEventListener('click',l=>{l.preventDefault(),window.location.href='/p/my-products.html'}),o&&l&&o.addEventListener('click',h=>{h.preventDefault(),l.checked=!l.checked}),document.addEventListener('click',h=>{const d=h.target;l&&l.checked&&o&&e&&!o.contains(d)&&!e.contains(d)&&(l.checked=!1)})});
+            </div>`,b=document.createElement('div');b.innerHTML=A,document.body.insertBefore(b.firstElementChild,document.body.firstChild);const v=document.getElementById('login-signup-prompt-dynamic'),S=document.getElementById('dismiss-prompt-dynamic');console.log("Prompt Log: بدء محاولة الإظهار بعد",500,"مللي ثانية."),setTimeout(()=>{v.style.setProperty('display','block','important'),console.log("Prompt Log: تم تطبيق display: block !important."),setTimeout(()=>{v.classList.add('show'),console.log("Prompt Log: تم إضافة .show class. يجب أن يكون الإشعار مرئياً.")},50)},500),S.addEventListener('click',()=>{v.classList.remove('show'),setTimeout(()=>{v.parentNode&&v.parentNode.removeChild(v),localStorage.setItem('prompt_dismissed_v13',JSON.stringify({timestamp:Date.now(),version:'v13'})),console.log("Prompt Log: تم إغلاق الإشعار وحذفه.")},d)})}
+
+function k(){
+    const h=()=>{
+        l&&(l.checked=!1),
+        window.location.href="/p/login.html"
+    };
+    u?signOut(u).then(h).catch(h):(
+        localStorage.removeItem(g),
+        f(!1,null,null),
+        h()
+    );
+}
+
+d?u=getAuth(d):f(!1,null,null),
+u?onAuthStateChanged(u,h=>{
+    if(h){
+        const d={
+            uid:h.uid,
+            displayName:h.displayName,
+            photoURL:h.photoURL,
+            email:h.email
+        };
+        let u=null;
+        const p=localStorage.getItem(g);
+        if(p)try{u=JSON.parse(p)}catch(l){u=null}
+        const A={...u,...d,isAdmin:u?u.isAdmin:!1};
+        localStorage.setItem(g,JSON.stringify(A)),
+        f(!0,A,A.photoURL||h.photoURL)
+    }else{
+        localStorage.removeItem(g),
+        f(!1,null,null),
+        y();
+    }
+    l&&(l.checked=!1)
+}):(f(!1,null,null),y()),
+
+s&&s.addEventListener('click',k),
+a&&a.addEventListener('click',()=>{window.location.href='/p/admin.html'}),
+n&&n.addEventListener('click',l=>{l.preventDefault(),window.location.href='/p/points.html'}),
+c&&c.addEventListener('click',l=>{l.preventDefault(),window.location.href='/p/my-products.html'}),
+o&&l&&o.addEventListener('click',h=>{h.preventDefault(),l.checked=!l.checked}),
+document.addEventListener('click',h=>{
+    const d=h.target;
+    l&&l.checked&&o&&e&&!o.contains(d)&&!e.contains(d)&&(l.checked=!1)
+})});
