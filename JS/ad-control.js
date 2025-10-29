@@ -1,4 +1,4 @@
-// ad-control.js - إصدار نظيف بدون تدخل في التخصيصات
+// ad-control-clean.js - إصدار نظيف بدون أي CSS
 (function() {
     'use strict';
     
@@ -9,7 +9,7 @@
     }
     
     function initAdControl() {
-        console.log('🚀 بدء نظام التحكم في الإعلانات...');
+        console.log('🚀 بدء نظام التحكم في الإعلانات (بدون CSS)...');
         
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
@@ -76,45 +76,58 @@
     }
     
     function activateAdFreeMode() {
-        // ✅ CSS نظيف جداً - يستهدف الإعلانات فقط
-        const style = document.createElement('style');
-        style.id = 'clean-ad-remover-final';
-        style.textContent = `
-            /* إعلانات Google فقط - بدون أي تأثير جانبي */
-            ins.adsbygoogle {
-                display: none !important;
-            }
-            
-            .adsbygoogle {
-                display: none !important;
-            }
-            
-            /* منع popup مانع الإعلانات فقط */
-            .js-antiadblocker {
-                display: none !important;
-            }
-        `;
+        // ✅ لا نضيف أي CSS - نستخدم JavaScript مباشرة
+        hideAdsWithJS();
+        blockNewAds();
+        hideAdBlockPopup();
         
-        const existingStyle = document.getElementById('clean-ad-remover-final');
-        if (existingStyle) existingStyle.remove();
-        
-        document.head.appendChild(style);
-        
-        // ✅ مراقبة بسيطة للإعلانات الجديدة
-        startMinimalAdMonitoring();
-        
-        console.log('🎉 تم إخفاء الإعلانات بنجاح');
+        console.log('🎉 تم إخفاء الإعلانات بنجاح (بدون CSS)');
     }
     
-    function startMinimalAdMonitoring() {
-        // مراقبة بسيطة دون تدخل في الأنماط
-        setInterval(() => {
+    function hideAdsWithJS() {
+        // إخفاء الإعلانات الحالية باستخدام JavaScript مباشرة
+        const hideExistingAds = () => {
             const ads = document.querySelectorAll('ins.adsbygoogle, .adsbygoogle');
             ads.forEach(ad => {
-                if (ad.style.display !== 'none') {
-                    ad.style.display = 'none';
-                }
+                // ✅ نستخدم فقط style.display بدون CSS
+                ad.style.display = 'none';
             });
-        }, 1000);
+        };
+        
+        // التنفيذ الفوري
+        hideExistingAds();
+        
+        // تكرار كل ثانية للإعلانات الجديدة
+        setInterval(hideExistingAds, 1000);
+    }
+    
+    function blockNewAds() {
+        // منع تحميل إعلانات جديدة
+        const originalAppend = Element.prototype.appendChild;
+        Element.prototype.appendChild = function(element) {
+            if (element.tagName === 'SCRIPT' && element.src) {
+                const src = element.src;
+                if (src.includes('adsbygoogle') || 
+                    src.includes('pagead2.googlesyndication.com') ||
+                    src.includes('doubleclick.net')) {
+                    console.log('🚫 تم منع تحميل إعلان:', src);
+                    return element;
+                }
+            }
+            return originalAppend.call(this, element);
+        };
+    }
+    
+    function hideAdBlockPopup() {
+        // إخفاء popup مانع الإعلانات باستخدام JavaScript
+        const hidePopup = () => {
+            const popups = document.querySelectorAll('.js-antiadblocker');
+            popups.forEach(popup => {
+                popup.style.display = 'none';
+            });
+        };
+        
+        hidePopup();
+        setInterval(hidePopup, 1000);
     }
 })();
