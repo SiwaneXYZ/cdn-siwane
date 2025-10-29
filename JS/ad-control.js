@@ -1,4 +1,4 @@
-// ad-control.js - إصدار مركّز على الإعلانات فقط
+// ad-control.js - إصدار نظيف بدون تدخل في التخصيصات
 (function() {
     'use strict';
     
@@ -48,18 +48,12 @@
         
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // ✅ حساب premium مع إعفاء من الإعلانات (دائم أو مؤقت)
         if (accountTypeLower === 'premium') {
-            // إعفاء دائم
-            if (userProfile.adFreeExpiry === null) {
-                return true;
-            }
+            if (userProfile.adFreeExpiry === null) return true;
             
-            // إعفاء مؤقت - التحقق من التاريخ
             if (userProfile.adFreeExpiry && userProfile.adFreeExpiry.seconds) {
                 const expiryTime = userProfile.adFreeExpiry.seconds * 1000;
-                const currentTime = Date.now();
-                return expiryTime > currentTime;
+                return expiryTime > Date.now();
             }
         }
         
@@ -82,104 +76,45 @@
     }
     
     function activateAdFreeMode() {
-        // ✅ CSS مركّز فقط على الإعلانات بدون لمس البروفيل
+        // ✅ CSS نظيف جداً - يستهدف الإعلانات فقط
         const style = document.createElement('style');
-        style.id = 'clean-ad-remover';
+        style.id = 'clean-ad-remover-final';
         style.textContent = `
-            /* إعلانات Google فقط - بدون تأثير على البروفيل */
-            ins.adsbygoogle,
-            .adsbygoogle,
-            iframe[src*="pagead2.googlesyndication.com"],
-            iframe[src*="googleads.g.doubleclick.net"],
-            iframe[src*="doubleclick.net"],
-            [data-ad-slot],
-            [data-ad-client],
-            [data-ad-status] {
+            /* إعلانات Google فقط - بدون أي تأثير جانبي */
+            ins.adsbygoogle {
                 display: none !important;
-                visibility: hidden !important;
-                height: 0 !important;
-                width: 0 !important;
-                overflow: hidden !important;
+            }
+            
+            .adsbygoogle {
+                display: none !important;
             }
             
             /* منع popup مانع الإعلانات فقط */
             .js-antiadblocker {
                 display: none !important;
             }
-            
-            /* ✅ تأكيد حماية كاملة للبروفيل - لا نغير أي شيء */
-            #profile-ad-free-status,
-            #profile-ad-free-item,
-            #profile-premium-expiry,
-            #profile-premium-expiry-item,
-            #profile-account-type,
-            #profile-current-points,
-            #profile-current-points-item,
-            #profile-total-points-earned,
-            #profile-total-points-earned-item,
-            #profile-total-exchanges,
-            #profile-total-exchanges-item,
-            #profile-fullname,
-            #profile-username,
-            #profile-email,
-            #profile-phone,
-            #profile-created-at,
-            #profile-provider,
-            #profile-email-status,
-            #account-type-badge,
-            #pic,
-            #astat,
-            .profile-pic-container {
-                /* لا نضيف أي أنماط هنا - نتركها كما هي */
-            }
         `;
         
-        const existingStyle = document.getElementById('clean-ad-remover');
+        const existingStyle = document.getElementById('clean-ad-remover-final');
         if (existingStyle) existingStyle.remove();
         
         document.head.appendChild(style);
         
-        // ✅ منع تحميل إعلانات جديدة بدون تأثير على البروفيل
-        setupAdBlocking();
+        // ✅ مراقبة بسيطة للإعلانات الجديدة
+        startMinimalAdMonitoring();
         
         console.log('🎉 تم إخفاء الإعلانات بنجاح');
     }
     
-    function setupAdBlocking() {
-        // منع تحميل scripts إعلانات Google
-        const originalAppend = Element.prototype.appendChild;
-        Element.prototype.appendChild = function(element) {
-            if (element.tagName === 'SCRIPT' && element.src) {
-                const src = element.src;
-                if (src.includes('adsbygoogle') || 
-                    src.includes('pagead2.googlesyndication.com') ||
-                    src.includes('doubleclick.net')) {
-                    console.log('🚫 تم منع تحميل إعلان:', src);
-                    return element; // نمنع الإضافة
-                }
-            }
-            return originalAppend.call(this, element);
-        };
-        
-        // ✅ مراقبة بسيطة للإعلانات الجديدة
-        const observer = new MutationObserver(() => {
-            // نستهدف فقط الإعلانات الواضحة
-            const ads = document.querySelectorAll(`
-                ins.adsbygoogle,
-                .adsbygoogle,
-                iframe[src*="pagead2"],
-                iframe[src*="doubleclick"]
-            `);
-            
+    function startMinimalAdMonitoring() {
+        // مراقبة بسيطة دون تدخل في الأنماط
+        setInterval(() => {
+            const ads = document.querySelectorAll('ins.adsbygoogle, .adsbygoogle');
             ads.forEach(ad => {
-                ad.style.display = 'none';
-                ad.style.visibility = 'hidden';
+                if (ad.style.display !== 'none') {
+                    ad.style.display = 'none';
+                }
             });
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        }, 1000);
     }
 })();
