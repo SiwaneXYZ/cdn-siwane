@@ -1,4 +1,5 @@
-// ad-control.js - إصدار v101 (متوافق مع admin.js v101)
+// ad-control.js - إصدار v102 (محدث لإضافة الـ Toast)
+// + ✅ [تعديل v102] إضافة دالة showToast لعرض حالة الحساب.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
 // + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
 (function() {
@@ -15,7 +16,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing Ad Control System (v101)...');
+        console.log('Initializing Ad Control System (v102)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -61,6 +62,36 @@
             return null;
         }
     }
+    
+    // ==========================================================
+    // ✅✅✅ دالة عرض رسالة Toast (تعتمد على CSS المقدم) ✅✅✅
+    // ==========================================================
+    function showToast(message) {
+        // إنشاء الحاوية الأم
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'tNtf'; 
+        
+        // إنشاء عنصر الرسالة الداخلي
+        const toastMessage = document.createElement('div');
+        toastMessage.textContent = message;
+        
+        toastContainer.appendChild(toastMessage);
+        
+        // إزالة أي توست سابق قبل إضافة الجديد
+        const existingToast = document.querySelector('.tNtf');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // إضافة التوست إلى الجسم
+        document.body.appendChild(toastContainer);
+
+        // إزالة التوست بعد 5 ثوانٍ، لتنظيف DOM، وهذا يتوافق مع مدة animation في CSS
+        setTimeout(() => {
+            toastContainer.remove();
+        }, 5000); 
+    }
+    // ==========================================================
     
     // ==========================================================
     // ✅✅✅ [تعديل v101] الدالة المنطقية للتحقق من حالة الإعفاء ✅✅✅
@@ -114,6 +145,23 @@
         const userIsAdFree = isUserAdFree(userProfile);
         
         console.log('Ad-Control: Applying rules. User is Ad-Free:', userIsAdFree);
+        
+        // 🌟🌟🌟 الإضافة الجديدة: إظهار رسالة Toast 🌟🌟🌟
+        let statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
+        
+        if (userProfile.isAdmin) {
+             // الأدمن والمشرفين يرون الإعلانات (للمراقبة) كما في منطق isUserAdFree
+             statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
+        } else if (userIsAdFree) {
+            statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
+        }
+
+        // يتم عرض التوست فقط في أول تطبيق للقواعد (تجنب التكرار في تحديثات التخزين)
+        if (!window.__ad_control_toast_shown) {
+            showToast(statusMessage);
+            window.__ad_control_toast_shown = true;
+        }
+        // 🌟🌟🌟 نهاية الإضافة الجديدة 🌟🌟🌟
         
         if (userIsAdFree) {
             // المستخدم المعفى: نخفي الإعلانات
