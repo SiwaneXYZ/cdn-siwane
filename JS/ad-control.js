@@ -1,25 +1,9 @@
-// ad-control.js - إصدار v109 (الحل النهائي لـ AdBlocker والـ Scroll)
-// + ✅ تمكين التمرير الإجباري للمستخدمين المعفيين.
-// + ✅ إخفاء ويجت AdBlocker (عنصر .js-antiadblocker) وإزالة سمة 'hidden' منه.
-// + ✅ استخدام Toast يعتمد على كلاسات الموقع الأصلي مع ضمان عدم حجب التمرير.
-// + ✅ التحقق من حالة الإعفاء (isVip, adFreeExpiry, vipp).
-
+// ad-control.js - إصدار v105 (إلغاء Toast الأصلي واعتماد تخصيص جديد)
+// + ✅ [تعديل v105] استخدام دالة showToast جديدة بتخصيص CSS مضمن (Inline) لحل جميع مشاكل التمرير.
+// + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
+// + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
 (function() {
     'use strict';
-
-    // ==========================================================
-    // ✅✅✅ دالة لتمكين التمرير على الجسم ✅✅✅
-    // ==========================================================
-    function enableBodyScroll() {
-        const bodyStyle = document.body.style;
-        // إزالة overflow: hidden أو clip التي قد يفرضها الـ AdBlocker
-        if (bodyStyle.overflow === 'hidden' || bodyStyle.overflow === 'clip') {
-            bodyStyle.overflow = '';
-        }
-        // إزالة أي كلاسات قد تمنع التمرير
-        document.body.classList.remove('no-scroll'); 
-    }
-    // ==========================================================
     
     // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
@@ -29,10 +13,12 @@
     }
     
     function initAdControl() {
+        // تشغيل فحص فوري وسريع
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v109)...'); 
+
+        console.log('Initializing Ad Control System (v105)...');
         
-        // التحقق المتكرر في البداية
+        // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
@@ -41,7 +27,7 @@
             }
         }, 500); 
         
-        // التحقق بعد 3 ثوانٍ كدعم
+        // التحقق أيضاً بعد 3 ثوانٍ (كدعم إضافي في حالة تأخر تحميل البيانات)
         setTimeout(() => {
             const userProfile = getUserProfile();
             if (userProfile) {
@@ -52,11 +38,13 @@
         // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
+                // تأخير بسيط لمنح المتصفح وقتاً لمعالجة البيانات
                 setTimeout(checkAndApplyRules, 100); 
             }
         });
     }
 
+    // دالة مساعدة لتطبيق القواعد
     function checkAndApplyRules() {
         const userProfile = getUserProfile();
         if (userProfile) {
@@ -76,46 +64,72 @@
     }
     
     // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (تعتمد على تنسيق الموقع) ✅✅✅
+    // ✅✅✅ دالة عرض رسالة Toast (تخصيص جديد ومستقل) ✅✅✅
     // ==========================================================
     function showToast(message) {
-        // إنشاء الحاوية الأم باستخدام الكلاس الأصلي
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'tNtf'; 
-        
-        // تطبيق خصائص تسمح بالتمرير عبر الحاوية (مهم جداً لضمان عدم حجب التمرير)
-        toastContainer.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-            pointer-events: none; 
-            background: rgba(0, 0, 0, 0); 
-        `;
+        // نستخدم ID للتخصيص الداخلي
+        const toastId = 'gemini-custom-toast'; 
 
-        // إنشاء عنصر الرسالة الداخلي
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        
-        // إعادة خاصية التفاعل لعنصر الرسالة نفسه
-        toastMessage.style.pointerEvents = 'auto'; 
-
-        toastContainer.appendChild(toastMessage);
-        
-        // إزالة أي توست سابق
-        const existingToast = document.querySelector('.tNtf');
+        // إزالة أي توست سابق قبل إضافة الجديد
+        const existingToast = document.getElementById(toastId);
         if (existingToast) {
             existingToast.remove();
         }
 
-        document.body.appendChild(toastContainer);
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.textContent = message;
 
-        // إزالة التوست بعد 5 ثوانٍ
+        // تطبيق تخصيص CSS مباشر (مستوحى من تخصيصك الأصلي)
+        toast.style.cssText = `
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%) translateY(70px); /* يبدأ خارج الرؤية في الأسفل */
+            bottom: 25px; /* الموضع النهائي للظهور */
+            display: inline-flex;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            z-index: 9999; /* قيمة عالية جداً لضمان الظهور فوق كل شيء */
+            background: #323232;
+            color: rgba(255, 255, 255, .9);
+            font-size: 14px;
+            border-radius: 3px;
+            padding: 13px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            pointer-events: none; /* الأهم: منع حجب التمرير */
+        `;
+
+        document.body.appendChild(toast);
+
+        // تشغيل الـ animation للإظهار (بشكل أفضل وأكثر استقلالية)
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            // نقله من الأسفل للخارج ليظهر
+            toast.style.transform = 'translateX(-50%) translateY(0)'; 
+        });
+
+        // تشغيل الـ animation للإخفاء بعد 3 ثوانٍ
+        const displayDuration = 3000;
+        const fadeDuration = 500;
+
         setTimeout(() => {
-            toastContainer.remove();
-        }, 5000); 
+            toast.style.opacity = '0';
+            // نقله للأسفل ليختفي
+            toast.style.transform = 'translateX(-50%) translateY(70px)'; 
+        }, displayDuration);
+
+        // إزالة العنصر بالكامل بعد انتهاء مدة الإخفاء
+        setTimeout(() => {
+            toast.remove();
+        }, displayDuration + fadeDuration);
     }
     // ==========================================================
     
     // ==========================================================
-    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء (isUserAdFree) ✅✅✅
+    // ✅✅✅ [تعديل v101] الدالة المنطقية للتحقق من حالة الإعفاء ✅✅✅
     // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
@@ -167,32 +181,14 @@
         
         console.log('Ad-Control: Applying rules. User is Ad-Free:', userIsAdFree);
         
+        // 🌟🌟🌟 الإضافة الجديدة: إظهار رسالة Toast 🌟🌟🌟
         let statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
         
         if (userProfile.isAdmin) {
+             // الأدمن والمشرفين يرون الإعلانات (للمراقبة) كما في منطق isUserAdFree
              statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
         } else if (userIsAdFree) {
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            
-            // 🌟🌟🌟 الحل لمشكلة التمرير والـ AdBlocker 🌟🌟🌟
-            enableBodyScroll(); 
-
-            // إخفاء الويجت وإزالة أي سمات حظر
-            const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
-            if (antiAdBlockerEl) {
-                 // إزالة سمات الحجب لتقليد سلوك الـ Admin بعد الإظهار
-                 antiAdBlockerEl.removeAttribute('hidden');
-                 antiAdBlockerEl.removeAttribute('aria-hidden');
-                 // إخفاء العنصر عبر CSS المباشر لتغطية أي تأخير
-                 antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-            }
-            // تغطية أي عنصر حجب آخر قد يظهر
-            const accessBlockerEl = document.querySelector('.js-accessblocker');
-            if (accessBlockerEl) {
-                 accessBlockerEl.removeAttribute('hidden');
-                 accessBlockerEl.removeAttribute('aria-hidden');
-                 accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-            }
         }
 
         // يتم عرض التوست فقط في أول تطبيق للقواعد
@@ -200,27 +196,55 @@
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
         }
+        // 🌟🌟🌟 نهاية الإضافة الجديدة 🌟🌟🌟
         
         if (userIsAdFree) {
+            // المستخدم المعفى: نخفي الإعلانات
             hideAllAds();
         } else {
+            // الأدمن أو المستخدم العادي/الذي انتهت صلاحيته: نضمن ظهور الإعلانات
             showAllAds(); 
         }
     }
     
     function hideAllAds() {
+        // ... (كود إخفاء الإعلانات دون تغيير) ...
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
             /* إخفاء إعلانات Google AdSense */
-            .adsbygoogle, ins.adsbygoogle { display: none !important; visibility: hidden !important; opacity: 0 !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
+            .adsbygoogle,
+            ins.adsbygoogle {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+            }
             
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات (مهم جداً) */
+            /* إخفاء إطارات iframe التي تحمل كلمة ads أو أسماء معروفة لإعلانات جوجل */
+            iframe[src*="ads"],
+            iframe[id*="aswift_"],
+            iframe[id*="google_ads_frame"] {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* حماية إضافية ضد أي كائنات إعلانية أخرى معروفة */
+            div[id*="ad-slot"],
+            div[id*="AdContainer"],
+            div[class*="ad-unit"],
+            div[class*="ads-container"],
+            div[class*="ad_wrapper"] {
+                display: none !important;
+            }
+            
+            /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
             .js-antiadblocker,
-            .js-accessblocker, 
-            .papW, /* كلاس الويجت الأم */
             [class*="adblock"],
             [class*="anti-ad"] {
                 display: none !important;
@@ -234,6 +258,7 @@
         }
         
         document.head.appendChild(style);
+        // console.log('Ads hidden for Ad-Free user'); // (تم تقليل التكرار)
     }
     
     function showAllAds() {
