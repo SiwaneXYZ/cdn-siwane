@@ -1,7 +1,6 @@
-// ad-control.js - إصدار v112 (الحل الإلزامي لمشكلة التمرير/اللمس)
-// + ✅ إعادة تفعيل دالة enableBodyScroll() واستدعائها كإجراء إلزامي في حال الإعفاء.
-// + ✅ إضافة إجراء إلزامي لحذف عنصر AdBlocker Overlay من الـ DOM.
-// + ✅ إضافة قواعد CSS صارمة لـ body لضمان التمرير.
+// ad-control.js - إصدار v113 (إزالة التوست لحل مشكلة منع التمرير)
+// + ✅ تم حذف دالة showToast بالكامل.
+// + ✅ تم الحفاظ على الإجراءات الإلزامية لتمكين التمرير وحذف الـ Overlay.
 (function() {
     'use strict';
 
@@ -17,21 +16,13 @@
         // إزالة أي كلاسات قد تمنع التمرير
         document.body.classList.remove('no-scroll', 'overlay-active', 'scroll-lock'); 
         
-        // إزالة أي توست متبقي قد يكون سبباً
-        const existingToast = document.querySelector('.tNtf');
-        if (existingToast) {
-            existingToast.remove();
-        }
-        
-        // إجراء إلزامي لحذف عنصر الـ AdBlocker جسدياً
-        const adBlockerElement = document.querySelector('.js-antiadblocker');
+        // إجراء إلزامي لحذف عنصر الـ AdBlocker جسدياً، وإزالة التوست المتبقي (إن وجد)
+        const adBlockerElement = document.querySelector('.js-antiadblocker, .tNtf, .papW');
         if (adBlockerElement) {
             adBlockerElement.remove();
         }
     }
     // ==========================================================
-
-    // ... (بقية دوال initAdControl, checkAndApplyRules, getUserProfile كما هي) ...
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
@@ -41,7 +32,7 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v112)...'); 
+        console.log('Initializing Ad Control System (v113) - Toast Removed...'); 
         
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
@@ -83,14 +74,9 @@
         }
     }
     
-    // 🚫 دالة عرض رسالة Toast (معطلة مؤقتاً) 🚫
-    // يمكن حذف هذه الدالة إذا قررت عدم استخدام التوست
-    /* function showToast(message) {
-        // ...
-    }
-    */
-    
-    // ... (بقية الدالة isUserAdFree كما هي) ...
+    // ==========================================================
+    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء (isUserAdFree) ✅✅✅
+    // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
@@ -144,24 +130,11 @@
             
             // 🌟 إجراء إلزامي: تمكين التمرير وحذف العنصر المسبب للحظر
             enableBodyScroll();
-            
-            // إزالة أي سمات حظر (إجراء احتياطي)
-            const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
-            if (antiAdBlockerEl) {
-                 antiAdBlockerEl.removeAttribute('hidden');
-                 antiAdBlockerEl.removeAttribute('aria-hidden');
-            }
-            const accessBlockerEl = document.querySelector('.js-accessblocker');
-            if (accessBlockerEl) {
-                 accessBlockerEl.removeAttribute('hidden');
-                 accessBlockerEl.removeAttribute('aria-hidden');
-            }
         }
 
-        // يتم عرض الرسالة/التوست فقط في أول تطبيق للقواعد
+        // استخدام console.log فقط بدلاً من التوست
         if (!window.__ad_control_toast_shown) {
             console.log('Message Status:', statusMessage);
-            // showToast(statusMessage); // معطل مؤقتاً
             window.__ad_control_toast_shown = true;
         }
         
@@ -182,17 +155,14 @@
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
             
             /* منع ظهور طبقات الـ AdBlocker والـ Overlay والـ Toast (بشكل صارم) */
-            .js-antiadblocker,
-            .js-accessblocker, 
-            .papW,  /* كلاس الويجت الأم */
-            .tNtf {
+            .js-antiadblocker, .js-accessblocker, .papW, .tNtf {
                 display: none !important;
             }
             
             /* الإجراء الصارم لإعادة التمرير على الجسم */
             body, html {
                 overflow: auto !important;
-                overflow-x: hidden !important; /* ضمان عدم وجود تمرير أفقي */
+                overflow-x: hidden !important;
             }
             /* إزالة كلاسات قفل التمرير التي قد تكون مضافة */
             body.no-scroll, body.overlay-active, body.scroll-lock {
