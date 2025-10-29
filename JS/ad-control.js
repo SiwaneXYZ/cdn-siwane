@@ -61,17 +61,8 @@
 
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // ✅ فقط إذا كان VIP وكان بريميوم → معفي من الإعلانات
-        if (accountTypeLower === 'vipp') {
-            // التحقق إذا كان المستخدم بريميوم
-            const isPremiumActive = userProfile.premiumExpiry && 
-                                  userProfile.premiumExpiry.seconds * 1000 > Date.now();
-            const isPremiumType = userProfile.accountType === 'premium' || isPremiumActive;
-            
-            return isPremiumType; // فقط إذا كان بريميوم و VIP
-        }
-        
-        return false;
+        // ✅ فقط إذا كان VIP → معفي من الإعلانات
+        return accountTypeLower === 'vipp';
     }
     
     function applyAdRules(userProfile) {
@@ -85,7 +76,7 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // ✅ المستخدم VIP + بريميوم: نخفي الإعلانات ونعرض الإشعار
+            // ✅ المستخدم VIP: نخفي الإعلانات ونعرض الإشعار
             hideAllAds();
             showSimpleNotification("تم التحقق بنجاح! حسابك VIP - أنت معفي من عرض الإعلانات");
         } else if (userIsAdmin) {
@@ -127,7 +118,7 @@
         }
         
         document.head.appendChild(style);
-        console.log('Ads hidden for VIP + Premium user');
+        console.log('Ads hidden for VIP user');
     }
     
     function showAllAds() {
