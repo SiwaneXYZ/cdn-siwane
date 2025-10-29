@@ -1,6 +1,5 @@
-// ad-control.js - إصدار v104 (حل مشكلة التمرير)
-// + ✅ [تعديل v104] التأكد من تعيين pointer-events: none للحاوية الأم و pointer-events: auto للرسالة الداخلية لحل مشكلة منع التمرير.
-// + ✅ [تعديل v102] إضافة دالة showToast لعرض حالة الحساب.
+// ad-control.js - إصدار v105 (إلغاء Toast الأصلي واعتماد تخصيص جديد)
+// + ✅ [تعديل v105] استخدام دالة showToast جديدة بتخصيص CSS مضمن (Inline) لحل جميع مشاكل التمرير.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
 // + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
 (function() {
@@ -17,7 +16,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing Ad Control System (v104)...');
+        console.log('Initializing Ad Control System (v105)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -65,44 +64,67 @@
     }
     
     // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (مع حل نهائي لمشكلة التمرير) ✅✅✅
+    // ✅✅✅ دالة عرض رسالة Toast (تخصيص جديد ومستقل) ✅✅✅
     // ==========================================================
     function showToast(message) {
-        // إنشاء الحاوية الأم
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'tNtf'; 
-        
-        // تعيين خصائص للحاوية الأم لتغطي الشاشة وتسمح بمرور أحداث التمرير
-        toastContainer.style.position = 'fixed';
-        toastContainer.style.top = '0';
-        toastContainer.style.left = '0';
-        toastContainer.style.width = '100%';
-        toastContainer.style.height = '100%';
-        // الحل الرئيسي: السماح لأحداث الماوس والتمرير بالمرور عبر هذه الطبقة
-        toastContainer.style.pointerEvents = 'none'; 
-        
-        // إنشاء عنصر الرسالة الداخلي
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        
-        // إعادة خاصية التفاعل (النقر) لعنصر الرسالة نفسه
-        toastMessage.style.pointerEvents = 'auto'; 
+        // نستخدم ID للتخصيص الداخلي
+        const toastId = 'gemini-custom-toast'; 
 
-        toastContainer.appendChild(toastMessage);
-        
         // إزالة أي توست سابق قبل إضافة الجديد
-        const existingToast = document.querySelector('.tNtf');
+        const existingToast = document.getElementById(toastId);
         if (existingToast) {
             existingToast.remove();
         }
 
-        // إضافة التوست إلى الجسم
-        document.body.appendChild(toastContainer);
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.textContent = message;
 
-        // إزالة التوست بعد 5 ثوانٍ، لتنظيف DOM
+        // تطبيق تخصيص CSS مباشر (مستوحى من تخصيصك الأصلي)
+        toast.style.cssText = `
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%) translateY(70px); /* يبدأ خارج الرؤية في الأسفل */
+            bottom: 25px; /* الموضع النهائي للظهور */
+            display: inline-flex;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            z-index: 9999; /* قيمة عالية جداً لضمان الظهور فوق كل شيء */
+            background: #323232;
+            color: rgba(255, 255, 255, .9);
+            font-size: 14px;
+            border-radius: 3px;
+            padding: 13px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            pointer-events: none; /* الأهم: منع حجب التمرير */
+        `;
+
+        document.body.appendChild(toast);
+
+        // تشغيل الـ animation للإظهار (بشكل أفضل وأكثر استقلالية)
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            // نقله من الأسفل للخارج ليظهر
+            toast.style.transform = 'translateX(-50%) translateY(0)'; 
+        });
+
+        // تشغيل الـ animation للإخفاء بعد 3 ثوانٍ
+        const displayDuration = 3000;
+        const fadeDuration = 500;
+
         setTimeout(() => {
-            toastContainer.remove();
-        }, 5000); 
+            toast.style.opacity = '0';
+            // نقله للأسفل ليختفي
+            toast.style.transform = 'translateX(-50%) translateY(70px)'; 
+        }, displayDuration);
+
+        // إزالة العنصر بالكامل بعد انتهاء مدة الإخفاء
+        setTimeout(() => {
+            toast.remove();
+        }, displayDuration + fadeDuration);
     }
     // ==========================================================
     
@@ -169,7 +191,7 @@
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
         }
 
-        // يتم عرض التوست فقط في أول تطبيق للقواعد (تجنب التكرار في تحديثات التخزين)
+        // يتم عرض التوست فقط في أول تطبيق للقواعد
         if (!window.__ad_control_toast_shown) {
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
