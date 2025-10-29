@@ -90,7 +90,7 @@
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
-            /* إخفاء إعلانات Google التلقائية فقط */
+            /* إخفاء إعلانات Google التلقائية واليدوية فقط */
             .adsbygoogle,
             ins.adsbygoogle,
             iframe[src*="ads"],
@@ -112,14 +112,20 @@
                 display: none !important;
             }
             
-            /* ✅ الحفاظ على العناصر الوصفية في البروفيل */
+            /* ✅ الحفاظ على العناصر الوصفية في البروفيل - مهم جداً */
             #profile-ad-free-status,
             #profile-ad-free-item,
+            #profile-premium-expiry,
+            #profile-premium-expiry-item,
+            #profile-account-type,
             [class*="profile-"],
             [id*="profile-"] {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
+                height: auto !important;
+                width: auto !important;
+                overflow: visible !important;
             }
         `;
         
