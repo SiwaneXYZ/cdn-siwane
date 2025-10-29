@@ -61,8 +61,21 @@
 
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // ✅ فقط إذا كان VIP → معفي من الإعلانات
-        return accountTypeLower === 'vipp';
+        // ✅ حساب VIP دائم (معفي دائماً)
+        if (accountTypeLower === 'vipp') return true;
+        
+        // ✅ حساب Premium نشط
+        const isPremiumActive = userProfile.premiumExpiry && 
+                              userProfile.premiumExpiry.seconds * 1000 > Date.now();
+        if ((accountTypeLower === 'premium' || isPremiumActive)) return true;
+        
+        // ✅ إعفاء مؤقت من الإعلانات (adFreeExpiry)
+        if (userProfile.adFreeExpiry) {
+            if (userProfile.adFreeExpiry === null) return true; // دائم
+            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; // نشط
+        }
+        
+        return false;
     }
     
     function applyAdRules(userProfile) {
@@ -76,14 +89,13 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // ✅ المستخدم VIP: نخفي الإعلانات ونعرض الإشعار
+            // ✅ المستخدم VIP: نخفي الإعلانات
             hideAllAds();
-            showSimpleNotification("تم التحقق بنجاح! حسابك VIP - أنت معفي من عرض الإعلانات");
         } else if (userIsAdmin) {
             // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
             showAllAds();
         }
-        // ✅ المستخدم العادي أو بريميوم فقط: نترك النظام الأصلي يعمل
+        // ✅ المستخدم العادي: نترك النظام الأصلي يعمل (لا نتدخل)
     }
     
     function hideAllAds() {
@@ -91,14 +103,21 @@
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
+            /* إخفاء إعلانات Google */
             .adsbygoogle,
             [class*="ad-"],
             [class*="ads-"],
             iframe[src*="ads"],
             ins.adsbygoogle {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
             }
             
+            /* حماية إضافية من أي إعلانات قد تظهر */
             [id*="ad-"],
             [id*="ads-"],
             div[id*="Ad"],
@@ -106,7 +125,10 @@
                 display: none !important;
             }
             
-            .js-antiadblocker {
+            /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
+            .js-antiadblocker,
+            [class*="adblock"],
+            [class*="anti-ad"] {
                 display: none !important;
             }
         `;
@@ -126,66 +148,7 @@
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
-        }
-    }
-    
-    // ✅ دالة بسيطة لعرض الإشعار (مشابهة لتلك في onload.js)
-    function showSimpleNotification(message) {
-        // استخدام نظام الإشعارات الموجود في onload.js إذا كان متاحاً
-        if (window.PU && window.PU.tNtf) {
-            window.PU.tNtf(message);
-            return;
-        }
-        
-        // بديل بسيط إذا لم يكن نظام الإشعارات متاحاً
-        console.log("VIP Notification:", message);
-        
-        // إنشاء إشعار بسيط مشابه لنظام onload.js
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            z-index: 10000;
-            font-size: 14px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            animation: fadeIn 0.3s ease-in;
-        `;
-        
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        // إزالة الإشعار بعد 3 ثوانٍ
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.style.animation = 'fadeOut 0.3s ease-out';
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 300);
-            }
-        }, 3000);
-        
-        // إضافة أنيميشن بسيط إذا لم يكن موجوداً
-        if (!document.querySelector('style#vip-notification-animations')) {
-            const style = document.createElement('style');
-            style.id = 'vip-notification-animations';
-            style.textContent = `
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(-10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fadeOut {
-                    from { opacity: 1; transform: translateY(0); }
-                    to { opacity: 0; transform: translateY(-10px); }
-                }
-            `;
-            document.head.appendChild(style);
+            console.log('Ads style removed for admin');
         }
     }
 })();
