@@ -1,28 +1,27 @@
-// ad-control.js - إصدار v115 (تثبيت قائمة الهاتف السفلية)
-// + ✅ تم إضافة قاعدة صارمة لتثبيت الويجت TextList99.
+// ad-control.js - إصدار v109 (الحل النهائي لـ AdBlocker والـ Scroll)
+// + ✅ تمكين التمرير الإجباري للمستخدمين المعفيين.
+// + ✅ إخفاء ويجت AdBlocker (عنصر .js-antiadblocker) وإزالة سمة 'hidden' منه.
+// + ✅ استخدام Toast يعتمد على كلاسات الموقع الأصلي مع ضمان عدم حجب التمرير.
+// + ✅ التحقق من حالة الإعفاء (isVip, adFreeExpiry, vipp).
+
 (function() {
     'use strict';
 
     // ==========================================================
-    // ✅✅✅ دالة لتمكين التمرير على الجسم (إجراء إلزامي وقوي) ✅✅✅
+    // ✅✅✅ دالة لتمكين التمرير على الجسم ✅✅✅
     // ==========================================================
     function enableBodyScroll() {
         const bodyStyle = document.body.style;
-        // إزالة القيود الصارمة مباشرة
-        bodyStyle.overflow = '';
-        bodyStyle.overflowY = '';
-        bodyStyle.overflowX = '';
-        // إزالة أي كلاسات قد تمنع التمرير
-        document.body.classList.remove('no-scroll', 'overlay-active', 'scroll-lock'); 
-        
-        // إجراء إلزامي لحذف عنصر الـ AdBlocker جسدياً، وإزالة التوست المتبقي (إن وجد)
-        const adBlockerElement = document.querySelector('.js-antiadblocker, .tNtf, .papW');
-        if (adBlockerElement) {
-            adBlockerElement.remove();
+        // إزالة overflow: hidden أو clip التي قد يفرضها الـ AdBlocker
+        if (bodyStyle.overflow === 'hidden' || bodyStyle.overflow === 'clip') {
+            bodyStyle.overflow = '';
         }
+        // إزالة أي كلاسات قد تمنع التمرير
+        document.body.classList.remove('no-scroll'); 
     }
     // ==========================================================
-
+    
+    // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
     } else {
@@ -31,8 +30,9 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v115) - Fixed Bar Forcefully Applied...'); 
+        console.log('Initializing Ad Control System (v109)...'); 
         
+        // التحقق المتكرر في البداية
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
@@ -41,6 +41,7 @@
             }
         }, 500); 
         
+        // التحقق بعد 3 ثوانٍ كدعم
         setTimeout(() => {
             const userProfile = getUserProfile();
             if (userProfile) {
@@ -48,6 +49,7 @@
             }
         }, 3000); 
         
+        // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
                 setTimeout(checkAndApplyRules, 100); 
@@ -73,25 +75,70 @@
         }
     }
     
-    // ... (بقية الدالة isUserAdFree كما هي) ...
+    // ==========================================================
+    // ✅✅✅ دالة عرض رسالة Toast (تعتمد على تنسيق الموقع) ✅✅✅
+    // ==========================================================
+    function showToast(message) {
+        // إنشاء الحاوية الأم باستخدام الكلاس الأصلي
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'tNtf'; 
+        
+        // تطبيق خصائص تسمح بالتمرير عبر الحاوية (مهم جداً لضمان عدم حجب التمرير)
+        toastContainer.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
+            pointer-events: none; 
+            background: rgba(0, 0, 0, 0); 
+        `;
+
+        // إنشاء عنصر الرسالة الداخلي
+        const toastMessage = document.createElement('div');
+        toastMessage.textContent = message;
+        
+        // إعادة خاصية التفاعل لعنصر الرسالة نفسه
+        toastMessage.style.pointerEvents = 'auto'; 
+
+        toastContainer.appendChild(toastMessage);
+        
+        // إزالة أي توست سابق
+        const existingToast = document.querySelector('.tNtf');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        document.body.appendChild(toastContainer);
+
+        // إزالة التوست بعد 5 ثوانٍ
+        setTimeout(() => {
+            toastContainer.remove();
+        }, 5000); 
+    }
+    // ==========================================================
+    
+    // ==========================================================
+    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء (isUserAdFree) ✅✅✅
+    // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
+        // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) {
             console.log('Ad-Control: Admin user (Showing Ads for testing)');
             return false;
         }
         
+        // 2. التحقق من حقل 'isVip' الجديد (الأولوية القصوى)
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
             return true;
         }
 
+        // 3. التحقق من 'adFreeExpiry' الدائم (null)
         if (userProfile.adFreeExpiry === null) {
             console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
+        // 4. التحقق من 'adFreeExpiry' المؤقت (Timestamp)
         const adFreeExpiry = userProfile.adFreeExpiry;
         if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
             const expiryTimestampMs = adFreeExpiry.seconds * 1000;
@@ -102,12 +149,14 @@
             }
         }
         
+        // 5. [دعم للخلف] التحقق من الحقول القديمة (vipp)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
             console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
             return true;
         }
         
+        // 6. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
         console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
@@ -125,12 +174,30 @@
         } else if (userIsAdFree) {
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             
-            // 🌟 إجراء إلزامي: تمكين التمرير وحذف العنصر المسبب للحظر
-            enableBodyScroll();
+            // 🌟🌟🌟 الحل لمشكلة التمرير والـ AdBlocker 🌟🌟🌟
+            enableBodyScroll(); 
+
+            // إخفاء الويجت وإزالة أي سمات حظر
+            const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
+            if (antiAdBlockerEl) {
+                 // إزالة سمات الحجب لتقليد سلوك الـ Admin بعد الإظهار
+                 antiAdBlockerEl.removeAttribute('hidden');
+                 antiAdBlockerEl.removeAttribute('aria-hidden');
+                 // إخفاء العنصر عبر CSS المباشر لتغطية أي تأخير
+                 antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
+            }
+            // تغطية أي عنصر حجب آخر قد يظهر
+            const accessBlockerEl = document.querySelector('.js-accessblocker');
+            if (accessBlockerEl) {
+                 accessBlockerEl.removeAttribute('hidden');
+                 accessBlockerEl.removeAttribute('aria-hidden');
+                 accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
+            }
         }
 
+        // يتم عرض التوست فقط في أول تطبيق للقواعد
         if (!window.__ad_control_toast_shown) {
-            console.log('Message Status:', statusMessage);
+            showToast(statusMessage);
             window.__ad_control_toast_shown = true;
         }
         
@@ -150,22 +217,17 @@
             iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
             
-            /* منع ظهور طبقات الـ AdBlocker والـ Overlay والـ Toast (بشكل صارم) */
-            .js-antiadblocker, .js-accessblocker, .papW, .tNtf {
+            /* منع ظهور الويجت الخاصة بمانع الإعلانات (مهم جداً) */
+            .js-antiadblocker,
+            .js-accessblocker, 
+            .papW, /* كلاس الويجت الأم */
+            [class*="adblock"],
+            [class*="anti-ad"] {
                 display: none !important;
-            }
-            
-            /* ✅ القاعدة الجديدة: تثبيت شريط الأدوات للهاتف إجبارياً */
-            #TextList99.mobC,
-            .widget.TextList.mobC {
-                position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                z-index: 99999 !important; /* أولوية عرض عالية جداً */
             }
         `;
         
+        // إزالة النمط السابق إذا موجود
         const existingStyle = document.getElementById('vip-ad-free-style');
         if (existingStyle) {
             existingStyle.remove();
@@ -175,6 +237,7 @@
     }
     
     function showAllAds() {
+        // إزالة نمط الإخفاء
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
