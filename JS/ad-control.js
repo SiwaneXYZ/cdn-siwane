@@ -22,7 +22,7 @@
                 clearInterval(checkInterval);
                 applyAdRules(userProfile);
             }
-        }, 500); // تم تقليل الفترة لسرعة الاستجابة
+        }, 500); 
         
         // التحقق أيضاً بعد 3 ثوانٍ (كدعم إضافي في حالة تأخر تحميل البيانات)
         setTimeout(() => {
@@ -30,7 +30,7 @@
             if (userProfile) {
                 applyAdRules(userProfile);
             }
-        }, 3000); // تم تقليل الفترة
+        }, 3000); 
         
         // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
@@ -69,7 +69,7 @@
         // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) return false;
         
-        // 2. التحقق من حقل الإعفاء (adFreeExpiry) - الأولوية القصوى
+        // 2. التحقق من حقل الإعفاء (adFreeExpiry) - الأولوية
         const adFreeExpiry = userProfile.adFreeExpiry;
 
         if (adFreeExpiry !== undefined && adFreeExpiry !== null) {
@@ -81,21 +81,20 @@
                     console.log('Ad-Free: Active (Temporary via adFreeExpiry)');
                     return true; 
                 } else {
-                    // التاريخ انتهى (مثل المثال الذي يرجع لعام 2015)
+                    // التاريخ انتهى
                     console.log('Ad-Free: Expired (Date has passed)');
-                    return false;
+                    // نستمر في التحقق من VIPP قبل الإرجاع false
                 }
             }
         } 
         
         // 3. التحقق من adFreeExpiry === null (الحالة الدائمة)
-        // يتم التعامل مع هذه الحالة بشكل منفصل في حال تم تعيين القيمة كـ null صراحةً
         if (adFreeExpiry === null) {
             console.log('Ad-Free: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
-        // 4. التحقق من حالة VIPP (كدعم للسيناريوهات الدائمة البديلة)
+        // 4. التحقق من حالة VIPP (إعفاء الحسابات المحددة كـ VIPP)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp') {
             console.log('Ad-Free: Active (via accountType = VIPP)');
@@ -128,6 +127,7 @@
     }
     
     function hideAllAds() {
+        // ... (كود إخفاء الإعلانات دون تغيير) ...
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
