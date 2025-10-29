@@ -1,6 +1,5 @@
-// ad-control.js - إصدار v113 (إزالة التوست لحل مشكلة منع التمرير)
-// + ✅ تم حذف دالة showToast بالكامل.
-// + ✅ تم الحفاظ على الإجراءات الإلزامية لتمكين التمرير وحذف الـ Overlay.
+// ad-control.js - إصدار v114 (إعادة تثبيت قائمة الهاتف)
+// + ✅ تم إزالة القاعدة التي تسبب مشاكل في position: fixed.
 (function() {
     'use strict';
 
@@ -32,7 +31,7 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v113) - Toast Removed...'); 
+        console.log('Initializing Ad Control System (v114) - Fixed Position Restored...'); 
         
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
@@ -132,7 +131,6 @@
             enableBodyScroll();
         }
 
-        // استخدام console.log فقط بدلاً من التوست
         if (!window.__ad_control_toast_shown) {
             console.log('Message Status:', statusMessage);
             window.__ad_control_toast_shown = true;
@@ -159,15 +157,7 @@
                 display: none !important;
             }
             
-            /* الإجراء الصارم لإعادة التمرير على الجسم */
-            body, html {
-                overflow: auto !important;
-                overflow-x: hidden !important;
-            }
-            /* إزالة كلاسات قفل التمرير التي قد تكون مضافة */
-            body.no-scroll, body.overlay-active, body.scroll-lock {
-                overflow: auto !important;
-            }
+            /* ملاحظة: تم إزالة قواعد body/html هنا، لكي لا تتعارض مع position: fixed */
         `;
         
         const existingStyle = document.getElementById('vip-ad-free-style');
