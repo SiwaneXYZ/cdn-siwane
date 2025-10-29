@@ -54,7 +54,7 @@
     }
     
     // ==========================================================
-    // ✅✅✅ التعديل المطلوب: الاعتماد فقط على VIPP أو adFreeExpiry ✅✅✅
+    // منطق الإعفاء: يعتمد فقط على VIPP أو adFreeExpiry
     // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
@@ -133,6 +133,18 @@
             div[class*="ads-container"],
             div[class*="ad_wrapper"] {
                 display: none !important;
+            }
+            
+            /* ✅✅✅ قواعد الاستثناء: منع إخفاء عناصر الواجهة الأساسية */
+            #account-type-badge.badge-ad-free,
+            #profile-ad-free-item {
+                display: block !important; /* تأكد من ظهور العنصر */
+                visibility: visible !important;
+                opacity: 1 !important;
+                height: auto !important;
+                width: auto !important;
+                overflow: visible !important;
+                pointer-events: auto !important; /* لضمان التفاعل إذا كان مُعطّلاً */
             }
             
             /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
