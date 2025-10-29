@@ -2,7 +2,7 @@ import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/11.6
 
 // متغيرات لتأثير Ping
 let pingColorInterval = null;
-let isPremiumColor = true;
+let isPremiumShowing = true;
 
 function h(){const l=document.getElementById('json:firebaseconfig');if(!l)return{};try{const o=JSON.parse(l.textContent);if(o&&o.apiKey&&(o.appId||o.projectId))return{apiKey:o.apiKey,authDomain:o.authDomain,projectId:o.projectId,databaseURL:o.databaseURL,storageBucket:o.storageBucket,messagingSenderId:o.messagingSenderId,appId:o.appId}}catch(l){console.error("Failed to parse Firebase config:",l)}return{}}let d,u=null,p=h();if(Object.keys(p).length>0)try{const l=getApps();d=0===l.length?initializeApp(p):getApp()}catch(l){console.error("Firebase initialization failed:",l)}
 
@@ -27,23 +27,20 @@ function updatePingEffectColor(userData) {
     const isCurrentUserOwnerAdmin = userData.email && window.ownerAdminEmail && userData.email.toLowerCase() === window.ownerAdminEmail.toLowerCase();
     const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
     const isPremiumActive = userData.premiumExpiry && userData.premiumExpiry.seconds * 1000 > Date.now();
+    const isSpecialRole = isCurrentUserOwnerAdmin || userData.isAdmin;
     
     console.log('Ping Effect Debug:', {
         accountType: accountTypeLower,
         isPremiumActive: isPremiumActive,
         isVipp: accountTypeLower === 'vipp',
-        hasBoth: accountTypeLower === 'vipp' && isPremiumActive
+        isSpecialRole: isSpecialRole
     });
     
-    // تحديد نوع الحساب مع الأولوية
+    // تحديد نوع الحساب مع الأولوية - نفس منطق البروفيل
     if (isCurrentUserOwnerAdmin) {
         o.classList.add('account-owner');
     } else if (userData.isAdmin) {
         o.classList.add('account-admin');
-    } else if (accountTypeLower === 'vipp' && isPremiumActive) {
-        // حساب VIP + Premium - تفعيل التبديل بين الألوان
-        o.classList.add('account-vipp');
-        startDualColorAnimation();
     } else if (accountTypeLower === 'vipp') {
         o.classList.add('account-vipp');
     } else if (accountTypeLower === 'premium' || isPremiumActive) {
@@ -51,29 +48,44 @@ function updatePingEffectColor(userData) {
     } else {
         o.classList.add('account-normal');
     }
+    
+    // منطق التبديل بين الألوان - نفس منطق البروفيل
+    const isPremiumOrVip = (accountTypeLower === 'vipp') || (accountTypeLower === 'premium') || isPremiumActive;
+    const isAdFree = (userData.adFreeExpiry === null) || (userData.adFreeExpiry && userData.adFreeExpiry.seconds * 1000 > Date.now());
+    
+    // تطبيق التبديل فقط إذا كان ليس مالك/أدمن + بريميوم/فب + معفي من الإعلانات
+    if (!isSpecialRole && isPremiumOrVip && isAdFree) {
+        startDualColorAnimation(accountTypeLower);
+    }
 }
 
-// دالة التبديل بين ألوان VIP و Premium
-function startDualColorAnimation() {
+// دالة التبديل بين ألوان Premium و Ad-Free
+function startDualColorAnimation(accountTypeLower) {
     if (!o) return;
     
-    isPremiumColor = true;
-    updateDualColor();
+    isPremiumShowing = true;
+    updateDualColor(accountTypeLower);
     
     pingColorInterval = setInterval(() => {
-        isPremiumColor = !isPremiumColor;
-        updateDualColor();
-    }, 1200);
+        isPremiumShowing = !isPremiumShowing;
+        updateDualColor(accountTypeLower);
+    }, 5000); // التبديل كل 5 ثواني مثل البروفيل
 }
 
 // دالة تحديث اللون للتبديل
-function updateDualColor() {
+function updateDualColor(accountTypeLower) {
     if (!o) return;
     
-    if (isPremiumColor) {
-        o.style.setProperty('--ripple-color', 'var(--acct-premium-col, gold)');
+    if (isPremiumShowing) {
+        // عرض لون Premium/VIP
+        if (accountTypeLower === 'vipp') {
+            o.style.setProperty('--ripple-color', 'var(--acct-vip-col, purple)');
+        } else {
+            o.style.setProperty('--ripple-color', 'var(--acct-premium-col, gold)');
+        }
     } else {
-        o.style.setProperty('--ripple-color', 'var(--acct-vip-col, purple)');
+        // عرض لون Ad-Free
+        o.style.setProperty('--ripple-color', 'var(--msg-succ-col, green)');
     }
 }
 
@@ -133,6 +145,7 @@ function f(h,d,u){
     var L
 }
 
+// ... باقي الكود يبقى كما هو بدون تغيير
 function y(){const h=localStorage.getItem('prompt_dismissed_v13'),d=400;if(h)try{if((Date.now()-JSON.parse(h).timestamp)/864e5<3.5)return void console.warn("Prompt Check: الإشعار تم إغلاقه مؤخراً (أقل من 3.5 أيام). لن يظهر.")}catch(l){}if(document.getElementById('login-signup-prompt-dynamic'))return;const u="undefined"!=typeof data&&data.blog&&data.blog.title?data.blog.title:"صوانˣʸᶻ",p="undefined"!=typeof data&&data.blog&&data.blog.blogspotFaviconUrl?data.blog.blogspotFaviconUrl:"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh80X00Lvdk3ZJBmgQFmGd1SmDZvqHpPf8D6YhmW7QsWYXyo_Cbo6BFHHdv1r1ocOe4gr5OexjPYYi-9Tp6QFQsfci2WPbFDu6DGFFr4UzhyphenhyphenkbTKFEBEQyPPbuYDM08v9-OU4ySBsI4bNOPtqr-U1fKMmcqRL38XSVE_XvVjFcblgVffq1j18GvYQTZEM8/s1600/favicon.png",A=`<div id="login-signup-prompt-dynamic" class="browser-notification-bar">
                 <div class="prompt-content">
                     <div class="site-info">
