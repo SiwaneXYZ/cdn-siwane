@@ -1,4 +1,110 @@
-import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';document.addEventListener('DOMContentLoaded',()=>{const l=document.getElementById('forlogPop'),o=document.querySelector('.logReg'),e=document.querySelector('.logPop-wrp'),i=document.querySelector('.NotLog'),r=document.querySelector('.DonLog'),a=r?r.querySelector('div.loginS[aria-label="ادمن"]'):null,s=r?r.querySelector('div.loginS[aria-label="الخروج"]'):null,n=r?r.querySelector('a.loginS[aria-label="نقاطي"]'):null,c=r?r.querySelector('a.loginS[aria-label="منتجاتي"]'):null,g='firebaseUserProfileData',m='https://cdn-icons-png.flaticon.com/512/3135/3135715.png',t=o?o.innerHTML:'';function h(){const l=document.getElementById('json:firebaseconfig');if(!l)return{};try{const o=JSON.parse(l.textContent);if(o&&o.apiKey&&(o.appId||o.projectId))return{apiKey:o.apiKey,authDomain:o.authDomain,projectId:o.projectId,databaseURL:o.databaseURL,storageBucket:o.storageBucket,messagingSenderId:o.messagingSenderId,appId:o.appId}}catch(l){console.error("Failed to parse Firebase config:",l)}return{}}let d,u=null,p=h();if(Object.keys(p).length>0)try{const l=getApps();d=0===l.length?initializeApp(p):getApp()}catch(l){console.error("Firebase initialization failed:",l)}function f(h,d,u){if(i&&r)if(h){i.classList.add('hidden'),r.classList.remove('hidden');const l=!0===d.isAdmin;a&&a.classList.toggle('hidden',!l),c&&c.classList.toggle('hidden',l),n&&n.classList.toggle('hidden',l),o&&(L=o.querySelector('.current-profile-image'),L||(o.innerHTML='',L=document.createElement('img'),L.alt='Profile Image',L.classList.add('profileUser','current-profile-image'),o.appendChild(L)),L.src=u||m,L.onerror=function(){this.src=m},o.classList.add('logged-in'))}else i.classList.remove('hidden'),r.classList.add('hidden'),a&&a.classList.add('hidden'),n&&n.classList.add('hidden'),c&&c.classList.add('hidden'),o&&(o.innerHTML=t,o.classList.remove('logged-in'));var L}function y(){const h=localStorage.getItem('prompt_dismissed_v13'),d=400;if(h)try{if((Date.now()-JSON.parse(h).timestamp)/864e5<3.5)return void console.warn("Prompt Check: الإشعار تم إغلاقه مؤخراً (أقل من 3.5 أيام). لن يظهر.")}catch(l){}if(document.getElementById('login-signup-prompt-dynamic'))return;const u="undefined"!=typeof data&&data.blog&&data.blog.title?data.blog.title:"صوانˣʸᶻ",p="undefined"!=typeof data&&data.blog&&data.blog.blogspotFaviconUrl?data.blog.blogspotFaviconUrl:"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh80X00Lvdk3ZJBmgQFmGd1SmDZvqHpPf8D6YhmW7QsWYXyo_Cbo6BFHHdv1r1ocOe4gr5OexjPYYi-9Tp6QFQsfci2WPbFDu6DGFFr4UzhyphenhyphenkbTKFEBEQyPPbuYDM08v9-OU4ySBsI4bNOPtqr-U1fKMmcqRL38XSVE_XvVjFcblgVffq1j18GvYQTZEM8/s1600/favicon.png",A=`<div id="login-signup-prompt-dynamic" class="browser-notification-bar">
+import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';document.addEventListener('DOMContentLoaded',()=>{const l=document.getElementById('forlogPop'),o=document.querySelector('.logReg'),e=document.querySelector('.logPop-wrp'),i=document.querySelector('.NotLog'),r=document.querySelector('.DonLog'),a=r?r.querySelector('div.loginS[aria-label="ادمن"]'):null,s=r?r.querySelector('div.loginS[aria-label="الخروج"]'):null,n=r?r.querySelector('a.loginS[aria-label="نقاطي"]'):null,c=r?r.querySelector('a.loginS[aria-label="منتجاتي"]'):null,g='firebaseUserProfileData',m='https://cdn-icons-png.flaticon.com/512/3135/3135715.png',t=o?o.innerHTML:'';
+
+// متغيرات لتأثير Ping
+let pingColorInterval = null;
+let isPremiumColor = true;
+
+function h(){const l=document.getElementById('json:firebaseconfig');if(!l)return{};try{const o=JSON.parse(l.textContent);if(o&&o.apiKey&&(o.appId||o.projectId))return{apiKey:o.apiKey,authDomain:o.authDomain,projectId:o.projectId,databaseURL:o.databaseURL,storageBucket:o.storageBucket,messagingSenderId:o.messagingSenderId,appId:o.appId}}catch(l){console.error("Failed to parse Firebase config:",l)}return{}}let d,u=null,p=h();if(Object.keys(p).length>0)try{const l=getApps();d=0===l.length?initializeApp(p):getApp()}catch(l){console.error("Firebase initialization failed:",l)}
+
+// دالة تحديث لون Ping Effect
+function updatePingEffectColor(userData) {
+    if (!o) return;
+    
+    // إيقاف أي مؤتمر سابق
+    if (pingColorInterval) {
+        clearInterval(pingColorInterval);
+        pingColorInterval = null;
+    }
+    
+    // إزالة كلاسات الألوان القديمة
+    o.classList.remove('account-owner', 'account-admin', 'account-vipp', 'account-premium', 'account-normal', 'account-dual');
+    
+    const isCurrentUserOwnerAdmin = userData && userData.email && window.ownerAdminEmail && userData.email.toLowerCase() === window.ownerAdminEmail.toLowerCase();
+    const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
+    const isPremiumActive = userData.premiumExpiry && userData.premiumExpiry.seconds * 1000 > Date.now();
+    
+    // تحديد نوع الحساب
+    if (isCurrentUserOwnerAdmin) {
+        o.classList.add('account-owner');
+    } else if (userData.isAdmin) {
+        o.classList.add('account-admin');
+    } else if (accountTypeLower === 'vipp' && (isPremiumActive || accountTypeLower === 'vipp')) {
+        // حساب VIP + Premium - تفعيل التبديل بين الألوان
+        o.classList.add('account-dual');
+        startDualColorAnimation();
+    } else if (accountTypeLower === 'vipp') {
+        o.classList.add('account-vipp');
+    } else if (accountTypeLower === 'premium' || isPremiumActive) {
+        o.classList.add('account-premium');
+    } else {
+        o.classList.add('account-normal');
+    }
+}
+
+// دالة التبديل بين ألوان VIP و Premium
+function startDualColorAnimation() {
+    if (!o) return;
+    
+    isPremiumColor = true;
+    updateDualColor();
+    
+    pingColorInterval = setInterval(() => {
+        isPremiumColor = !isPremiumColor;
+        updateDualColor();
+    }, 2000); // التبديل كل 2 ثانية (بين كل نبضة ping)
+}
+
+// دالة تحديث اللون للتبديل
+function updateDualColor() {
+    if (!o) return;
+    
+    if (isPremiumColor) {
+        o.style.setProperty('--ripple-color', 'var(--acct-premium-col, gold)');
+    } else {
+        o.style.setProperty('--ripple-color', 'var(--acct-vip-col, purple)');
+    }
+}
+
+// دالة إيقاف تأثيرات Ping
+function stopPingEffects() {
+    if (pingColorInterval) {
+        clearInterval(pingColorInterval);
+        pingColorInterval = null;
+    }
+    if (o) {
+        o.classList.remove('account-dual');
+        o.style.removeProperty('--ripple-color');
+    }
+}
+
+function f(h,d,u){if(i&&r)if(h){
+    i.classList.add('hidden'),r.classList.remove('hidden');
+    const l=!0===d.isAdmin;
+    a&&a.classList.toggle('hidden',!l),
+    c&&c.classList.toggle('hidden',l),
+    n&&n.classList.toggle('hidden',l),
+    o&&(L=o.querySelector('.current-profile-image'),
+    L||(o.innerHTML='',L=document.createElement('img'),
+    L.alt='Profile Image',
+    L.classList.add('profileUser','current-profile-image'),
+    o.appendChild(L)),
+    L.src=u||m,
+    L.onerror=function(){this.src=m},
+    o.classList.add('logged-in'));
+    
+    // تحديث لون Ping Effect عند تسجيل الدخول
+    if (d) {
+        updatePingEffectColor(d);
+    }
+    
+}else i.classList.remove('hidden'),r.classList.add('hidden'),a&&a.classList.add('hidden'),n&&n.classList.add('hidden'),c&&c.classList.add('hidden'),o&&(o.innerHTML=t,o.classList.remove('logged-in'));
+
+// إيقاف تأثيرات Ping عند تسجيل الخروج
+stopPingEffects();
+
+var L}
+
+function y(){const h=localStorage.getItem('prompt_dismissed_v13'),d=400;if(h)try{if((Date.now()-JSON.parse(h).timestamp)/864e5<3.5)return void console.warn("Prompt Check: الإشعار تم إغلاقه مؤخراً (أقل من 3.5 أيام). لن يظهر.")}catch(l){}if(document.getElementById('login-signup-prompt-dynamic'))return;const u="undefined"!=typeof data&&data.blog&&data.blog.title?data.blog.title:"صوانˣʸᶻ",p="undefined"!=typeof data&&data.blog&&data.blog.blogspotFaviconUrl?data.blog.blogspotFaviconUrl:"https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh80X00Lvdk3ZJBmgQFmGd1SmDZvqHpPf8D6YhmW7QsWYXyo_Cbo6BFHHdv1r1ocOe4gr5OexjPYYi-9Tp6QFQsfci2WPbFDu6DGFFr4UzhyphenhyphenkbTKFEBEQyPPbuYDM08v9-OU4ySBsI4bNOPtqr-U1fKMmcqRL38XSVE_XvVjFcblgVffq1j18GvYQTZEM8/s1600/favicon.png",A=`<div id="login-signup-prompt-dynamic" class="browser-notification-bar">
                 <div class="prompt-content">
                     <div class="site-info">
                         <img src="${p}" alt="${u} icon" class="site-icon"/>
