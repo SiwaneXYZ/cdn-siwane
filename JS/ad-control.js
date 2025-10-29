@@ -1,4 +1,5 @@
-// ad-control.js - إصدار v102 (محدث لإضافة الـ Toast)
+// ad-control.js - إصدار v103 (محدث لحل مشكلة التمرير في Toast)
+// + ✅ [تعديل v103] تعديل دالة showToast باستخدام pointer-events: none لحل مشكلة منع التمرير.
 // + ✅ [تعديل v102] إضافة دالة showToast لعرض حالة الحساب.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
 // + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
@@ -16,7 +17,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing Ad Control System (v102)...');
+        console.log('Initializing Ad Control System (v103)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -64,17 +65,29 @@
     }
     
     // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (تعتمد على CSS المقدم) ✅✅✅
+    // ✅✅✅ دالة عرض رسالة Toast (مع حل مشكلة التمرير) ✅✅✅
     // ==========================================================
     function showToast(message) {
         // إنشاء الحاوية الأم
         const toastContainer = document.createElement('div');
         toastContainer.className = 'tNtf'; 
         
+        // تعيين خصائص للحاوية الأم لمنعها من حجب التمرير والتفاعل (Pointer-Events)
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '0';
+        toastContainer.style.left = '0';
+        toastContainer.style.width = '100%';
+        toastContainer.style.height = '100%';
+        // الحل الرئيسي: السماح لأحداث الماوس والتمرير بالمرور عبر هذه الطبقة
+        toastContainer.style.pointerEvents = 'none'; 
+        
         // إنشاء عنصر الرسالة الداخلي
         const toastMessage = document.createElement('div');
         toastMessage.textContent = message;
         
+        // إعادة التفاعل لعنصر الرسالة نفسه
+        toastMessage.style.pointerEvents = 'auto';
+
         toastContainer.appendChild(toastMessage);
         
         // إزالة أي توست سابق قبل إضافة الجديد
