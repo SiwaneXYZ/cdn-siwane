@@ -10,36 +10,43 @@
     }
     
     function initAdControl() {
+        // تشغيل فحص فوري وسريع
+        checkAndApplyRules();
+
         console.log('Initializing VIP Ad Control System...');
         
-        // التحقق من حالة المستخدم كل ثانيتين (حتى يتم تحميل البيانات)
+        // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
                 clearInterval(checkInterval);
                 applyAdRules(userProfile);
             }
-        }, 2000);
+        }, 500); // تم تقليل الفترة لسرعة الاستجابة
         
-        // التحقق أيضاً بعد 5 ثوانٍ (كدعم إضافي)
+        // التحقق أيضاً بعد 3 ثوانٍ (كدعم إضافي في حالة تأخر تحميل البيانات)
         setTimeout(() => {
             const userProfile = getUserProfile();
             if (userProfile) {
                 applyAdRules(userProfile);
             }
-        }, 5000);
+        }, 3000); // تم تقليل الفترة
         
         // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
-                setTimeout(() => {
-                    const userProfile = getUserProfile();
-                    if (userProfile) {
-                        applyAdRules(userProfile);
-                    }
-                }, 100);
+                // تأخير بسيط لمنح المتصفح وقتاً لمعالجة البيانات
+                setTimeout(checkAndApplyRules, 100); 
             }
         });
+    }
+
+    // دالة مساعدة لتطبيق القواعد
+    function checkAndApplyRules() {
+        const userProfile = getUserProfile();
+        if (userProfile) {
+            applyAdRules(userProfile);
+        }
     }
     
     function getUserProfile() {
@@ -54,29 +61,49 @@
     }
     
     // ==========================================================
-    // ✅✅✅ التعديل المطلوب: الاعتماد فقط على VIPP أو adFreeExpiry ✅✅✅
+    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء من الإعلانات ✅✅✅
     // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // الأدمن والمشرفين يرون الإعلانات (للمراقبة)
+        // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) return false;
+        
+        // 2. التحقق من حقل الإعفاء (adFreeExpiry) - الأولوية القصوى
+        const adFreeExpiry = userProfile.adFreeExpiry;
 
+        if (adFreeExpiry !== undefined && adFreeExpiry !== null) {
+            // الحالة أ: adFreeExpiry هو كائن طابع زمني (إعفاء مؤقت أو منتهي)
+            if (typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
+                const expiryTimestampMs = adFreeExpiry.seconds * 1000;
+                
+                if (expiryTimestampMs > Date.now()) {
+                    console.log('Ad-Free: Active (Temporary via adFreeExpiry)');
+                    return true; 
+                } else {
+                    // التاريخ انتهى (مثل المثال الذي يرجع لعام 2015)
+                    console.log('Ad-Free: Expired (Date has passed)');
+                    return false;
+                }
+            }
+        } 
+        
+        // 3. التحقق من adFreeExpiry === null (الحالة الدائمة)
+        // يتم التعامل مع هذه الحالة بشكل منفصل في حال تم تعيين القيمة كـ null صراحةً
+        if (adFreeExpiry === null) {
+            console.log('Ad-Free: Active (Permanent via adFreeExpiry = null)');
+            return true; 
+        }
+
+        // 4. التحقق من حالة VIPP (كدعم للسيناريوهات الدائمة البديلة)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        
-        // 1. ✅ التحقق من حالة VIPP (الإعفاء الدائم)
-        if (accountTypeLower === 'vipp') return true;
-        
-        // 2. ✅ التحقق من حقل الإعفاء المؤقت/الدائم (adFreeExpiry)
-        if (userProfile.adFreeExpiry) {
-            // adFreeExpiry === null يعني إعفاء دائم
-            if (userProfile.adFreeExpiry === null) return true; 
-            
-            // التحقق من صلاحية الإعفاء المؤقت
-            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; 
+        if (accountTypeLower === 'vipp') {
+            console.log('Ad-Free: Active (via accountType = VIPP)');
+            return true;
         }
         
-        // إذا لم يكن VIPP ولم يكن لديه adFreeExpiry نشط، فإنه يعرض الإعلانات
+        // 5. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
+        console.log('Ad-Free: Inactive (Showing Ads)');
         return false;
     }
     // ==========================================================
@@ -95,7 +122,7 @@
             // المستخدم المعفى: نخفي الإعلانات
             hideAllAds();
         } else {
-            // الأدمن أو المستخدم العادي: نضمن ظهور الإعلانات
+            // الأدمن أو المستخدم العادي/الذي انتهت صلاحيته: نضمن ظهور الإعلانات
             showAllAds(); 
         }
     }
