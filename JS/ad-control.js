@@ -214,3 +214,71 @@
         }, 1000);
     }
 })();
+
+// debug-fix.js - تشخيص دقيق
+(function() {
+    'use strict';
+    
+    console.log('🔍 بدء تشخيص الإعلانات وعناصر البروفيل...');
+    
+    setTimeout(() => {
+        // مسح جميع العناصر المشبوهة
+        const allElements = document.querySelectorAll('*');
+        
+        console.log('=== العناصر التي قد تكون إعلانات ===');
+        allElements.forEach(el => {
+            const id = el.id || '';
+            const className = el.className || '';
+            const tag = el.tagName;
+            
+            // عناصر قد تكون إعلانات
+            const isPossibleAd = (
+                id.includes('ad') || 
+                className.includes('ad') ||
+                id.includes('ads') || 
+                className.includes('ads') ||
+                el.hasAttribute('data-ad-slot') ||
+                el.hasAttribute('data-ad-client') ||
+                (tag === 'IFRAME' && el.src && (
+                    el.src.includes('ads') || 
+                    el.src.includes('doubleclick') ||
+                    el.src.includes('googleads')
+                ))
+            );
+            
+            // عناصر بروفيل (يجب ألا تخفي)
+            const isProfileElement = (
+                id.includes('profile') || 
+                className.includes('profile') ||
+                id === 'account-type-badge' ||
+                id === 'pic' ||
+                id === 'astat'
+            );
+            
+            if (isPossibleAd && !isProfileElement) {
+                const styles = window.getComputedStyle(el);
+                console.log('🚫 إعلان محتمل:', {
+                    id: id,
+                    class: className,
+                    tag: tag,
+                    display: styles.display,
+                    visible: styles.visibility !== 'hidden' && styles.display !== 'none',
+                    src: el.src || 'N/A'
+                });
+            }
+            
+            if (isProfileElement) {
+                const styles = window.getComputedStyle(el);
+                console.log('✅ عنصر بروفيل:', {
+                    id: id,
+                    class: className,
+                    display: styles.display,
+                    visible: styles.visibility !== 'hidden' && styles.display !== 'none'
+                });
+            }
+        });
+        
+        console.log('=== نهاية التشخيص ===');
+        
+    }, 4000);
+})();
