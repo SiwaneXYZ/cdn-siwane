@@ -1,26 +1,11 @@
-// ad-control.js - إصدار v109 (الحل النهائي لـ AdBlocker والـ Scroll)
-// + ✅ تمكين التمرير الإجباري للمستخدمين المعفيين.
-// + ✅ إخفاء ويجت AdBlocker (عنصر .js-antiadblocker) وإزالة سمة 'hidden' منه.
-// + ✅ استخدام Toast يعتمد على كلاسات الموقع الأصلي مع ضمان عدم حجب التمرير.
-// + ✅ التحقق من حالة الإعفاء (isVip, adFreeExpiry, vipp).
-
+// ad-control.js - إصدار v110 (التنظيف بعد تعديل onload.js)
+// ✅ تم حذف حلول تجاوز الـ Scroll Blocking وإخفاء AdBlocker لأن onload.js أصبح معدلاً.
+// ✅ التركيز فقط على منطق الإعفاء (isUserAdFree) وإخفاء الإعلانات (hideAllAds).
 (function() {
     'use strict';
 
-    // ==========================================================
-    // ✅✅✅ دالة لتمكين التمرير على الجسم ✅✅✅
-    // ==========================================================
-    function enableBodyScroll() {
-        const bodyStyle = document.body.style;
-        // إزالة overflow: hidden أو clip التي قد يفرضها الـ AdBlocker
-        if (bodyStyle.overflow === 'hidden' || bodyStyle.overflow === 'clip') {
-            bodyStyle.overflow = '';
-        }
-        // إزالة أي كلاسات قد تمنع التمرير
-        document.body.classList.remove('no-scroll'); 
-    }
-    // ==========================================================
-    
+    // لا حاجة لـ enableBodyScroll() بعد تعديل onload.js
+
     // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
@@ -30,7 +15,7 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v109)...'); 
+        console.log('Initializing Ad Control System (v110)...'); 
         
         // التحقق المتكرر في البداية
         const checkInterval = setInterval(() => {
@@ -79,27 +64,22 @@
     // ✅✅✅ دالة عرض رسالة Toast (تعتمد على تنسيق الموقع) ✅✅✅
     // ==========================================================
     function showToast(message) {
-        // إنشاء الحاوية الأم باستخدام الكلاس الأصلي
         const toastContainer = document.createElement('div');
         toastContainer.className = 'tNtf'; 
         
-        // تطبيق خصائص تسمح بالتمرير عبر الحاوية (مهم جداً لضمان عدم حجب التمرير)
+        // تطبيق خصائص تسمح بالتمرير عبر الحاوية (ضروري)
         toastContainer.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
             pointer-events: none; 
             background: rgba(0, 0, 0, 0); 
         `;
 
-        // إنشاء عنصر الرسالة الداخلي
         const toastMessage = document.createElement('div');
         toastMessage.textContent = message;
-        
-        // إعادة خاصية التفاعل لعنصر الرسالة نفسه
         toastMessage.style.pointerEvents = 'auto'; 
 
         toastContainer.appendChild(toastMessage);
         
-        // إزالة أي توست سابق
         const existingToast = document.querySelector('.tNtf');
         if (existingToast) {
             existingToast.remove();
@@ -107,7 +87,6 @@
 
         document.body.appendChild(toastContainer);
 
-        // إزالة التوست بعد 5 ثوانٍ
         setTimeout(() => {
             toastContainer.remove();
         }, 5000); 
@@ -126,7 +105,7 @@
             return false;
         }
         
-        // 2. التحقق من حقل 'isVip' الجديد (الأولوية القصوى)
+        // 2. التحقق من حقل 'isVip' الجديد
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
             return true;
@@ -156,7 +135,7 @@
             return true;
         }
         
-        // 6. إذا لم ينطبق أي من الشروط أعلاه، يعرض الإعلانات
+        // 6. إذا لم ينطبق أي من الشروط أعلاه
         console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
@@ -174,25 +153,8 @@
         } else if (userIsAdFree) {
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             
-            // 🌟🌟🌟 الحل لمشكلة التمرير والـ AdBlocker 🌟🌟🌟
-            enableBodyScroll(); 
-
-            // إخفاء الويجت وإزالة أي سمات حظر
-            const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
-            if (antiAdBlockerEl) {
-                 // إزالة سمات الحجب لتقليد سلوك الـ Admin بعد الإظهار
-                 antiAdBlockerEl.removeAttribute('hidden');
-                 antiAdBlockerEl.removeAttribute('aria-hidden');
-                 // إخفاء العنصر عبر CSS المباشر لتغطية أي تأخير
-                 antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-            }
-            // تغطية أي عنصر حجب آخر قد يظهر
-            const accessBlockerEl = document.querySelector('.js-accessblocker');
-            if (accessBlockerEl) {
-                 accessBlockerEl.removeAttribute('hidden');
-                 accessBlockerEl.removeAttribute('aria-hidden');
-                 accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-            }
+            // 💡 ملاحظة: لا حاجة لإجراءات التمرير أو إخفاء AdBlocker هنا
+            // لأن onload.js المُعدّل سيتجاوز الحظر للمستخدم المعفى.
         }
 
         // يتم عرض التوست فقط في أول تطبيق للقواعد
@@ -217,12 +179,10 @@
             iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
             
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات (مهم جداً) */
+            /* إخفاء الويجت الخاصة بالـ AdBlocker في حالة فشل تجاوز onload.js (كإجراء احترازي بسيط) */
             .js-antiadblocker,
             .js-accessblocker, 
-            .papW, /* كلاس الويجت الأم */
-            [class*="adblock"],
-            [class*="anti-ad"] {
+            .papW {
                 display: none !important;
             }
         `;
