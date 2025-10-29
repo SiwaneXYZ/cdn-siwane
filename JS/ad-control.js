@@ -1,12 +1,38 @@
-// ad-control.js - إصدار v110 (التنظيف بعد تعديل onload.js)
-// ✅ تم حذف حلول تجاوز الـ Scroll Blocking وإخفاء AdBlocker لأن onload.js أصبح معدلاً.
-// ✅ التركيز فقط على منطق الإعفاء (isUserAdFree) وإخفاء الإعلانات (hideAllAds).
+// ad-control.js - إصدار v112 (الحل الإلزامي لمشكلة التمرير/اللمس)
+// + ✅ إعادة تفعيل دالة enableBodyScroll() واستدعائها كإجراء إلزامي في حال الإعفاء.
+// + ✅ إضافة إجراء إلزامي لحذف عنصر AdBlocker Overlay من الـ DOM.
+// + ✅ إضافة قواعد CSS صارمة لـ body لضمان التمرير.
 (function() {
     'use strict';
 
-    // لا حاجة لـ enableBodyScroll() بعد تعديل onload.js
+    // ==========================================================
+    // ✅✅✅ دالة لتمكين التمرير على الجسم (إجراء إلزامي وقوي) ✅✅✅
+    // ==========================================================
+    function enableBodyScroll() {
+        const bodyStyle = document.body.style;
+        // إزالة القيود الصارمة مباشرة
+        bodyStyle.overflow = '';
+        bodyStyle.overflowY = '';
+        bodyStyle.overflowX = '';
+        // إزالة أي كلاسات قد تمنع التمرير
+        document.body.classList.remove('no-scroll', 'overlay-active', 'scroll-lock'); 
+        
+        // إزالة أي توست متبقي قد يكون سبباً
+        const existingToast = document.querySelector('.tNtf');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // إجراء إلزامي لحذف عنصر الـ AdBlocker جسدياً
+        const adBlockerElement = document.querySelector('.js-antiadblocker');
+        if (adBlockerElement) {
+            adBlockerElement.remove();
+        }
+    }
+    // ==========================================================
 
-    // الانتظار حتى تحميل الصفحة بالكامل
+    // ... (بقية دوال initAdControl, checkAndApplyRules, getUserProfile كما هي) ...
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
     } else {
@@ -15,9 +41,8 @@
     
     function initAdControl() {
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v110)...'); 
+        console.log('Initializing Ad Control System (v112)...'); 
         
-        // التحقق المتكرر في البداية
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
@@ -26,7 +51,6 @@
             }
         }, 500); 
         
-        // التحقق بعد 3 ثوانٍ كدعم
         setTimeout(() => {
             const userProfile = getUserProfile();
             if (userProfile) {
@@ -34,7 +58,6 @@
             }
         }, 3000); 
         
-        // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
                 setTimeout(checkAndApplyRules, 100); 
@@ -60,64 +83,32 @@
         }
     }
     
-    // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (تعتمد على تنسيق الموقع) ✅✅✅
-    // ==========================================================
-    function showToast(message) {
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'tNtf'; 
-        
-        // تطبيق خصائص تسمح بالتمرير عبر الحاوية (ضروري)
-        toastContainer.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-            pointer-events: none; 
-            background: rgba(0, 0, 0, 0); 
-        `;
-
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        toastMessage.style.pointerEvents = 'auto'; 
-
-        toastContainer.appendChild(toastMessage);
-        
-        const existingToast = document.querySelector('.tNtf');
-        if (existingToast) {
-            existingToast.remove();
-        }
-
-        document.body.appendChild(toastContainer);
-
-        setTimeout(() => {
-            toastContainer.remove();
-        }, 5000); 
+    // 🚫 دالة عرض رسالة Toast (معطلة مؤقتاً) 🚫
+    // يمكن حذف هذه الدالة إذا قررت عدم استخدام التوست
+    /* function showToast(message) {
+        // ...
     }
-    // ==========================================================
+    */
     
-    // ==========================================================
-    // ✅✅✅ الدالة المنطقية للتحقق من حالة الإعفاء (isUserAdFree) ✅✅✅
-    // ==========================================================
+    // ... (بقية الدالة isUserAdFree كما هي) ...
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) {
             console.log('Ad-Control: Admin user (Showing Ads for testing)');
             return false;
         }
         
-        // 2. التحقق من حقل 'isVip' الجديد
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
             return true;
         }
 
-        // 3. التحقق من 'adFreeExpiry' الدائم (null)
         if (userProfile.adFreeExpiry === null) {
             console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
-        // 4. التحقق من 'adFreeExpiry' المؤقت (Timestamp)
         const adFreeExpiry = userProfile.adFreeExpiry;
         if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
             const expiryTimestampMs = adFreeExpiry.seconds * 1000;
@@ -128,14 +119,12 @@
             }
         }
         
-        // 5. [دعم للخلف] التحقق من الحقول القديمة (vipp)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
             console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
             return true;
         }
         
-        // 6. إذا لم ينطبق أي من الشروط أعلاه
         console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
@@ -153,13 +142,26 @@
         } else if (userIsAdFree) {
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             
-            // 💡 ملاحظة: لا حاجة لإجراءات التمرير أو إخفاء AdBlocker هنا
-            // لأن onload.js المُعدّل سيتجاوز الحظر للمستخدم المعفى.
+            // 🌟 إجراء إلزامي: تمكين التمرير وحذف العنصر المسبب للحظر
+            enableBodyScroll();
+            
+            // إزالة أي سمات حظر (إجراء احتياطي)
+            const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
+            if (antiAdBlockerEl) {
+                 antiAdBlockerEl.removeAttribute('hidden');
+                 antiAdBlockerEl.removeAttribute('aria-hidden');
+            }
+            const accessBlockerEl = document.querySelector('.js-accessblocker');
+            if (accessBlockerEl) {
+                 accessBlockerEl.removeAttribute('hidden');
+                 accessBlockerEl.removeAttribute('aria-hidden');
+            }
         }
 
-        // يتم عرض التوست فقط في أول تطبيق للقواعد
+        // يتم عرض الرسالة/التوست فقط في أول تطبيق للقواعد
         if (!window.__ad_control_toast_shown) {
-            showToast(statusMessage);
+            console.log('Message Status:', statusMessage);
+            // showToast(statusMessage); // معطل مؤقتاً
             window.__ad_control_toast_shown = true;
         }
         
@@ -179,15 +181,25 @@
             iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
             
-            /* إخفاء الويجت الخاصة بالـ AdBlocker في حالة فشل تجاوز onload.js (كإجراء احترازي بسيط) */
+            /* منع ظهور طبقات الـ AdBlocker والـ Overlay والـ Toast (بشكل صارم) */
             .js-antiadblocker,
             .js-accessblocker, 
-            .papW {
+            .papW,  /* كلاس الويجت الأم */
+            .tNtf {
                 display: none !important;
+            }
+            
+            /* الإجراء الصارم لإعادة التمرير على الجسم */
+            body, html {
+                overflow: auto !important;
+                overflow-x: hidden !important; /* ضمان عدم وجود تمرير أفقي */
+            }
+            /* إزالة كلاسات قفل التمرير التي قد تكون مضافة */
+            body.no-scroll, body.overlay-active, body.scroll-lock {
+                overflow: auto !important;
             }
         `;
         
-        // إزالة النمط السابق إذا موجود
         const existingStyle = document.getElementById('vip-ad-free-style');
         if (existingStyle) {
             existingStyle.remove();
@@ -197,7 +209,6 @@
     }
     
     function showAllAds() {
-        // إزالة نمط الإخفاء
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
