@@ -12,22 +12,19 @@
     function initAdControl() {
         console.log('Initializing VIP Ad Control System...');
         
-        // التحقق من حالة المستخدم كل ثانيتين (حتى يتم تحميل البيانات)
+        // التحقق من حالة المستخدم بشكل متكرر حتى يتم تحميل البيانات
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
                 clearInterval(checkInterval);
+                
+                // ✅ تطبيق القواعد فوراً بعد الحصول على البيانات
                 applyAdRules(userProfile);
+                
+                // ✅ تشغيل متأخر إضافي (1 ثانية) للتعامل مع الإعلانات التي يتم حقنها لاحقاً
+                setTimeout(() => applyAdRules(userProfile), 1000);
             }
-        }, 2000);
-        
-        // التحقق أيضاً بعد 5 ثوانٍ (كدعم إضافي)
-        setTimeout(() => {
-            const userProfile = getUserProfile();
-            if (userProfile) {
-                applyAdRules(userProfile);
-            }
-        }, 5000);
+        }, 500); // تقليل الفترة لسرعة الاستجابة
         
         // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
@@ -53,9 +50,6 @@
         }
     }
     
-    // ==========================================================
-    // منطق الإعفاء: يعتمد فقط على VIPP أو adFreeExpiry
-    // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
@@ -76,10 +70,8 @@
             if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; 
         }
         
-        // إذا لم يكن VIPP ولم يكن لديه adFreeExpiry نشط، فإنه يعرض الإعلانات
         return false;
     }
-    // ==========================================================
     
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
@@ -103,10 +95,12 @@
     function hideAllAds() {
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
+        
+        // ✅✅✅ زيادة قوة محددات الإخفاء (CSS Specificity) ✅✅✅
         style.textContent = `
-            /* إخفاء إعلانات Google AdSense */
-            .adsbygoogle,
-            ins.adsbygoogle {
+            /* إخفاء إعلانات Google AdSense بقوة عالية */
+            html body .adsbygoogle,
+            html body ins.adsbygoogle {
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
@@ -127,24 +121,24 @@
             }
 
             /* حماية إضافية ضد أي كائنات إعلانية أخرى معروفة */
-            div[id*="ad-slot"],
-            div[id*="AdContainer"],
-            div[class*="ad-unit"],
-            div[class*="ads-container"],
-            div[class*="ad_wrapper"] {
+            html body div[id*="ad-slot"],
+            html body div[id*="AdContainer"],
+            html body div[class*="ad-unit"],
+            html body div[class*="ads-container"],
+            html body div[class*="ad_wrapper"] {
                 display: none !important;
             }
             
-            /* ✅✅✅ قواعد الاستثناء: منع إخفاء عناصر الواجهة الأساسية */
+            /* ✅✅✅ قواعد الاستثناء: منع إخفاء عناصر الواجهة الأساسية (يجب أن تتفوق هذه على محددات الإخفاء) */
             #account-type-badge.badge-ad-free,
             #profile-ad-free-item {
-                display: block !important; /* تأكد من ظهور العنصر */
+                display: block !important; 
                 visibility: visible !important;
                 opacity: 1 !important;
                 height: auto !important;
                 width: auto !important;
                 overflow: visible !important;
-                pointer-events: auto !important; /* لضمان التفاعل إذا كان مُعطّلاً */
+                pointer-events: auto !important;
             }
             
             /* منع ظهور البوب أب الخاص بمانع الإعلانات للمستخدمين VIP */
