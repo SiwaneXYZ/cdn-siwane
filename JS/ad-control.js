@@ -53,30 +53,33 @@
         }
     }
     
+    // ==========================================================
+    // ✅✅✅ التعديل المطلوب: الاعتماد فقط على VIPP أو adFreeExpiry ✅✅✅
+    // ==========================================================
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // ✅ الأدمن والمشرفين يرون الإعلانات (للمراقبة)
+        // الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) return false;
 
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // ✅ حساب VIP دائم (معفي دائماً)
+        // 1. ✅ التحقق من حالة VIPP (الإعفاء الدائم)
         if (accountTypeLower === 'vipp') return true;
         
-        // ✅ حساب Premium نشط
-        const isPremiumActive = userProfile.premiumExpiry && 
-                              userProfile.premiumExpiry.seconds * 1000 > Date.now();
-        if ((accountTypeLower === 'premium' || isPremiumActive)) return true;
-        
-        // ✅ إعفاء مؤقت من الإعلانات (adFreeExpiry)
+        // 2. ✅ التحقق من حقل الإعفاء المؤقت/الدائم (adFreeExpiry)
         if (userProfile.adFreeExpiry) {
-            if (userProfile.adFreeExpiry === null) return true; // دائم
-            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; // نشط
+            // adFreeExpiry === null يعني إعفاء دائم
+            if (userProfile.adFreeExpiry === null) return true; 
+            
+            // التحقق من صلاحية الإعفاء المؤقت
+            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; 
         }
         
+        // إذا لم يكن VIPP ولم يكن لديه adFreeExpiry نشط، فإنه يعرض الإعلانات
         return false;
     }
+    // ==========================================================
     
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
@@ -89,25 +92,20 @@
         });
         
         if (userIsAdFree && !userIsAdmin) {
-            // ✅ المستخدم VIP: نخفي الإعلانات
+            // المستخدم المعفى: نخفي الإعلانات
             hideAllAds();
-        } else if (userIsAdmin) {
-            // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
-            showAllAds();
+        } else {
+            // الأدمن أو المستخدم العادي: نضمن ظهور الإعلانات
+            showAllAds(); 
         }
-        // ✅ المستخدم العادي: نترك النظام الأصلي يعمل (لا نتدخل)
     }
     
     function hideAllAds() {
-        // طريقة آمنة لإخفاء الإعلانات بدون التعارض مع onload.js
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
-            /* إخفاء إعلانات Google */
+            /* إخفاء إعلانات Google AdSense */
             .adsbygoogle,
-            [class*="ad-"],
-            [class*="ads-"],
-            iframe[src*="ads"],
             ins.adsbygoogle {
                 display: none !important;
                 visibility: hidden !important;
@@ -117,11 +115,23 @@
                 overflow: hidden !important;
             }
             
-            /* حماية إضافية من أي إعلانات قد تظهر */
-            [id*="ad-"],
-            [id*="ads-"],
-            div[id*="Ad"],
-            div[class*="banner"] {
+            /* إخفاء إطارات iframe التي تحمل كلمة ads أو أسماء معروفة لإعلانات جوجل */
+            iframe[src*="ads"],
+            iframe[id*="aswift_"],
+            iframe[id*="google_ads_frame"] {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* حماية إضافية ضد أي كائنات إعلانية أخرى معروفة */
+            div[id*="ad-slot"],
+            div[id*="AdContainer"],
+            div[class*="ad-unit"],
+            div[class*="ads-container"],
+            div[class*="ad_wrapper"] {
                 display: none !important;
             }
             
@@ -144,11 +154,11 @@
     }
     
     function showAllAds() {
-        // إزالة نمط الإخفاء (للأدمن فقط)
+        // إزالة نمط الإخفاء
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
             style.remove();
-            console.log('Ads style removed for admin');
+            console.log('Ads style removed for user');
         }
     }
 })();
