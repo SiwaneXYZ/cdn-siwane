@@ -61,21 +61,8 @@
 
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         
-        // ✅ حساب VIP دائم (معفي دائماً)
-        if (accountTypeLower === 'vipp') return true;
-        
-        // ✅ حساب Premium نشط
-        const isPremiumActive = userProfile.premiumExpiry && 
-                              userProfile.premiumExpiry.seconds * 1000 > Date.now();
-        if ((accountTypeLower === 'premium' || isPremiumActive)) return true;
-        
-        // ✅ إعفاء مؤقت من الإعلانات (adFreeExpiry)
-        if (userProfile.adFreeExpiry) {
-            if (userProfile.adFreeExpiry === null) return true; // دائم
-            if (userProfile.adFreeExpiry.seconds * 1000 > Date.now()) return true; // نشط
-        }
-        
-        return false;
+        // ✅ فقط إذا كان VIP → معفي من الإعلانات
+        return accountTypeLower === 'vipp';
     }
     
     function applyAdRules(userProfile) {
@@ -95,11 +82,11 @@
             // ✅ الأدمن: نترك الإعلانات ظاهرة (للمراقبة)
             showAllAds();
         }
-        // ✅ المستخدم العادي: نترك النظام الأصلي يعمل (لا نتدخل)
+        // ✅ المستخدم العادي أو بريميوم: نترك النظام الأصلي يعمل (لا نتدخل)
     }
     
     function hideAllAds() {
-        // طريقة آمنة لإخفاء الإعلانات بدون التعارض مع onload.js
+        // طريقة آملة لإخفاء الإعلانات بدون التعارض مع onload.js
         const style = document.createElement('style');
         style.id = 'vip-ad-free-style';
         style.textContent = `
