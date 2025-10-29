@@ -17,7 +17,7 @@ function updatePingEffectColor(userData) {
     }
     
     // إزالة كلاسات الألوان القديمة
-    o.classList.remove('account-owner', 'account-admin', 'account-vipp', 'account-premium', 'account-normal', 'account-dual');
+    o.classList.remove('account-owner', 'account-admin', 'account-vipp', 'account-premium', 'account-normal');
     
     if (!userData) {
         o.classList.add('account-normal');
@@ -28,6 +28,13 @@ function updatePingEffectColor(userData) {
     const accountTypeLower = (userData.accountType || 'normal').toLowerCase();
     const isPremiumActive = userData.premiumExpiry && userData.premiumExpiry.seconds * 1000 > Date.now();
     
+    console.log('Ping Effect Debug:', {
+        accountType: accountTypeLower,
+        isPremiumActive: isPremiumActive,
+        isVipp: accountTypeLower === 'vipp',
+        hasBoth: accountTypeLower === 'vipp' && isPremiumActive
+    });
+    
     // تحديد نوع الحساب مع الأولوية
     if (isCurrentUserOwnerAdmin) {
         o.classList.add('account-owner');
@@ -35,7 +42,7 @@ function updatePingEffectColor(userData) {
         o.classList.add('account-admin');
     } else if (accountTypeLower === 'vipp' && isPremiumActive) {
         // حساب VIP + Premium - تفعيل التبديل بين الألوان
-        o.classList.add('account-dual');
+        o.classList.add('account-vipp');
         startDualColorAnimation();
     } else if (accountTypeLower === 'vipp') {
         o.classList.add('account-vipp');
@@ -56,7 +63,7 @@ function startDualColorAnimation() {
     pingColorInterval = setInterval(() => {
         isPremiumColor = !isPremiumColor;
         updateDualColor();
-    }, 1200); // التبديل كل 1.2 ثانية (مع كل نبضة ping)
+    }, 1200);
 }
 
 // دالة تحديث اللون للتبديل
@@ -77,7 +84,6 @@ function stopPingEffects() {
         pingColorInterval = null;
     }
     if (o) {
-        o.classList.remove('account-dual');
         o.style.removeProperty('--ripple-color');
     }
 }
