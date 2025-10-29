@@ -1,5 +1,5 @@
-// ad-control.js - إصدار v103 (محدث لحل مشكلة التمرير في Toast)
-// + ✅ [تعديل v103] تعديل دالة showToast باستخدام pointer-events: none لحل مشكلة منع التمرير.
+// ad-control.js - إصدار v104 (حل مشكلة التمرير)
+// + ✅ [تعديل v104] التأكد من تعيين pointer-events: none للحاوية الأم و pointer-events: auto للرسالة الداخلية لحل مشكلة منع التمرير.
 // + ✅ [تعديل v102] إضافة دالة showToast لعرض حالة الحساب.
 // + ✅ [تعديل v101] قراءة الحقل الجديد 'isVip' (Boolean).
 // + ✅ [تعديل v101] إضافة دعم للخلف (Backward Compatibility) لقراءة 'adStatus: vipp'.
@@ -17,7 +17,7 @@
         // تشغيل فحص فوري وسريع
         checkAndApplyRules();
 
-        console.log('Initializing Ad Control System (v103)...');
+        console.log('Initializing Ad Control System (v104)...');
         
         // التحقق من حالة المستخدم كل 500 ملي ثانية (لضمان السرعة)
         const checkInterval = setInterval(() => {
@@ -65,14 +65,14 @@
     }
     
     // ==========================================================
-    // ✅✅✅ دالة عرض رسالة Toast (مع حل مشكلة التمرير) ✅✅✅
+    // ✅✅✅ دالة عرض رسالة Toast (مع حل نهائي لمشكلة التمرير) ✅✅✅
     // ==========================================================
     function showToast(message) {
         // إنشاء الحاوية الأم
         const toastContainer = document.createElement('div');
         toastContainer.className = 'tNtf'; 
         
-        // تعيين خصائص للحاوية الأم لمنعها من حجب التمرير والتفاعل (Pointer-Events)
+        // تعيين خصائص للحاوية الأم لتغطي الشاشة وتسمح بمرور أحداث التمرير
         toastContainer.style.position = 'fixed';
         toastContainer.style.top = '0';
         toastContainer.style.left = '0';
@@ -85,8 +85,8 @@
         const toastMessage = document.createElement('div');
         toastMessage.textContent = message;
         
-        // إعادة التفاعل لعنصر الرسالة نفسه
-        toastMessage.style.pointerEvents = 'auto';
+        // إعادة خاصية التفاعل (النقر) لعنصر الرسالة نفسه
+        toastMessage.style.pointerEvents = 'auto'; 
 
         toastContainer.appendChild(toastMessage);
         
@@ -99,7 +99,7 @@
         // إضافة التوست إلى الجسم
         document.body.appendChild(toastContainer);
 
-        // إزالة التوست بعد 5 ثوانٍ، لتنظيف DOM، وهذا يتوافق مع مدة animation في CSS
+        // إزالة التوست بعد 5 ثوانٍ، لتنظيف DOM
         setTimeout(() => {
             toastContainer.remove();
         }, 5000); 
