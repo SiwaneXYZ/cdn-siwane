@@ -1,10 +1,10 @@
-// ad-control.js - نظام الإعفاء من الإعلانات (الإصدار النهائي)
-// يعتمد على نظام Plus UI الأصلي مع إضافة استثناءات المستخدمين المعفيين
+// ad-control.js - الإصدار النهائي (يعتمد على النظام الأصلي)
+// نظام مراقبة خفيف الوزن للإعفاء من الإعلانات
 
 (function() {
     'use strict';
     
-    console.log('Ad-Control: System Initialized');
+    console.log('Ad-Control: Lightweight Exception System Initialized');
     
     // ==========================================================
     // ✅ إعدادات نظام الاستثناءات
@@ -19,238 +19,162 @@
     // ✅ الدوال الأساسية
     // ==========================================================
     
-    // جلب بيانات المستخدم من Firebase
-    function getUserProfile() {
+    // التحقق من بيانات المستخدم المعفي
+    function checkAdFreeUser() {
         try {
             const userDataString = localStorage.getItem('firebaseUserProfileData');
-            if (!userDataString) return null;
-            return JSON.parse(userDataString);
+            if (!userDataString) return false;
+            
+            const userProfile = JSON.parse(userDataString);
+            
+            // 1. التحقق من VIP الأساسي
+            if (userProfile.isVip === true) {
+                console.log('Ad-Control: VIP user detected');
+                return true;
+            }
+            
+            // 2. التحقق من الإعفاء الدائم
+            if (userProfile.adFreeExpiry === null) {
+                console.log('Ad-Control: Permanent ad-free user detected');
+                return true;
+            }
+            
+            // 3. التحقق من الإعفاء المؤقت
+            if (userProfile.adFreeExpiry && userProfile.adFreeExpiry.seconds) {
+                const expiryTimestampMs = userProfile.adFreeExpiry.seconds * 1000;
+                if (expiryTimestampMs > Date.now()) {
+                    console.log('Ad-Control: Temporary ad-free user detected');
+                    return true;
+                }
+            }
+            
+            // 4. التحقق من الحالات التراثية
+            const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
+            if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
+                console.log('Ad-Control: Legacy VIP user detected');
+                return true;
+            }
+            
+            return false;
         } catch (error) {
-            console.error('Ad-Control: Error parsing user profile', error);
-            return null;
+            console.error('Ad-Control: Error checking user profile', error);
+            return false;
         }
     }
     
-    // التحقق من المستخدم المعفي من الإعلانات
-    function isUserAdFree(userProfile) {
-        if (!userProfile) return false;
+    // التحقق من صفحات الاستثناء
+    function checkExceptionPage() {
+        const currentPath = window.location.pathname;
+        const isException = EXCEPTION_PATHS.some(path => currentPath.indexOf(path) === 0);
         
-        // 1. الحالة الأساسية - VIP
-        if (userProfile.isVip === true) {
-            console.log('Ad-Control: VIP user detected');
+        if (isException) {
+            console.log('Ad-Control: Exception page detected');
+        }
+        
+        return isException;
+    }
+    
+    // التحقق من المسؤول
+    function checkAdminUser() {
+        try {
+            const userDataString = localStorage.getItem('firebaseUserProfileData');
+            if (!userDataString) return false;
+            
+            const userProfile = JSON.parse(userDataString);
+            return userProfile.isAdmin === true;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    // ==========================================================
+    // ✅ تطبيق نظام الاستثناءات
+    // ==========================================================
+    function applyExceptionRules() {
+        const isAdFree = checkAdFreeUser();
+        const isExceptionPage = checkExceptionPage();
+        const isAdmin = checkAdminUser();
+        
+        // إذا كان المستخدم معفي أو في صفحة استثناء
+        if (isAdFree || isExceptionPage) {
+            console.log('Ad-Control: Applying exception rules');
+            
+            // 1. خداع النظام الأساسي
+            if (window.PU && typeof window.PU === 'object') {
+                window.PU.iAd = true;
+            }
+            
+            // 2. تمكين التمرير الطبيعي
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            
+            // 3. إخفاء نوافذ الحظر
+            const antiAdBlocker = document.querySelector('.js-antiadblocker');
+            const accessBlocker = document.querySelector('.js-accessblocker');
+            
+            if (antiAdBlocker) antiAdBlocker.style.display = 'none';
+            if (accessBlocker) accessBlocker.style.display = 'none';
+            
             return true;
         }
         
-        // 2. الإعفاء الدائم
-        if (userProfile.adFreeExpiry === null) {
-            console.log('Ad-Control: Permanent ad-free user detected');
-            return true;
-        }
-        
-        // 3. الإعفاء المؤقت (بناء على التاريخ)
-        if (userProfile.adFreeExpiry && 
-            userProfile.adFreeExpiry.seconds && 
-            userProfile.adFreeExpiry.seconds * 1000 > Date.now()) {
-            console.log('Ad-Control: Temporary ad-free user detected');
-            return true;
+        // إذا كان مسؤولاً، نعطيه رسالة توضيحية
+        if (isAdmin) {
+            console.log('Ad-Control: Admin user - showing ads for testing');
+            if (window.PU && typeof window.PU === 'object') {
+                window.PU.iAd = true;
+            }
         }
         
         return false;
     }
     
-    // التحقق من صفحات الاستثناء
-    function isExceptionPage() {
-        const currentPath = window.location.pathname;
-        return EXCEPTION_PATHS.some(path => currentPath.indexOf(path) === 0);
-    }
-    
-    // التحقق من مسؤول Firebase
-    function isFirebaseAdmin(userProfile) {
-        return userProfile && userProfile.isAdmin === true;
-    }
-    
-    // التحقق من مسؤول Blogger (النظام الأصلي)
-    function isBloggerAdmin() {
-        return window.PU && window.PU.iAd === true;
-    }
-    
     // ==========================================================
-    // ✅ تطبيق قواعد الاستثناء
+    // ✅ نظام المراقبة المستمرة
     // ==========================================================
-    function applyExceptionRules() {
-        const userProfile = getUserProfile();
-        const userIsAdFree = isUserAdFree(userProfile);
-        const pageIsException = isExceptionPage();
-        const userIsFirebaseAdmin = isFirebaseAdmin(userProfile);
-        const userIsBloggerAdmin = isBloggerAdmin();
-        
-        // تحديد الحالة الحالية
-        let status = 'normal';
-        if (userIsBloggerAdmin) status = 'blogger_admin';
-        else if (userIsFirebaseAdmin) status = 'firebase_admin';
-        else if (userIsAdFree) status = 'ad_free';
-        else if (pageIsException) status = 'exception_page';
-        
-        console.log('Ad-Control: Status:', status);
-        
-        // تطبيق القواعد بناء على الحالة
-        switch (status) {
-            case 'ad_free':
-            case 'exception_page':
-                // ✅ مستخدم معفي أو صفحة استثناء - إخفاء كل شيء
-                enableFullBypass();
-                showStatusMessage('تم تفعيل الإعفاء من الإعلانات! 🎉');
-                break;
-                
-            case 'firebase_admin':
-                // ✅ مسؤول Firebase - إظهار الإعلانات مع رسالة توضيحية
-                enableAdminBypass();
-                showStatusMessage('وضع المسؤول: الإعلانات ظاهرة للاختبار ⚠️');
-                break;
-                
-            case 'blogger_admin':
-                // ✅ مسؤول Blogger - النظام يعمل كما هو
-                console.log('Ad-Control: Blogger admin - system unchanged');
-                break;
-                
-            default:
-                // ❌ مستخدم عادي - لا تفعل شيء (النظام الأساسي سيتكفل)
-                console.log('Ad-Control: Normal user - showing ads');
-                break;
-        }
-    }
-    
-    // ==========================================================
-    // ✅ دوال التطبيق
-    // ==========================================================
-    
-    // تفعيل تجاوز كامل (للمستخدمين المعفيين وصفحات الاستثناء)
-    function enableFullBypass() {
-        // 1. خداع النظام الأساسي
-        if (window.PU && typeof window.PU === 'object') {
-            window.PU.iAd = true;
-        }
-        
-        // 2. تمكين التمرير الطبيعي
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-        document.body.classList.remove('no-scroll', 'scroll-lock');
-        
-        // 3. إخفاء نوافذ الحظر
-        hideBlockerPopups();
-        
-        // 4. إخفاء الإعلانات اليدوية
-        hideManualAds();
-    }
-    
-    // تفعيل تجاوز المسؤول (الإعلانات ظاهرة ولكن بدون حظر)
-    function enableAdminBypass() {
-        // خداع النظام الأساسي للسماح بالتصفح
-        if (window.PU && typeof window.PU === 'object') {
-            window.PU.iAd = true;
-        }
-        
-        // تمكين التمرير وإخفاء النوافذ المنبثقة فقط
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-        hideBlockerPopups();
-    }
-    
-    // إخفاء النوافذ المنبثقة للحظر
-    function hideBlockerPopups() {
-        const blockers = [
-            '.js-antiadblocker',
-            '.js-accessblocker',
-            '.papW',
-            '[class*="adblock"]',
-            '[class*="anti-ad"]'
-        ];
-        
-        blockers.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            });
-        });
-    }
-    
-    // إخفاء الإعلانات اليدوية
-    function hideManualAds() {
-        const manualAds = [
-            '.pAd.show-if-js',
-            '.rAd.show-if-js', 
-            '.pAdIf.show-if-js',
-            '.adB'
-        ];
-        
-        manualAds.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            });
-        });
-    }
-    
-    // عرض رسالة الحالة
-    function showStatusMessage(message) {
-        // استخدام نظام الإشعارات الموجود في Plus UI إذا كان متاحاً
-        if (window.J && typeof window.J === 'function') {
-            window.J(message);
-        } else {
-            // بديل بسيط
-            console.log('Ad-Control:', message);
-        }
-    }
-    
-    // ==========================================================
-    // ✅ نظام المراقبة والتهيئة
-    // ==========================================================
-    
-    // بدء المراقبة
     function startMonitoring() {
-        console.log('Ad-Control: Starting monitoring system');
+        console.log('Ad-Control: Starting continuous monitoring');
         
         // التطبيق الفوري
         applyExceptionRules();
         
-        // المراقبة عند تغيير بيانات المستخدم
+        // المراقبة عند تغيير التخزين المحلي
         window.addEventListener('storage', (e) => {
             if (e.key === 'firebaseUserProfileData') {
-                console.log('Ad-Control: User data changed - reapplying rules');
                 setTimeout(applyExceptionRules, 100);
             }
         });
         
-        // مراقبة دورية خفيفة
-        const interval = setInterval(applyExceptionRules, 10000);
+        // المراقبة الدورية (خفيفة)
+        const monitorInterval = setInterval(applyExceptionRules, 5000);
         
-        // إيقاف المراقبة بعد 5 دقائق (توفير أداء)
+        // إيقاف المراقبة بعد 10 دقائق لتوفير الأداء
         setTimeout(() => {
-            clearInterval(interval);
-            console.log('Ad-Control: Monitoring stopped (performance optimization)');
-        }, 300000);
+            clearInterval(monitorInterval);
+            console.log('Ad-Control: Monitoring stopped after 10 minutes');
+        }, 600000);
     }
     
-    // تهيئة النظام
+    // ==========================================================
+    // ✅ التهيئة
+    // ==========================================================
     function init() {
-        // الانتظار حتى يصبح DOM جاهزاً
+        // ننتظر تحميل DOM
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(startMonitoring, 500);
+                setTimeout(startMonitoring, 1000);
             });
         } else {
-            setTimeout(startMonitoring, 500);
+            setTimeout(startMonitoring, 1000);
         }
         
-        // أيضًا التطبيق عند اكتمال تحميل الصفحة
+        // أيضًا نبدأ عند تحميل الصفحة بالكامل
         window.addEventListener('load', () => {
-            setTimeout(applyExceptionRules, 1000);
+            setTimeout(applyExceptionRules, 2000);
         });
     }
     
-    // بدء التنفيذ
+    // بدء النظام
     init();
     
 })();
