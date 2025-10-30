@@ -18,29 +18,32 @@
     // ==========================================================
 
 
-    // ==========================================================
-    // ⭐️⭐️⭐️ [ التعديل الوحيد والمهم هنا ] ⭐️⭐️⭐️
-    // دالة لتمكين التمرير بشكل إجباري (للتغلب على القالب)
+        // ==========================================================
+    // ✅ [ إصلاح نهائي ] دالة لتمكين التمرير (بشكل آمن)
+    // هذه النسخة تزيل الأوامر المضافة فقط ولا تكسر
+    // خاصية position: fixed الخاصة بالقالب
     // ==========================================================
     function enableBodyScroll() {
         const bodyStyle = document.body.style;
-        const htmlStyle = document.documentElement.style; // استهداف <html> أيضاً
+        const htmlStyle = document.documentElement.style; // <html>
 
-        // استخدام setProperty لضمان الأولوية القصوى (important)
-        // هذا يتجاوز أي "inline style" قد يضعه onload.js
-        bodyStyle.setProperty('overflow', 'auto', 'important');
-        htmlStyle.setProperty('overflow', 'auto', 'important');
-
-        // إزالة الكلاسات الشائعة لمنع التمرير من كلا العنصرين
+        // 1. إزالة أي كلاسات تمنع التمرير (كما في السابق)
         document.body.classList.remove('no-scroll', 'popup-visible', 'noscroll'); 
         document.documentElement.classList.remove('no-scroll', 'popup-visible', 'noscroll');
+
+        // 2. [الأهم] إزالة خاصية "overflow" المضافة (inline)
+        // بدلاً من إجبارها على "auto"
+        if (bodyStyle.overflow) {
+            bodyStyle.removeProperty('overflow');
+        }
+        if (htmlStyle.overflow) {
+            htmlStyle.removeProperty('overflow');
+        }
         
-        console.log('Ad-Control: Scrolling forcefully enabled.');
+        console.log('Ad-Control: Scrolling restored to default (Fixed-Menu Safe).');
     }
     // ==========================================================
-    // ⭐️⭐️⭐️ [ نهاية التعديل ] ⭐️⭐️⭐️
-    // ==========================================================
-    
+
     // الانتظار حتى تحميل الصفحة بالكامل
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
