@@ -1,291 +1,174 @@
-// ad-control.js - إصدار v112 (إدارة الاستثناءات + إصلاح التمرير)
-// + ✅ إصلاح التمرير القوي (Forced Scroll) للتغلب على `onload.js`
-// + ✅ إضافة مصفوفة "صفحات الاستثناء".
-// + ✅ إخفاء الإعلانات اليدوية للمستخدمين المعفيين.
-// + ✅ تعديل المتغير العام (PU.iAd) لخداع 'onload.js'.
+/*!
+ * Plus UI Ad Controller (ad-controller.js)
+ * الإصدار 2.0 | نظام متكامل لإدارة الإعلانات ومكافحة مانع الإعلانات.
+ * يعتمد على onload.js (يجب تحميله أولاً).
+ */
+"use strict";
 
-(function() {
-    'use strict';
-
-    // ==========================================================
-    // ✅ 1. إعدادات صفحات الاستثناء
-    // ==========================================================
-    const EXCEPTION_PATHS = [
-        '/p/login.html',
-        '/p/profile.html',
-        '/p/packages.html'
-    ];
-    // ==========================================================
-
-
-        // ==========================================================
-    // ✅ [ إصلاح نهائي ] دالة لتمكين التمرير (بشكل آمن)
-    // هذه النسخة تزيل الأوامر المضافة فقط ولا تكسر
-    // خاصية position: fixed الخاصة بالقالب
-    // ==========================================================
-    function enableBodyScroll() {
-        const bodyStyle = document.body.style;
-        const htmlStyle = document.documentElement.style; // <html>
-
-        // 1. إزالة أي كلاسات تمنع التمرير (كما في السابق)
-        document.body.classList.remove('no-scroll', 'popup-visible', 'noscroll'); 
-        document.documentElement.classList.remove('no-scroll', 'popup-visible', 'noscroll');
-
-        // 2. [الأهم] إزالة خاصية "overflow" المضافة (inline)
-        // بدلاً من إجبارها على "auto"
-        if (bodyStyle.overflow) {
-            bodyStyle.removeProperty('overflow');
-        }
-        if (htmlStyle.overflow) {
-            htmlStyle.removeProperty('overflow');
-        }
-        
-        console.log('Ad-Control: Scrolling restored to default (Fixed-Menu Safe).');
-    }
-    // ==========================================================
-
-    // الانتظار حتى تحميل الصفحة بالكامل
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAdControl);
-    } else {
-        initAdControl();
-    }
-    
-    function initAdControl() {
-        console.log('Initializing Ad Control System (v112)...'); 
-        // تطبيق القواعد فوراً عند التحميل
-        checkAndApplyRules();
-        
-        // التحقق المتكرر (لضمان التقاط بيانات المستخدم)
-        const checkInterval = setInterval(() => {
-            const userProfile = getUserProfile();
-            if (userProfile && userProfile.uid) {
-                clearInterval(checkInterval);
-                checkAndApplyRules(); // إعادة التطبيق عند العثور على المستخدم
-            }
-        }, 500); 
-        
-        // الاستماع لتحديثات بيانات المستخدم
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'firebaseUserProfileData') {
-                setTimeout(checkAndApplyRules, 100); 
-            }
-        });
+((e, t, n) => {
+    // التأكد من تحميل PU (onload.js)
+    if (!e || !e.df) {
+        t.console.error("AdControl Error: PU (onload.js) is not loaded. ad-controller.js must be loaded AFTER onload.js.");
+        return;
     }
 
-    function checkAndApplyRules() {
-        const userProfile = getUserProfile();
-        applyAdRules(userProfile);
-    }
-    
-    function getUserProfile() {
-        try {
-            const userDataString = localStorage.getItem('firebaseUserProfileData');
-            if (!userDataString) return null;
-            return JSON.parse(userDataString);
-        } catch (e) {
-            console.error('Failed to parse user profile data', e);
-            return null;
-        }
-    }
-    
-    // دالة عرض رسالة Toast
-    function showToast(message) {
-        // (الكود الخاص بك هنا - لا حاجة لتعديله)
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'tNtf'; 
-        toastContainer.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-            pointer-events: none; background: rgba(0, 0, 0, 0); 
-        `;
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        toastMessage.style.pointerEvents = 'auto'; 
-        toastContainer.appendChild(toastMessage);
-        const existingToast = document.querySelector('.tNtf');
-        if (existingToast) { existingToast.remove(); }
-        document.body.appendChild(toastContainer);
-        setTimeout(() => {
-            toastContainer.remove();
-        }, 5000); 
-    }
-    
-    // الدالة المنطقية للتحقق من حالة الإعفاء
-    function isUserAdFree(userProfile) {
+    // المتغيرات الأساسية
+    const l = t.console;
+    const o = n.body;
+    const a = "ads-hidden"; // الكلاس الرئيسي لإخفاء الإعلانات
+
+    /**
+     * -----------------------------------------------------------------
+     * 1. منطق إخفاء الإعلانات (للمستخدمين المعفيين)
+     * -----------------------------------------------------------------
+     */
+
+    /**
+     * يحدد ما إذا كان يجب إعفاء المستخدم الحالي من مشاهدة الإعلانات.
+     * @param {object | null} userProfile - كائن ملف تعريف المستخدم من Firebase.
+     * @param {boolean} bloggerAdmin - حالة مسؤول بلوجر (من PU.vw.iAd).
+     * @returns {boolean} - إرجاع 'true' إذا كان يجب إخفاء الإعلانات.
+     */
+    const isAdFree = (userProfile, bloggerAdmin) => {
+        // 1. مسؤول بلوجر ($.iAd)
+        if (bloggerAdmin === true) return true;
+
+        // 2. مستخدم ضيف (لا يوجد ملف تعريف)
         if (!userProfile) return false;
 
-        if (userProfile.isAdmin) {
-            console.log('Ad-Control: Admin user (Showing Ads for testing)');
-            return false;
-        }
-        
-        if (userProfile.isVip === true) {
-            console.log('Ad-Control: Active (via isVip = true)');
-            return true;
-        }
+        // 3. مسؤول Firebase
+        if (userProfile.isAdmin === true) return true;
 
-        if (userProfile.adFreeExpiry === null) {
-            console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
-            return true; 
-        }
+        // 4. حالة العضوية المميزة (VIP)
+        if (userProfile.isVip === true) return true;
 
-        const adFreeExpiry = userProfile.adFreeExpiry;
-        if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
-            const expiryTimestampMs = adFreeExpiry.seconds * 1000;
-            if (expiryTimestampMs > Date.now()) {
-                console.log('Ad-Control: Active (Temporary via adFreeExpiry)');
-                return true; 
+        // 5. إعفاء دائم (null)
+        if (userProfile.adFreeExpiry === null) return true;
+
+        // 6. إعفاء مؤقت (بناءً على التاريخ)
+        if (userProfile.adFreeExpiry && userProfile.adFreeExpiry.seconds) {
+            const expiryTimeMs = userProfile.adFreeExpiry.seconds * 1000;
+            if (expiryTimeMs > Date.now()) {
+                return true; // الإعفاء المؤقت لا يزال ساريًا
             }
         }
-        
-        const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
-            console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
-            return true;
-        }
-        
-        console.log('Ad-Control: Inactive (Showing Ads)');
+
+        // الافتراضي: إظهار الإعلانات
         return false;
-    }
-    
-    // دالة للتحقق إذا كانت الصفحة الحالية صفحة استثناء
-    function isExceptionPage() {
-        const currentPath = window.location.pathname;
-        for (let i = 0; i < EXCEPTION_PATHS.length; i++) {
-            if (currentPath.indexOf(EXCEPTION_PATHS[i]) === 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    // دالة لضبط متغير التجاوز العام (PU.iAd)
-    function setGlobalBypassFlag(isBypassed) {
-        const attemptSet = () => {
-            try {
-                // التأكد من وجود PU وإنشائه إذا لم يكن موجوداً
-                if (typeof window.PU === 'undefined') {
-                    window.PU = {};
-                    console.log(`Ad-Control: Created PU object.`);
+    };
+
+    /**
+     * يطبق كلاس 'ads-hidden' على الـ <body> إذا تحققت الشروط.
+     * @param {object | null} userProfile - ملف تعريف المستخدم من Firebase.
+     */
+    const applyAdPreference = (userProfile) => {
+        // ننتظر جاهزية onload.js
+        e.df.then(() => {
+            const isBloggerAdmin = e.vw.iAd; 
+            if (isAdFree(userProfile, isBloggerAdmin)) {
+                if (!o.classList.contains(a)) {
+                     o.classList.add(a);
                 }
-                
-                // تعيين القيمة
-                window.PU.iAd = isBypassed; 
-                console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to control onload.js.`);
-                return true;
+            } else {
+                 if (o.classList.contains(a)) {
+                    o.classList.remove(a);
+                 }
+            }
+        });
+    };
 
-            } catch (e) {
-                console.error('Ad-Control: Error setting global PU.iAd flag.', e);
-                return true; 
+    /**
+     * -----------------------------------------------------------------
+     * 2. منطق مكافحة مانع الإعلانات (Anti-AdBlock)
+     * -----------------------------------------------------------------
+     * هذا الكود يعدل السلوك الافتراضي لـ onload.js.
+     */
+    
+    // الانتظار حتى يتم تحميل (onload.js) بالكامل
+    e.df.then(() => {
+        // 1. تعريف الصفحات المستثناة
+        const EXCEPTION_PATHS = [
+            '/p/login.html',
+            '/p/profile.html', 
+            '/p/packages.html'
+        ];
+        // 2. الحصول على المسار الحالي
+        const currentPath = location.pathname;
+
+        // 3. الوصول إلى دوال ومتغيرات onload.js الضرورية
+        const antiAdBlockPopup = e.qSel(".js-antiadblocker"); // نافذة الحظر
+        const lazyPromise = e.lz;        // PU.lz (Promise)
+        const adTools = e.ads;           // PU.ads (يحتوي على iBlk)
+        const viewState = e.vw;          // PU.vw (يحتوي على iAd)
+        const showToast = e.tNtf;        // PU.tNtf (إظهار تنبيه)
+        const hideAdRemnants = () => e.cCss("body .adsbygoogle{display:none!important}");
+        const showPopup = (el) => { // دالة إظهار النافذة المنبثقة
+            e.sAb(el, "hidden");
+            e.aCl(el, "hidden");
+            if (e.hAb(el, "aria-hidden")) {
+                e.sAb(el, "aria-hidden", "false");
             }
         };
 
-        if (!attemptSet()) {
-            console.warn('Ad-Control: Global PU object not found. Retrying in 500ms.');
-            setTimeout(attemptSet, 500);
+        // 4. تنفيذ منطق مكافحة مانع الإعلانات المعدل
+        if (antiAdBlockPopup) { // إذا وُجد عنصر الحظر
+            lazyPromise.then(() => adTools.iBlk()).then((isAdBlockDetected) => {
+                
+                // إذا تم اكتشاف AdBlock
+                if (isAdBlockDetected) {
+                    
+                    // التحقق من شروط السماح بالتصفح
+                    const isBloggerAdmin = viewState.iAd;
+                    const isExceptionPath = EXCEPTION_PATHS.includes(currentPath);
+                    const isUserAdFree = o.classList.contains(a); // التحقق من الكلاس
+                    
+                    if (isBloggerAdmin) {
+                        // 1. مسؤول بلوجر: اسمح بالتصفح + أظهر تنبيه
+                        showToast("تم تمكين AdBlock! يبدو أنك مسؤول، لذلك لم يتم عرض النافذة المنبثقة.");
+                    
+                    } else if (isExceptionPath || isUserAdFree) {
+                        // 2. صفحة مستثناة أو مستخدم معفي (VIP/Admin/etc):
+                        // اسمح بالتصفح (بصمت، لا تفعل شيئًا)
+                        l.log("AdControl: AdBlock detected, but user is exempt. Allowing browsing.");
+                    
+                    } else {
+                        // 3. زائر عادي: اظهر نافذة الحظر
+                        hideAdRemnants(); 
+                        showPopup(antiAdBlockPopup); 
+                    }
+                }
+            }).catch(err => {
+                l.error("AdControl: AdBlock detection failed.", err);
+            });
         }
-    }
+    });
 
-    // دالة تطبيق القواعد (منطقك سليم)
-    function applyAdRules(userProfile) {
-        const userIsAdFree = isUserAdFree(userProfile);
-        const pageIsException = isExceptionPage(); 
-        const isAdmin = userProfile ? userProfile.isAdmin : false;
-        
-        let statusMessage = '';
-        let showStatusToast = true; 
-        
-        if (pageIsException) {
-            // 1. حالة صفحة الاستثناء (الأولوية القصوى)
-            console.log('Ad-Control: Exception page detected. Bypassing AdBlocker and hiding ads.');
-            setGlobalBypassFlag(true); 
-            hideAllAds();
-            enableBodyScroll(); // ⭐️ تطبيق الإصلاح
-            hideBlockerPopups();
-            showStatusToast = false; 
+    /**
+     * -----------------------------------------------------------------
+     * 3. المتحكم العام (Controller)
+     * -----------------------------------------------------------------
+     * هذا هو الكائن الذي ستستخدمه للربط مع Firebase.
+     */
+    const controller = {
+        /**
+         * الدالة الرئيسية التي يجب استدعاؤها عند تغيير حالة مصادقة Firebase.
+         * @param {object | null} userProfile - ملف تعريف المستخدم أو null.
+         */
+        update: applyAdPreference,
 
-        } else if (isAdmin) {
-            // 2. حالة المسؤول (Admin)
-            statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
-            setGlobalBypassFlag(true); 
-            showAllAds(); 
-        
-        } else if (userIsAdFree) {
-            // 3. حالة المستخدم المعفي (VIP)
-            statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            console.log('Ad-Control: VIP mode. Hiding ads and bypassing AdBlocker popup.');
-            setGlobalBypassFlag(true); 
-            hideAllAds(); 
-            enableBodyScroll(); // ⭐️ تطبيق الإصلاح
-            hideBlockerPopups();
-
-        } else {
-            // 4. حالة المستخدم العادي
-            statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
-            console.log('Ad-Control: Normal user mode. Showing ads.');
-            setGlobalBypassFlag(false); 
-            showAllAds(); 
+        /**
+         * دالة مساعدة إذا كنت بحاجة للتحقق من الحالة في مكان آخر.
+         * @param {object | null} userProfile
+         * @returns {boolean}
+         */
+        isAdFree: (userProfile) => {
+            const isBloggerAdmin = (e.vw && e.vw.iAd) || false;
+            return isAdFree(userProfile, isBloggerAdmin);
         }
+    };
 
-        if (showStatusToast && !window.__ad_control_toast_shown) {
-            showToast(statusMessage);
-            window.__ad_control_toast_shown = true;
-        }
-    }
-    
-    // دالة مخصصة لإخفاء النوافذ المنبثقة
-    function hideBlockerPopups() {
-        const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
-        if (antiAdBlockerEl) {
-             antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-        }
-        const accessBlockerEl = document.querySelector('.js-accessblocker');
-        if (accessBlockerEl) {
-             accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-        }
-    }
-    
-    // دالة إخفاء كل الإعلانات
-    function hideAllAds() {
-        const styleId = 'vip-ad-free-style';
-        let existingStyle = document.getElementById(styleId);
-        if (existingStyle) return; 
+    // كشف المتحكم في الكائن PU العام وفي Window لسهولة الوصول
+    e.AdControl = controller;
+    t.PU_AdControl = controller; // الآن يمكنك استدعاؤه باستخدام PU_AdControl.update(...)
 
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            /* إخفاء إعلانات Google AdSense */
-            .adsbygoogle, ins.adsbygoogle { display: none !important; visibility: hidden !important; opacity: 0 !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
-            
-            /* إخفاء الإعلانات اليدوية */
-            .pAd.show-if-js,
-            .rAd.show-if-js,
-            .pAdIf.show-if-js,
-            .adB {
-                display: none !important; 
-                visibility: hidden !important;
-            }
-
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات */
-            .js-antiadblocker,
-            .js-accessblocker, 
-            .papW,
-            [class*="adblock"],
-            [class*="anti-ad"] {
-                display: none !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // دالة إظهار الإعلانات
-    function showAllAds() {
-        const style = document.getElementById('vip-ad-free-style');
-        if (style) {
-            style.remove();
-            console.log('Ad-Control: Ads style removed (Showing Ads)');
-        }
-    }
-})();
+})(window.PU, window, document);
