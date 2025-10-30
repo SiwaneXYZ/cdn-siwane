@@ -1,11 +1,23 @@
-// ad-control.js - إصدار v110 (حل نهائي لـ AdBlocker و Scroll وتعارض onload.js)
+// ad-control.js - إصدار v111 (إدارة الاستثناءات والإعلانات اليدوية)
+// + ✅ [جديد] إضافة مصفوفة "صفحات الاستثناء" لتعطيل مانع الإعلانات عليها (مثل صفحة شراء الباقات).
+// + ✅ [جديد] إخفاء الإعلانات اليدوية (.pAd, .rAd, .pAdIf) للمستخدمين المعفيين.
 // + ✅ تعديل المتغير العام (PU.iAd) لخداع 'onload.js' وتجاوز نافذته المنبثقة.
 // + ✅ تمكين التمرير الإجباري للمستخدمين المعفيين.
-// + ✅ إخفاء ويجت AdBlocker (عنصر .js-antiadblocker).
-// + ✅ إعادة هيكلة 'applyAdRules' لضمان إخفاء/إظهار الإعلانات بشكل صحيح.
 
 (function() {
     'use strict';
+
+    // ==========================================================
+    // ✅✅✅ [إعدادات جديدة] صفحات الاستثناء ✅✅✅
+    // أضف هنا روابط الصفحات التي تريد السماح بالتصفح فيها
+    // حتى لو كان مانع الإعلانات مفعلاً (مثل صفحة شراء الباقات)
+    // ==========================================================
+    const EXCEPTION_PATHS = [
+        '/p/login.html',
+        '/p/profile.html',
+        '/p/packages.html' // <-- غير هذا الرابط إلى رابط صفحة الباقات الفعلي لديك
+    ];
+    // ==========================================================
 
     // ==========================================================
     // ✅ دالة لتمكين التمرير على الجسم
@@ -27,25 +39,18 @@
     }
     
     function initAdControl() {
+        console.log('Initializing Ad Control System (v111)...'); 
+        // تطبيق القواعد فوراً عند التحميل
         checkAndApplyRules();
-        console.log('Initializing Ad Control System (v110)...'); 
         
-        // التحقق المتكرر
+        // التحقق المتكرر (لضمان التقاط بيانات المستخدم)
         const checkInterval = setInterval(() => {
             const userProfile = getUserProfile();
             if (userProfile && userProfile.uid) {
                 clearInterval(checkInterval);
-                applyAdRules(userProfile);
+                checkAndApplyRules(); // إعادة التطبيق عند العثور على المستخدم
             }
         }, 500); 
-        
-        // التحقق بعد 3 ثوانٍ كدعم
-        setTimeout(() => {
-            const userProfile = getUserProfile();
-            if (userProfile) {
-                applyAdRules(userProfile);
-            }
-        }, 3000); 
         
         // الاستماع لتحديثات بيانات المستخدم
         window.addEventListener('storage', (e) => {
@@ -57,9 +62,7 @@
 
     function checkAndApplyRules() {
         const userProfile = getUserProfile();
-        if (userProfile) {
-            applyAdRules(userProfile);
-        }
+        applyAdRules(userProfile);
     }
     
     function getUserProfile() {
@@ -82,8 +85,7 @@
         
         toastContainer.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-            pointer-events: none; 
-            background: rgba(0, 0, 0, 0); 
+            pointer-events: none; background: rgba(0, 0, 0, 0); 
         `;
 
         const toastMessage = document.createElement('div');
@@ -92,9 +94,7 @@
         toastContainer.appendChild(toastMessage);
         
         const existingToast = document.querySelector('.tNtf');
-        if (existingToast) {
-            existingToast.remove();
-        }
+        if (existingToast) { existingToast.remove(); }
 
         document.body.appendChild(toastContainer);
 
@@ -110,25 +110,21 @@
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
-        // 1. الأدمن والمشرفين يرون الإعلانات (للمراقبة)
         if (userProfile.isAdmin) {
             console.log('Ad-Control: Admin user (Showing Ads for testing)');
             return false;
         }
         
-        // 2. التحقق من حقل 'isVip' الجديد
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
             return true;
         }
 
-        // 3. التحقق من 'adFreeExpiry' الدائم (null)
         if (userProfile.adFreeExpiry === null) {
             console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
             return true; 
         }
 
-        // 4. التحقق من 'adFreeExpiry' المؤقت (Timestamp)
         const adFreeExpiry = userProfile.adFreeExpiry;
         if (adFreeExpiry && typeof adFreeExpiry === 'object' && adFreeExpiry.seconds) {
             const expiryTimestampMs = adFreeExpiry.seconds * 1000;
@@ -138,7 +134,6 @@
             }
         }
         
-        // 5. [دعم للخلف] التحقق من الحقول القديمة (vipp)
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
             console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
@@ -148,69 +143,111 @@
         console.log('Ad-Control: Inactive (Showing Ads)');
         return false;
     }
+    
     // ==========================================================
+    // ✅ [جديد] دالة للتحقق إذا كانت الصفحة الحالية صفحة استثناء
+    // ==========================================================
+    function isExceptionPage() {
+        const currentPath = window.location.pathname;
+        for (let i = 0; i < EXCEPTION_PATHS.length; i++) {
+            // نستخدم indexOf للتحقق من بداية الرابط (لتجنب مشاكل ? و #)
+            if (currentPath.indexOf(EXCEPTION_PATHS[i]) === 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // ==========================================================
+    // ✅ [جديد] دالة لضبط متغير التجاوز العام (PU.iAd)
+    // ==========================================================
+    function setGlobalBypassFlag(isBypassed) {
+        const attemptSet = () => {
+            try {
+                if (window.PU && typeof window.PU === 'object') {
+                    window.PU.iAd = isBypassed; 
+                    console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to control onload.js.`);
+                    return true;
+                }
+                // إذا كان PU غير موجود، أنشئه (احتياطي)
+                if (typeof window.PU === 'undefined') {
+                    window.PU = { iAd: isBypassed };
+                    console.log(`Ad-Control: Created PU object and set PU.iAd = ${isBypassed}.`);
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                console.error('Ad-Control: Error setting global PU.iAd flag.', e);
+                return true; // لا تعاود المحاولة إذا حدث خطأ
+            }
+        };
+
+        if (!attemptSet()) {
+            // PU غير جاهز بعد، محاولة احتياطية
+            console.warn('Ad-Control: Global PU object not found. Retrying in 500ms.');
+            setTimeout(attemptSet, 500);
+        }
+    }
 
     // ==========================================================
-    // ✅✅✅  دالة تطبيق القواعد (تم تعديلها بالكامل)  ✅✅✅
+    // ✅✅✅  دالة تطبيق القواعد (تم إعادة هيكلتها بالكامل)  ✅✅✅
     // ==========================================================
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
-        let statusMessage = '';
+        const pageIsException = isExceptionPage(); // فحص صفحة الاستثناء
+        const isAdmin = userProfile ? userProfile.isAdmin : false;
         
-        if (userProfile.isAdmin) {
-            // 1. حالة المسؤول (Admin)
+        let statusMessage = '';
+        let showStatusToast = true; // متغير للتحكم في إظهار التوست
+        
+        if (pageIsException) {
+            // ----------------------------------------------------
+            // 1. حالة صفحة الاستثناء (الأولوية القصوى)
+            // ----------------------------------------------------
+            console.log('Ad-Control: Exception page detected. Bypassing AdBlocker and hiding ads.');
+            // خداع 'onload.js' للسماح بالتصفح (الأهم)
+            setGlobalBypassFlag(true); 
+            // إخفاء أي إعلانات قد تكون في هذه الصفحة
+            hideAllAds();
+            // ضمان تفعيل التمرير
+            enableBodyScroll(); 
+            hideBlockerPopups();
+            // لا نظهر أي رسالة توست هنا
+            showStatusToast = false; 
+
+        } else if (isAdmin) {
+            // ----------------------------------------------------
+            // 2. حالة المسؤول (Admin) - (صفحة عادية)
+            // ----------------------------------------------------
             statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
             console.log('Ad-Control: Admin mode. Showing ads.');
-            // 'onload.js' سيتعرف عليه كـ $.iAd = true
-            // نحن فقط نتأكد من إظهار الإعلانات
+            setGlobalBypassFlag(true); // 'onload.js' سيتجاوزه
             showAllAds(); 
         
         } else if (userIsAdFree) {
-            // 2. حالة المستخدم المعفي (VIP)
+            // ----------------------------------------------------
+            // 3. حالة المستخدم المعفي (VIP) - (صفحة عادية)
+            // ----------------------------------------------------
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             console.log('Ad-Control: VIP mode. Hiding ads and bypassing AdBlocker popup.');
-            
-            // 🌟🌟🌟 [الحل الرئيسي] 🌟🌟🌟
-            // نقوم بتعيين المتغير العام (PU) الذي يستخدمه 'onload.js'
-            // هذا يجعل 'onload.js' يعتقد أن هذا المستخدم "مسؤول"
-            // وبالتالي يتجاوز نافذة مانع الإعلانات ومشكلة قفل التمرير.
-            try {
-                if (window.PU && typeof window.PU === 'object') {
-                    window.PU.iAd = true; 
-                    console.log('Ad-Control: Set PU.iAd = true to bypass onload.js anti-adblock.');
-                } else {
-                     console.warn('Ad-Control: Global PU object not found. Retrying in 1s.');
-                     // محاولة احتياطية إذا كان 'onload.js' يتأخر في التحميل
-                     setTimeout(() => {
-                         if (window.PU && typeof window.PU === 'object') {
-                             window.PU.iAd = true;
-                             console.log('Ad-Control: Set PU.iAd = true (Retry successful).');
-                         }
-                     }, 1000);
-                }
-            } catch (e) {
-                console.error('Ad-Control: Error setting global PU.iAd flag.', e);
-            }
-            // 🌟🌟🌟 [نهاية الحل الرئيسي] 🌟🌟🌟
-
-            // إخفاء جميع الإعلانات بشكل قسري
+            setGlobalBypassFlag(true); // 'onload.js' سيتجاوزه
             hideAllAds(); 
-            // تمكين التمرير (كإجراء احترازي إضافي)
             enableBodyScroll(); 
-            // إخفاء نوافذ الحظر (كإجراء احترازي إضافي)
             hideBlockerPopups();
 
         } else {
-            // 3. حالة المستخدم العادي
+            // ----------------------------------------------------
+            // 4. حالة المستخدم العادي - (صفحة عادية)
+            // ----------------------------------------------------
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
             console.log('Ad-Control: Normal user mode. Showing ads.');
-            // المستخدم عادي، نترك 'onload.js' يقوم بعمله
-            // ونتأكد من إظهار الإعلانات
+            // هنا نترك 'onload.js' يقوم بعمله
+            setGlobalBypassFlag(false); 
             showAllAds(); 
         }
 
-        // عرض رسالة التوست مرة واحدة فقط
-        if (!window.__ad_control_toast_shown) {
+        // عرض رسالة التوست مرة واحدة فقط (وفقط إذا لم تكن صفحة استثناء)
+        if (showStatusToast && !window.__ad_control_toast_shown) {
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
         }
@@ -228,6 +265,9 @@
         }
     }
     
+    // ==========================================================
+    // ✅ [محدث] دالة إخفاء كل الإعلانات
+    // ==========================================================
     function hideAllAds() {
         const styleId = 'vip-ad-free-style';
         let existingStyle = document.getElementById(styleId);
@@ -241,6 +281,15 @@
             iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
             
+            /* [جديد] إخفاء الإعلانات اليدوية التي أضفتها */
+            .pAd.show-if-js,
+            .rAd.show-if-js,
+            .pAdIf.show-if-js,
+            .adB {
+                display: none !important; 
+                visibility: hidden !important;
+            }
+
             /* منع ظهور الويجت الخاصة بمانع الإعلانات (مهم جداً) */
             .js-antiadblocker,
             .js-accessblocker, 
