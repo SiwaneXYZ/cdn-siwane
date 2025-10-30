@@ -1,118 +1,172 @@
-// ad-control.js - الإصدار الآمن (لا يتلاعب بالعناصر)
-// يعمل مع نظام الاستثناءات المدمج في onload.js
+// ad-control.js - الإصدار v115 (مراقب استثنائي)
+// يعمل كمراقب فقط ويتأكد من تطبيق نظام الاستثناءات
 
 (function() {
     'use strict';
     
-    console.log('Ad-Control: Safe mode initialized');
+    console.log('Ad-Control: Exception Monitor v115 initialized');
     
-    // الانتظار حتى تحميل الصفحة بالكامل
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAdControl);
-    } else {
-        initAdControl();
-    }
-    
-    function initAdControl() {
-        console.log('Ad-Control: Checking user status...');
-        
-        // التحقق من المستخدم وتطبيق القواعد بعد تأخير بسيط
-        setTimeout(() => {
-            checkAndApplyRules();
-        }, 1000);
-        
-        // الاستماع لتحديثات بيانات المستخدم
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'firebaseUserProfileData') {
-                setTimeout(checkAndApplyRules, 500);
-            }
-        });
-    }
-    
-    function checkAndApplyRules() {
-        const userProfile = getUserProfile();
-        const isExceptionPage = checkExceptionPage();
-        
-        if (shouldApplyAdFree(userProfile, isExceptionPage)) {
-            applyAdFreeMode();
-        } else {
-            console.log('Ad-Control: Normal mode - showing ads');
-        }
-    }
-    
-    function getUserProfile() {
+    // دالة التحقق من المستخدم المعفي
+    function isUserAdFree() {
         try {
             const userDataString = localStorage.getItem('firebaseUserProfileData');
-            if (!userDataString) return null;
-            return JSON.parse(userDataString);
+            if (!userDataString) return false;
+            
+            const userProfile = JSON.parse(userDataString);
+            
+            // شروط الإعفاء
+            if (userProfile.isVip === true) return true;
+            if (userProfile.adFreeExpiry === null) return true;
+            
+            if (userProfile.adFreeExpiry && userProfile.adFreeExpiry.seconds) {
+                const expiryTimestampMs = userProfile.adFreeExpiry.seconds * 1000;
+                if (expiryTimestampMs > Date.now()) return true;
+            }
+            
+            const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
+            if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
+                return true;
+            }
+            
+            return false;
         } catch (e) {
-            console.error('Ad-Control: Failed to parse user profile', e);
-            return null;
+            console.error('Ad-Control: Error checking user status', e);
+            return false;
         }
     }
     
-    function checkExceptionPage() {
+    // دالة التحقق من صفحات الاستثناء
+    function isExceptionPage() {
         const exceptionPaths = ['/p/login.html', '/p/profile.html', '/p/packages.html'];
         const currentPath = window.location.pathname;
         return exceptionPaths.some(path => currentPath.indexOf(path) === 0);
     }
     
-    function shouldApplyAdFree(userProfile, isExceptionPage) {
-        if (isExceptionPage) return true;
-        if (!userProfile) return false;
+    // دالة تطبيق نمط الإعلانات المخفية
+    function applyAdFreeStyle() {
+        const styleId = 'vip-ad-free-style';
+        let existingStyle = document.getElementById(styleId);
         
-        // نفس شروط الإعفاء المستخدمة في onload.js
-        if (userProfile.isVip === true) return true;
-        if (userProfile.adFreeExpiry === null) return true;
-        
-        if (userProfile.adFreeExpiry && userProfile.adFreeExpiry.seconds) {
-            const expiryTimestampMs = userProfile.adFreeExpiry.seconds * 1000;
-            if (expiryTimestampMs > Date.now()) return true;
+        if (!existingStyle) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+                /* إخفاء جميع أنواع الإعلانات */
+                .adsbygoogle, 
+                ins.adsbygoogle,
+                [id*='ad-slot'],
+                [class*='ad-unit'],
+                .pAd.show-if-js,
+                .rAd.show-if-js,
+                .pAdIf.show-if-js,
+                .adB,
+                iframe[src*="ads"],
+                iframe[id*="aswift_"],
+                iframe[id*="google_ads_frame"],
+                div[id*="AdContainer"],
+                div[class*="ads-container"],
+                div[class*="ad_wrapper"] {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    height: 0 !important;
+                    width: 0 !important;
+                    overflow: hidden !important;
+                }
+                
+                /* ضمان التمرير الطبيعي */
+                body, html {
+                    overflow: auto !important;
+                    position: static !important;
+                }
+                
+                /* إخفاء نوافذ الحظر */
+                .js-antiadblocker,
+                .js-accessblocker,
+                .papW,
+                [class*="adblock"],
+                [class*="anti-ad"] {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+            console.log('Ad-Control: Ad-free style applied');
         }
-        
-        const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
-            return true;
-        }
-        
-        return false;
     }
     
-    function applyAdFreeMode() {
-        console.log('Ad-Control: Applying ad-free mode');
+    // دالة إزالة نمط الإعلانات المخفية
+    function removeAdFreeStyle() {
+        const style = document.getElementById('vip-ad-free-style');
+        if (style) {
+            style.remove();
+            console.log('Ad-Control: Ad-free style removed');
+        }
+    }
+    
+    // دالة المراقبة الرئيسية
+    function monitorAndApply() {
+        const shouldBeAdFree = isUserAdFree() || isExceptionPage();
         
-        // إخفاء الإعلانات اليدوية فقط (آمن)
-        const style = document.createElement('style');
-        style.id = 'vip-ad-free-style';
-        style.textContent = `
-            /* إخفاء الإعلانات اليدوية فقط */
-            .pAd.show-if-js,
-            .rAd.show-if-js, 
-            .pAdIf.show-if-js,
-            .adB {
-                display: none !important;
+        if (shouldBeAdFree) {
+            console.log('Ad-Control: User/page should be ad-free - applying rules');
+            
+            // 1. ضبط المتغير العام
+            if (window.PU && typeof window.PU === 'object') {
+                window.PU.iAd = true;
             }
             
-            /* لا نلمس إعلانات Google أو نغير التمرير */
-        `;
-        
-        // إزالة النمط القديم إذا موجود
-        const oldStyle = document.getElementById('vip-ad-free-style');
-        if (oldStyle) oldStyle.remove();
-        
-        document.head.appendChild(style);
-        
-        // عرض رسالة تأكيد
-        showStatusMessage('تم تفعيل الإعفاء من الإعلانات! 🎉');
-    }
-    
-    function showStatusMessage(message) {
-        // استخدام نظام التنبيهات الموجود في onload.js إذا كان متاحاً
-        if (window.J && typeof window.J === 'function') {
-            window.J(message);
+            // 2. تطبيق نمط الإعلانات المخفية
+            applyAdFreeStyle();
+            
+            // 3. ضمان التمرير الطبيعي
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.body.classList.remove('no-scroll', 'scroll-lock');
+            
+            // 4. إخفاء النوافذ المنبثقة يدوياً
+            const blockers = document.querySelectorAll('.js-antiadblocker, .js-accessblocker');
+            blockers.forEach(blocker => {
+                blocker.style.display = 'none';
+            });
+            
         } else {
-            // بديل بسيط
-            console.log('Ad-Control:', message);
+            console.log('Ad-Control: Normal user - showing ads');
+            removeAdFreeStyle();
         }
     }
+    
+    // تهيئة النظام
+    function init() {
+        console.log('Ad-Control: Starting exception monitor...');
+        
+        // التطبيق الفوري
+        monitorAndApply();
+        
+        // المراقبة المستمرة
+        const monitorInterval = setInterval(monitorAndApply, 2000);
+        
+        // المراقبة عند تغيير التخزين
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'firebaseUserProfileData') {
+                setTimeout(monitorAndApply, 500);
+            }
+        });
+        
+        // المراقبة عند تحميل الصفحة
+        window.addEventListener('load', monitorAndApply);
+        
+        // إيقاف المراقبة بعد 5 دقائق (لأداء أفضل)
+        setTimeout(() => {
+            clearInterval(monitorInterval);
+            console.log('Ad-Control: Monitor stopped after 5 minutes');
+        }, 300000);
+    }
+    
+    // بدء التنفيذ
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
 })();
