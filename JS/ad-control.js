@@ -1,7 +1,7 @@
-// ad-control.js - إصدار v113 (إدارة الاستثناءات + إصلاحات الإظهار والإخفاء)
-// + ✅ تحديث لـ hideBlockerPopups لتستهدف الودجت الخاص برسالة AdBlock
-// + ✅ الإبقاء على منطق PU.iAd = true لإيقاف كود onload.js
-// + ✅ إصلاح التمرير القوي (Forced Scroll) للتغلب على قيود القالب
+// ad-control.js - إصدار v114 (الإلغاء التام لكاشف AdBlock عند الإعفاء)
+// + ✅ إلغاء تنشيط كاشف AdBlock عن طريق PU.iAd = true في جميع حالات الإعفاء والاستثناء.
+// + ✅ إزالة الإعلانات يدوياً للمستخدمين المعفيين.
+// + ✅ إصلاح التمرير القوي (Forced Scroll) لتعطيل قيود القالب.
 
 (function() {
     'use strict';
@@ -17,18 +17,18 @@
     // ==========================================================
 
 
-        // ==========================================================
+    // ==========================================================
     // ✅ [ إصلاح نهائي ] دالة لتمكين التمرير (بشكل آمن)
     // ==========================================================
     function enableBodyScroll() {
         const bodyStyle = document.body.style;
         const htmlStyle = document.documentElement.style; // <html>
 
-        // 1. إزالة أي كلاسات تمنع التمرير (يضيفها onload.js عند التفعيل)
+        // 1. إزالة أي كلاسات تمنع التمرير (التي قد يضيفها onload.js)
         document.body.classList.remove('no-scroll', 'popup-visible', 'noscroll'); 
         document.documentElement.classList.remove('no-scroll', 'popup-visible', 'noscroll');
 
-        // 2. إزالة السمة "overflow" المضافة (inline)
+        // 2. إزالة خاصية "overflow" المضافة (inline)
         if (bodyStyle.overflow) {
             bodyStyle.removeProperty('overflow');
         }
@@ -48,7 +48,7 @@
     }
     
     function initAdControl() {
-        console.log('Initializing Ad Control System (v113)...'); 
+        console.log('Initializing Ad Control System (v114)...'); 
         // تطبيق القواعد فوراً عند التحميل
         checkAndApplyRules();
         
@@ -87,7 +87,6 @@
     
     // دالة عرض رسالة Toast (لم يتم تغييرها)
     function showToast(message) {
-        // (الكود الخاص بك هنا - لا حاجة لتعديله)
         const toastContainer = document.createElement('div');
         toastContainer.className = 'tNtf'; 
         toastContainer.style.cssText = `
@@ -155,7 +154,7 @@
         return false;
     }
     
-    // دالة لضبط متغير التجاوز العام (PU.iAd) - لم يتم تغييرها (مهمة للإيقاف)
+    // دالة لضبط متغير التجاوز العام (PU.iAd) - ضروري لـ "الإلغاء"
     function setGlobalBypassFlag(isBypassed) {
         const attemptSet = () => {
             try {
@@ -165,9 +164,9 @@
                     console.log(`Ad-Control: Created PU object.`);
                 }
                 
-                // تعيين القيمة (هذه هي نقطة إيقاف onload.js)
+                // تعيين القيمة (هذه هي نقطة إلغاء تنشيط onload.js)
                 window.PU.iAd = isBypassed; 
-                console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to control onload.js.`);
+                console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to Deactivate Blocker.`);
                 return true;
 
             } catch (e) {
@@ -182,7 +181,7 @@
         }
     }
 
-    // دالة تطبيق القواعد (المنطق الرئيسي)
+    // دالة تطبيق القواعد (المنطق الرئيسي المُعدّل)
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
         const pageIsException = isExceptionPage(); 
@@ -191,37 +190,38 @@
         let statusMessage = '';
         let showStatusToast = true; 
         
-        if (pageIsException) {
-            // 1. حالة صفحة الاستثناء
-            console.log('Ad-Control: Exception page detected. Bypassing AdBlocker and hiding ads.');
-            setGlobalBypassFlag(true); 
-            hideAllAds();
-            enableBodyScroll(); 
-            hideBlockerPopups(); // 👈 استدعاء جديد
-            showStatusToast = false; 
-
-        } else if (isAdmin) {
-            // 2. حالة المسؤول (Admin)
+        // 🔴 المنطق هنا: إذا كان معفياً أو صفحة استثناء، يجب الإلغاء!
+        const shouldDeactivateBlocker = userIsAdFree || pageIsException;
+        
+        if (isAdmin) {
+            // 1. حالة المسؤول: لا إلغاء (للاختبار)، إعلانات مرئية
             statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
-            setGlobalBypassFlag(true); 
+            setGlobalBypassFlag(true); // الإبقاء على PU.iAd=true لتجنب منبثقات Admin
             showAllAds(); 
         
-        } else if (userIsAdFree) {
-            // 3. حالة المستخدم المعفي (VIP) - إيقاف AdBlocker
-            statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            console.log('Ad-Control: VIP mode. Hiding ads and **Stopping** AdBlocker popup.');
+        } else if (shouldDeactivateBlocker) {
+            // 2. حالة الإلغاء: (معفي أو صفحة استثناء)
+            if (userIsAdFree) {
+                statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
+                console.log('Ad-Control: VIP mode. Deactivating Ad Blocker and hiding ads.');
+            } else {
+                 statusMessage = 'صفحة استثناء: تم إلغاء تنشيط كاشف الإعلانات.';
+                 showStatusToast = false;
+                 console.log('Ad-Control: Exception page. Deactivating Ad Blocker.');
+            }
             
-            // 🛑 الإيقاف الفعلي: نجعل onload.js يتجاوز آلية المنع
+            // ✅ الإجراء الأهم: إلغاء تنشيط الكاشف (يجعل onload.js يتوقف)
             setGlobalBypassFlag(true); 
             
-            hideAllAds(); 
-            enableBodyScroll(); 
-            hideBlockerPopups(); // 👈 استدعاء جديد: لإخفاء الودجت الخاص بك يدوياً
-        
+            // ✅ إلغاء جميع القيود والإعلانات
+            hideAllAds(); // إخفاء الإعلانات والودجت يدوياً
+            enableBodyScroll(); // إصلاح التمرير
+            hideBlockerPopups(); // إخفاء نافذة المنع المنبثقة
+
         } else {
-            // 4. حالة المستخدم العادي
+            // 3. المستخدم العادي: الكاشف يعمل والإعلانات مرئية
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
-            console.log('Ad-Control: Normal user mode. Showing ads.');
+            console.log('Ad-Control: Normal user mode. Ad Blocker active.');
             setGlobalBypassFlag(false); 
             showAllAds(); 
         }
@@ -232,24 +232,21 @@
         }
     }
     
-    // ✅ تحديث: دالة مخصصة لإخفاء النوافذ المنبثقة (بما في ذلك الودجت الخاص بك)
+    // دالة مخصصة لإخفاء النوافذ المنبثقة (تستهدف الودجت الخاص بك: .papW)
     function hideBlockerPopups() {
-        // الودجت الخاص بك له الكلاس papW و js-antiadblocker
-        const antiAdBlockerEl = document.querySelector('.js-antiadblocker'); 
-        if (antiAdBlockerEl) {
-             antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-             antiAdBlockerEl.removeAttribute('hidden'); // إزالة السمة hidden إذا كان onload.js قد أزالها
-        }
-        
-        // قد يتم استخدام هذا لحظر الوصول الجغرافي (Access Blocker) في onload.js
-        const accessBlockerEl = document.querySelector('.js-accessblocker');
-        if (accessBlockerEl) {
-             accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-             accessBlockerEl.removeAttribute('hidden'); // إزالة السمة hidden إذا كان onload.js قد أزالها
-        }
+        const selectors = ['.js-antiadblocker', '.js-accessblocker', '.papW'];
+        selectors.forEach(selector => {
+            const el = document.querySelector(selector);
+            if (el) {
+                 // إخفاء قسري
+                 el.style.cssText = 'display: none !important; visibility: hidden !important;';
+                 // إزالة السمة hidden التي قد يحاول onload.js إضافتها أو إزالتها
+                 el.removeAttribute('hidden'); 
+            }
+        });
     }
     
-    // دالة إخفاء كل الإعلانات (تم تحديث بعض الكلاسات المستهدفة)
+    // دالة إخفاء كل الإعلانات
     function hideAllAds() {
         const styleId = 'vip-ad-free-style';
         let existingStyle = document.getElementById(styleId);
@@ -258,24 +255,22 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* إخفاء إعلانات Google AdSense والوحدات الإعلانية */
-            .adsbygoogle, ins.adsbygoogle { display: none !important; visibility: hidden !important; opacity: 0 !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
-            
-            /* إخفاء الإعلانات اليدوية */
-            .pAd.show-if-js,
-            .rAd.show-if-js,
-            .pAdIf.show-if-js,
-            .adB {
+            /* إخفاء شامل لجميع الإعلانات */
+            .adsbygoogle, ins.adsbygoogle,
+            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"],
+            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"],
+            .pAd.show-if-js, .rAd.show-if-js, .pAdIf.show-if-js, .adB {
                 display: none !important; 
                 visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
             }
 
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات (papW هو الودجت الخاص بك) */
-            .js-antiadblocker,
+            /* إخفاء الودجت الخاص بك وكاشف AdBlocker */
+            .js-antiadblocker, 
             .js-accessblocker, 
-            .papW, 
+            .papW,
             [class*="adblock"],
             [class*="anti-ad"] {
                 display: none !important;
@@ -284,7 +279,7 @@
         document.head.appendChild(style);
     }
     
-    // دالة إظهار الإعلانات (لم يتم تغييرها)
+    // دالة إظهار الإعلانات
     function showAllAds() {
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
