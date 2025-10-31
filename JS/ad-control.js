@@ -1,8 +1,7 @@
-// ad-control.js - إصدار v112 (إدارة الاستثناءات + إصلاح التمرير)
-// + ✅ إصلاح التمرير القوي (Forced Scroll) للتغلب على `onload.js`
-// + ✅ إضافة مصفوفة "صفحات الاستثناء".
-// + ✅ إخفاء الإعلانات اليدوية للمستخدمين المعفيين.
-// + ✅ تعديل المتغير العام (PU.iAd) لخداع 'onload.js'.
+// ad-control.js - إصدار v113 (إدارة الاستثناءات + إصلاحات الإظهار والإخفاء)
+// + ✅ تحديث لـ hideBlockerPopups لتستهدف الودجت الخاص برسالة AdBlock
+// + ✅ الإبقاء على منطق PU.iAd = true لإيقاف كود onload.js
+// + ✅ إصلاح التمرير القوي (Forced Scroll) للتغلب على قيود القالب
 
 (function() {
     'use strict';
@@ -20,19 +19,16 @@
 
         // ==========================================================
     // ✅ [ إصلاح نهائي ] دالة لتمكين التمرير (بشكل آمن)
-    // هذه النسخة تزيل الأوامر المضافة فقط ولا تكسر
-    // خاصية position: fixed الخاصة بالقالب
     // ==========================================================
     function enableBodyScroll() {
         const bodyStyle = document.body.style;
         const htmlStyle = document.documentElement.style; // <html>
 
-        // 1. إزالة أي كلاسات تمنع التمرير (كما في السابق)
+        // 1. إزالة أي كلاسات تمنع التمرير (يضيفها onload.js عند التفعيل)
         document.body.classList.remove('no-scroll', 'popup-visible', 'noscroll'); 
         document.documentElement.classList.remove('no-scroll', 'popup-visible', 'noscroll');
 
-        // 2. [الأهم] إزالة خاصية "overflow" المضافة (inline)
-        // بدلاً من إجبارها على "auto"
+        // 2. إزالة السمة "overflow" المضافة (inline)
         if (bodyStyle.overflow) {
             bodyStyle.removeProperty('overflow');
         }
@@ -52,7 +48,7 @@
     }
     
     function initAdControl() {
-        console.log('Initializing Ad Control System (v112)...'); 
+        console.log('Initializing Ad Control System (v113)...'); 
         // تطبيق القواعد فوراً عند التحميل
         checkAndApplyRules();
         
@@ -89,7 +85,7 @@
         }
     }
     
-    // دالة عرض رسالة Toast
+    // دالة عرض رسالة Toast (لم يتم تغييرها)
     function showToast(message) {
         // (الكود الخاص بك هنا - لا حاجة لتعديله)
         const toastContainer = document.createElement('div');
@@ -110,7 +106,7 @@
         }, 5000); 
     }
     
-    // الدالة المنطقية للتحقق من حالة الإعفاء
+    // الدالة المنطقية للتحقق من حالة الإعفاء (لم يتم تغييرها)
     function isUserAdFree(userProfile) {
         if (!userProfile) return false;
 
@@ -148,7 +144,7 @@
         return false;
     }
     
-    // دالة للتحقق إذا كانت الصفحة الحالية صفحة استثناء
+    // دالة للتحقق إذا كانت الصفحة الحالية صفحة استثناء (لم يتم تغييرها)
     function isExceptionPage() {
         const currentPath = window.location.pathname;
         for (let i = 0; i < EXCEPTION_PATHS.length; i++) {
@@ -159,7 +155,7 @@
         return false;
     }
     
-    // دالة لضبط متغير التجاوز العام (PU.iAd)
+    // دالة لضبط متغير التجاوز العام (PU.iAd) - لم يتم تغييرها (مهمة للإيقاف)
     function setGlobalBypassFlag(isBypassed) {
         const attemptSet = () => {
             try {
@@ -169,7 +165,7 @@
                     console.log(`Ad-Control: Created PU object.`);
                 }
                 
-                // تعيين القيمة
+                // تعيين القيمة (هذه هي نقطة إيقاف onload.js)
                 window.PU.iAd = isBypassed; 
                 console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to control onload.js.`);
                 return true;
@@ -186,7 +182,7 @@
         }
     }
 
-    // دالة تطبيق القواعد (منطقك سليم)
+    // دالة تطبيق القواعد (المنطق الرئيسي)
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
         const pageIsException = isExceptionPage(); 
@@ -196,12 +192,12 @@
         let showStatusToast = true; 
         
         if (pageIsException) {
-            // 1. حالة صفحة الاستثناء (الأولوية القصوى)
+            // 1. حالة صفحة الاستثناء
             console.log('Ad-Control: Exception page detected. Bypassing AdBlocker and hiding ads.');
             setGlobalBypassFlag(true); 
             hideAllAds();
-            enableBodyScroll(); // ⭐️ تطبيق الإصلاح
-            hideBlockerPopups();
+            enableBodyScroll(); 
+            hideBlockerPopups(); // 👈 استدعاء جديد
             showStatusToast = false; 
 
         } else if (isAdmin) {
@@ -211,14 +207,17 @@
             showAllAds(); 
         
         } else if (userIsAdFree) {
-            // 3. حالة المستخدم المعفي (VIP)
+            // 3. حالة المستخدم المعفي (VIP) - إيقاف AdBlocker
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            console.log('Ad-Control: VIP mode. Hiding ads and bypassing AdBlocker popup.');
+            console.log('Ad-Control: VIP mode. Hiding ads and **Stopping** AdBlocker popup.');
+            
+            // 🛑 الإيقاف الفعلي: نجعل onload.js يتجاوز آلية المنع
             setGlobalBypassFlag(true); 
+            
             hideAllAds(); 
-            enableBodyScroll(); // ⭐️ تطبيق الإصلاح
-            hideBlockerPopups();
-
+            enableBodyScroll(); 
+            hideBlockerPopups(); // 👈 استدعاء جديد: لإخفاء الودجت الخاص بك يدوياً
+        
         } else {
             // 4. حالة المستخدم العادي
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
@@ -233,19 +232,24 @@
         }
     }
     
-    // دالة مخصصة لإخفاء النوافذ المنبثقة
+    // ✅ تحديث: دالة مخصصة لإخفاء النوافذ المنبثقة (بما في ذلك الودجت الخاص بك)
     function hideBlockerPopups() {
-        const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
+        // الودجت الخاص بك له الكلاس papW و js-antiadblocker
+        const antiAdBlockerEl = document.querySelector('.js-antiadblocker'); 
         if (antiAdBlockerEl) {
              antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
+             antiAdBlockerEl.removeAttribute('hidden'); // إزالة السمة hidden إذا كان onload.js قد أزالها
         }
+        
+        // قد يتم استخدام هذا لحظر الوصول الجغرافي (Access Blocker) في onload.js
         const accessBlockerEl = document.querySelector('.js-accessblocker');
         if (accessBlockerEl) {
              accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
+             accessBlockerEl.removeAttribute('hidden'); // إزالة السمة hidden إذا كان onload.js قد أزالها
         }
     }
     
-    // دالة إخفاء كل الإعلانات
+    // دالة إخفاء كل الإعلانات (تم تحديث بعض الكلاسات المستهدفة)
     function hideAllAds() {
         const styleId = 'vip-ad-free-style';
         let existingStyle = document.getElementById(styleId);
@@ -254,7 +258,7 @@
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* إخفاء إعلانات Google AdSense */
+            /* إخفاء إعلانات Google AdSense والوحدات الإعلانية */
             .adsbygoogle, ins.adsbygoogle { display: none !important; visibility: hidden !important; opacity: 0 !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
             div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
@@ -268,10 +272,10 @@
                 visibility: hidden !important;
             }
 
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات */
+            /* منع ظهور الويجت الخاصة بمانع الإعلانات (papW هو الودجت الخاص بك) */
             .js-antiadblocker,
             .js-accessblocker, 
-            .papW,
+            .papW, 
             [class*="adblock"],
             [class*="anti-ad"] {
                 display: none !important;
@@ -280,7 +284,7 @@
         document.head.appendChild(style);
     }
     
-    // دالة إظهار الإعلانات
+    // دالة إظهار الإعلانات (لم يتم تغييرها)
     function showAllAds() {
         const style = document.getElementById('vip-ad-free-style');
         if (style) {
