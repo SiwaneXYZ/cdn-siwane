@@ -1,5 +1,5 @@
-// ad-control.js - إصدار v201 (إدارة كلاس الإعفاء)
-// هذا الكود يضيف 'js-antiadblocker' إلى body فقط
+// ad-control.js - إصدار v202 (إدارة كلاس الإعفاء وإخفاء الإعلانات)
+// هذا الكود يضيف 'js-antiadblocker' و 'hide-page-ads' إلى body
 // إذا كان المستخدم معفياً (VIP) والصفحة ليست من الاستثناءات.
 
 (function() {
@@ -34,7 +34,7 @@
     });
 
     function initAdControl() {
-        console.log('Ad-Control (v201): Initializing Exemption Class Logic...');
+        console.log('Ad-Control (v202): Initializing Exemption & Ad-Hide Logic...');
         
         applyAdBlockerLogic();
         
@@ -126,29 +126,31 @@
         const userIsAdFree = isUserAdFree(userProfile);
         const pageIsException = isExceptionPage();
 
-        // 1. أولاً، نقوم بإزالة الكلاس دائماً كإجراء احتياطي
-        // هذا يضمن أن المستخدم العادي أو صفحات الاستثناء لن تحتوي عليه أبداً
+        // 1. أولاً، نقوم بإزالة الكلاسات دائماً كإجراء احتياطي
+        // هذا يضمن أن المستخدم العادي أو صفحات الاستثناء لن تحتوي عليها أبداً
         document.body.classList.remove('js-antiadblocker');
+        document.body.classList.remove('hide-page-ads'); // <-- [تمت الإضافة] إزالة كلاس إخفاء الإعلانات
 
-        // 2. الحالة الوحيدة التي نضيف فيها الكلاس:
+        // 2. الحالة الوحيدة التي نضيف فيها الكلاسات:
         // إذا كان المستخدم معفياً (VIP) + الصفحة *ليست* من الاستثناءات
         if (userIsAdFree && !pageIsException) {
             
-            console.log('Ad-Control: User is VIP. Adding .js-antiadblocker to <body>.');
+            console.log('Ad-Control: User is VIP. Adding .js-antiadblocker and .hide-page-ads to <body>.');
             document.body.classList.add('js-antiadblocker');
+            document.body.classList.add('hide-page-ads'); // <-- [تمت الإضافة] إضافة كلاس إخفاء الإعلانات
             
             // إظهار رسالة الترحيب
             showAdFreeToast();
 
         } else if (pageIsException) {
             // 3. إذا كانت صفحة استثناء
-             console.log('Ad-Control: Exception page. No class added.');
-             // (الكلاس تمت إزالته مسبقاً)
+             console.log('Ad-Control: Exception page. No classes added.');
+             // (الكلاسات تمت إزالتها مسبقاً)
 
         } else {
             // 4. إذا كان مستخدم عادي
-            console.log('Ad-Control: Normal user. No class added.');
-            // (الكلاس تمت إزالته مسبقاً)
+            console.log('Ad-Control: Normal user. No classes added.');
+            // (الكلاسات تمت إزالتها مسبقاً)
         }
     }
 
