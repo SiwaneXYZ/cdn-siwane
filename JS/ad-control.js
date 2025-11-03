@@ -1,277 +1,348 @@
-// ad-control.js - إصدار v114 (الإعفاء لحالة VIPP فقط)
-// + ✅ تطبيق إخفاء الإعلانات وإضافة كلاس 'js-antiadblocker'
-//   فقط للحسابات التي تحمل حالة 'vipp'.
-// + ✅ إصلاح خطأ مطبعي في (hideBlockerPopups).
-// + ✅ (يحتوي على جميع مميزات v112/v113 السابقة).
+// ad-control.js - إصدار v115 (تحسينات الاستثناءات الشاملة)
+// + ✅ تطبيق إخفاء الإعلانات وإضافة كلاس 'js-antiadblocker' دائماً في الصفحات المختارة لجميع المستخدمين
+// + ✅ تطبيق إخفاء الإعلانات وإضافة كلاس 'js-antiadblocker' دائماً للحسابات المعفية (VIPP) في جميع الصفحات
+// + ✅ تحسين الأداء وإدارة الذاكرة
 
 (function() {
     'use strict';
 
     // ==========================================================
-    // ✅ 1. إعدادات صفحات الاستثناء
+    // ✅ 1. الصفحات المستثناة دائماً (لجميع أنواع الحسابات)
     // ==========================================================
-    const EXCEPTION_PATHS = [
+    const ALWAYS_EXCEPTION_PATHS = [
         '/p/login.html',
-        '/p/profile.html',
+        '/p/profile.html', 
         '/p/packages.html'
     ];
-    // ==========================================================
-
 
     // ==========================================================
-    // ✅ 2. دالة لتمكين التمرير (بشكل آمن)
+    // ✅ 2. إعدادات النظام
     // ==========================================================
-    function enableBodyScroll() {
-        const bodyStyle = document.body.style;
-        const htmlStyle = document.documentElement.style; // <html>
+    let checkInterval = null;
+    let isInitialized = false;
 
-        document.body.classList.remove('no-scroll', 'popup-visible', 'noscroll'); 
-        document.documentElement.classList.remove('no-scroll', 'popup-visible', 'noscroll');
+    const config = {
+        checkDelay: 500,
+        retryLimit: 10,
+        toastDuration: 5000
+    };
 
-        if (bodyStyle.overflow) {
-            bodyStyle.removeProperty('overflow');
-        }
-        if (htmlStyle.overflow) {
-            htmlStyle.removeProperty('overflow');
-        }
-        
-        console.log('Ad-Control: Scrolling restored to default (Fixed-Menu Safe).');
-    }
     // ==========================================================
+    // ✅ 3. نظام التسجيل
+    // ==========================================================
+    const logger = {
+        log: (message) => console.log(`[Ad-Control v115] ${message}`),
+        error: (message, error) => console.error(`[Ad-Control v115] ${message}`, error),
+        info: (message) => console.info(`[Ad-Control v115] ${message}`)
+    };
 
-    // الانتظار حتى تحميل الصفحة بالكامل
+    // ==========================================================
+    // ✅ 4. التهيئة الرئيسية
+    // ==========================================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initAdControl);
     } else {
         initAdControl();
     }
-    
+
     function initAdControl() {
-        console.log('Initializing Ad Control System (v114)...'); 
-        checkAndApplyRules();
+        if (isInitialized) return;
         
-        const checkInterval = setInterval(() => {
-            const userProfile = getUserProfile();
-            if (userProfile && userProfile.uid) {
-                clearInterval(checkInterval);
-                checkAndApplyRules(); 
-            }
-        }, 500); 
+        logger.log('Initializing Enhanced Ad Control System...');
+        isInitialized = true;
         
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'firebaseUserProfileData') {
-                setTimeout(checkAndApplyRules, 100); 
-            }
-        });
+        applyImmediateRules();
+        setupUserMonitoring();
     }
 
-    function checkAndApplyRules() {
-        const userProfile = getUserProfile();
-        applyAdRules(userProfile);
+    // ==========================================================
+    // ✅ 5. تطبيق القواعد الفورية (بدون انتظار بيانات المستخدم)
+    // ==========================================================
+    function applyImmediateRules() {
+        // إذا كانت الصفحة مستثناة، تطبيق القواعد فوراً
+        if (isAlwaysExceptionPage()) {
+            logger.log('Immediate application for exception page');
+            applyExceptionPageRules();
+        }
     }
-    
+
+    // ==========================================================
+    // ✅ 6. مراقبة بيانات المستخدم
+    // ==========================================================
+    function setupUserMonitoring() {
+        let retryCount = 0;
+        
+        checkInterval = setInterval(() => {
+            const userProfile = getUserProfile();
+            
+            if (userProfile && userProfile.uid) {
+                clearInterval(checkInterval);
+                checkInterval = null;
+                applyComprehensiveRules(userProfile);
+            } else if (retryCount >= config.retryLimit) {
+                clearInterval(checkInterval);
+                checkInterval = null;
+                logger.log('User profile not found after retries, applying default rules');
+                applyComprehensiveRules(null);
+            }
+            
+            retryCount++;
+        }, config.checkDelay);
+
+        // مراقبة تغييرات التخزين
+        window.adControlStorageHandler = (e) => {
+            if (e.key === 'firebaseUserProfileData') {
+                setTimeout(() => {
+                    applyComprehensiveRules(getUserProfile());
+                }, 100);
+            }
+        };
+        window.addEventListener('storage', window.adControlStorageHandler);
+    }
+
+    // ==========================================================
+    // ✅ 7. الدوال المساعدة
+    // ==========================================================
     function getUserProfile() {
         try {
             const userDataString = localStorage.getItem('firebaseUserProfileData');
             if (!userDataString) return null;
             return JSON.parse(userDataString);
         } catch (e) {
-            console.error('Failed to parse user profile data', e);
+            logger.error('Failed to parse user profile data', e);
             return null;
         }
     }
-    
-    // دالة عرض رسالة Toast
-    function showToast(message) {
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'tNtf'; 
-        toastContainer.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-            pointer-events: none; background: rgba(0, 0, 0, 0); 
-        `;
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        toastMessage.style.pointerEvents = 'auto'; 
-        toastContainer.appendChild(toastMessage);
-        const existingToast = document.querySelector('.tNtf');
-        if (existingToast) { existingToast.remove(); }
-        document.body.appendChild(toastContainer);
-        setTimeout(() => {
-            toastContainer.remove();
-        }, 5000); 
-    }
-    
-    // ==========================================================
-    // ✅ [ تم التعديل ] الدالة المنطقية للتحقق من حالة الإعفاء
-    // ==========================================================
-    function isUserAdFree(userProfile) {
-        if (!userProfile) return false;
 
-        // 1. التحقق من حالة "vipp" (فقط) كما طلبت
-        const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
-        if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
-            console.log('Ad-Control: Active (VIPP status detected)');
-            return true;
-        }
-
-        // 2. حالة المسؤول (يرى الإعلانات)
-        if (userProfile.isAdmin) {
-            console.log('Ad-Control: Admin user (Showing Ads for testing)');
-            return false;
-        }
-        
-        // 3. أي حالة أخرى (مثل isVip:true أو adFreeExpiry) تعتبر مستخدم عادي
-        console.log('Ad-Control: Inactive (Not VIPP status). Showing Ads.');
-        return false;
-    }
-    
-    // دالة للتحقق إذا كانت الصفحة الحالية صفحة استثناء
-    function isExceptionPage() {
+    function isAlwaysExceptionPage() {
         const currentPath = window.location.pathname;
-        for (let i = 0; i < EXCEPTION_PATHS.length; i++) {
-            if (currentPath.indexOf(EXCEPTION_PATHS[i]) === 0) {
-                return true;
-            }
-        }
-        return false;
+        return ALWAYS_EXCEPTION_PATHS.some(path => currentPath.startsWith(path));
     }
-    
-    // دالة لضبط متغير التجاوز العام (PU.iAd)
+
+    function isUserVipp(userProfile) {
+        if (!userProfile) return false;
+        
+        const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
+        return accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp';
+    }
+
+    function isUserAdmin(userProfile) {
+        return userProfile ? userProfile.isAdmin : false;
+    }
+
+    // ==========================================================
+    // ✅ 8. إدارة التمرير
+    // ==========================================================
+    function enableBodyScroll() {
+        const body = document.body;
+        const html = document.documentElement;
+        
+        ['no-scroll', 'popup-visible', 'noscroll'].forEach(className => {
+            body.classList.remove(className);
+            html.classList.remove(className);
+        });
+        
+        body.style.removeProperty('overflow');
+        html.style.removeProperty('overflow');
+        
+        logger.log('Body scrolling enabled');
+    }
+
+    // ==========================================================
+    // ✅ 9. نظام الإشعارات
+    // ==========================================================
+    function showToast(message) {
+        const existingToast = document.querySelector('.ad-control-toast');
+        if (existingToast) existingToast.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'ad-control-toast';
+        toast.textContent = message;
+        
+        Object.assign(toast.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            background: '#333',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '4px',
+            zIndex: '10000',
+            maxWidth: '300px',
+            fontSize: '14px'
+        });
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, config.toastDuration);
+    }
+
+    // ==========================================================
+    // ✅ 10. إدارة العلم العام
+    // ==========================================================
     function setGlobalBypassFlag(isBypassed) {
-        const attemptSet = () => {
-            try {
-                if (typeof window.PU === 'undefined') {
-                    window.PU = {};
-                    console.log(`Ad-Control: Created PU object.`);
-                }
-                
-                window.PU.iAd = isBypassed; 
-                console.log(`Ad-Control: Set PU.iAd = ${isBypassed} to control onload.js.`);
-                return true;
-
-            } catch (e) {
-                console.error('Ad-Control: Error setting global PU.iAd flag.', e);
-                return true; 
-            }
-        };
-
-        if (!attemptSet()) {
-            console.warn('Ad-Control: Global PU object not found. Retrying in 500ms.');
-            setTimeout(attemptSet, 500);
+        if (typeof window.PU === 'undefined') {
+            window.PU = {};
         }
+        window.PU.iAd = isBypassed;
+        logger.log(`Global bypass flag set: ${isBypassed}`);
     }
 
-    // دالة تطبيق القواعد (v113)
-    function applyAdRules(userProfile) {
-        // [ملاحظة] userIsAdFree الآن = true فقط لـ "vipp"
-        const userIsAdFree = isUserAdFree(userProfile); 
-        const pageIsException = isExceptionPage(); 
-        const isAdmin = userProfile ? userProfile.isAdmin : false;
+    // ==========================================================
+    // ✅ 11. قواعد الصفحات المستثناة (تطبق دائماً)
+    // ==========================================================
+    function applyExceptionPageRules() {
+        logger.log('Applying exception page rules (always ad-free)');
+        
+        setGlobalBypassFlag(true);
+        hideAllAds();
+        enableBodyScroll();
+        hideBlockerPopups();
+        document.body.classList.add('js-antiadblocker');
+        
+        logger.log('Exception page fully configured - ads hidden, class added');
+    }
+
+    // ==========================================================
+    // ✅ 12. القواعد الشاملة الرئيسية
+    // ==========================================================
+    function applyComprehensiveRules(userProfile) {
+        logger.log('Applying comprehensive ad rules');
+        
+        // إعادة التعيين أولاً
+        document.body.classList.remove('js-antiadblocker');
+        setGlobalBypassFlag(false);
+        
+        const isExceptionPage = isAlwaysExceptionPage();
+        const isVipp = isUserVipp(userProfile);
+        const isAdmin = isUserAdmin(userProfile);
         
         let statusMessage = '';
-        let showStatusToast = true; 
-        
-        // 1. إزالة الكلاس دائماً في البداية كإجراء احتياطي
-        document.body.classList.remove('js-antiadblocker');
+        let showToast = true;
 
-        if (pageIsException) {
-            // 2. حالة صفحة الاستثناء (الأولوية القصوى)
-            console.log('Ad-Control: Exception page detected. Bypassing AdBlocker and hiding ads.');
-            setGlobalBypassFlag(true); 
+        // ✅ الأولوية: الصفحات المستثناة (لجميع المستخدمين)
+        if (isExceptionPage) {
+            applyExceptionPageRules();
+            showToast = false; // لا عرض إشعار في الصفحات المستثناة
+            
+        } 
+        // ✅ الثاني: المستخدمون المعفيون (VIPP) في جميع الصفحات
+        else if (isVipp) {
+            logger.log('VIPP user detected - applying ad-free experience');
+            
+            setGlobalBypassFlag(true);
             hideAllAds();
             enableBodyScroll();
             hideBlockerPopups();
-            showStatusToast = false; 
-
-        } else if (isAdmin) {
-            // 3. حالة المسؤول (Admin)
-            statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
-            setGlobalBypassFlag(true); 
-            showAllAds(); 
-        
-        } else if (userIsAdFree) {
-            // 4. حالة المستخدم المعفي (VIPP فقط)
+            document.body.classList.add('js-antiadblocker');
+            
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            console.log('Ad-Control: VIPP mode. Hiding ads and bypassing AdBlocker popup.');
-            setGlobalBypassFlag(true); 
-            hideAllAds(); // <-- ✅ (الهدف 1: إخفاء الإعلانات)
-            enableBodyScroll();
-            hideBlockerPopups();
-
-            // 4b. إضافة كلاس الإعفاء إلى body
-            document.body.classList.add('js-antiadblocker'); // <-- ✅ (الهدف 2: إضافة الكلاس)
-            console.log('Ad-Control: Added .js-antiadblocker to <body> for VIPP.');
-
-        } else {
-            // 5. حالة المستخدم العادي (بما في ذلك isVip:true و adFreeExpiry)
+            
+        } 
+        // ✅ الثالث: المسؤولون (يرون الإعلانات للاختبار)
+        else if (isAdmin) {
+            logger.log('Admin user - showing ads for testing');
+            
+            setGlobalBypassFlag(true);
+            showAllAds();
+            
+            statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
+            
+        } 
+        // ✅ الرابع: المستخدمون العاديون
+        else {
+            logger.log('Normal user - showing standard ads');
+            
+            setGlobalBypassFlag(false);
+            showAllAds();
+            
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
-            console.log('Ad-Control: Normal user mode (Not VIPP). Showing ads.');
-            setGlobalBypassFlag(false); 
-            showAllAds(); 
         }
 
-        if (showStatusToast && !window.__ad_control_toast_shown) {
+        // عرض الإشعار (مرة واحدة فقط)
+        if (showToast && statusMessage && !window.__ad_control_toast_shown) {
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
+            
+            // إعادة تعيين العلامة بعد فترة
+            setTimeout(() => {
+                window.__ad_control_toast_shown = false;
+            }, 60000);
         }
     }
-    
+
     // ==========================================================
-    // ✅ [ تم الإصلاح ] دالة مخصصة لإخفاء النوافذ المنبثقة
+    // ✅ 13. إدارة الإعلانات والنوافذ المنبثقة
     // ==========================================================
     function hideBlockerPopups() {
-        const antiAdBlockerEl = document.querySelector('.js-antiadblocker');
-        if (antiAdBlockerEl) {
-             antiAdBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-        }
-        const accessBlockerEl = document.querySelector('.js-accessblocker');
-        // [تم الإصلاح] كان الخطأ هنا (accessBlockVl)
-        if (accessBlockerEl) { 
-             accessBlockerEl.style.cssText = 'display: none !important; visibility: hidden !important;';
-        }
+        const blockers = [
+            '.js-antiadblocker',
+            '.js-accessblocker',
+            '.papW',
+            '[class*="adblock"]',
+            '[class*="anti-ad"]'
+        ];
+        
+        blockers.forEach(selector => {
+            document.querySelectorAll(selector).forEach(el => {
+                el.style.cssText = 'display: none !important; visibility: hidden !important;';
+            });
+        });
     }
-    
-    // دالة إخفاء كل الإعلانات
+
     function hideAllAds() {
-        const styleId = 'vip-ad-free-style';
-        let existingStyle = document.getElementById(styleId);
-        if (existingStyle) return; 
+        const styleId = 'global-ad-free-style';
+        if (document.getElementById(styleId)) return;
 
         const style = document.createElement('style');
         style.id = styleId;
         style.textContent = `
-            /* إخفاء إعلانات Google AdSense */
-            .adsbygoogle, ins.adsbygoogle { display: none !important; visibility: hidden !important; opacity: 0 !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"] { display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; overflow: hidden !important; }
-            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], div[class*="ads-container"], div[class*="ad_wrapper"] { display: none !important; }
-            
-            /* إخفاء الإعلانات اليدوية */
-            .pAd.show-if-js,
-            .rAd.show-if-js,
-            .pAdIf.show-if-js,
-            .adB {
+            /* إخفاء شامل للإعلانات */
+            .adsbygoogle, ins.adsbygoogle, 
+            iframe[src*="ads"], iframe[id*="aswift_"], iframe[id*="google_ads_frame"],
+            div[id*="ad-slot"], div[id*="AdContainer"], div[class*="ad-unit"], 
+            div[class*="ads-container"], div[class*="ad_wrapper"],
+            .pAd.show-if-js, .rAd.show-if-js, .pAdIf.show-if-js, .adB,
+            .js-antiadblocker, .js-accessblocker, .papW,
+            [class*="adblock"], [class*="anti-ad"] {
                 display: none !important; 
-                visibility: hidden !important;
-            }
-
-            /* منع ظهور الويجت الخاصة بمانع الإعلانات */
-            .js-antiadblocker,
-            .js-accessblocker, 
-            .papW,
-            [class*="adblock"],
-            [class*="anti-ad"] {
-                display: none !important;
+                visibility: hidden !important; 
+                opacity: 0 !important; 
+                height: 0 !important; 
+                width: 0 !important; 
+                overflow: hidden !important;
             }
         `;
         document.head.appendChild(style);
+        logger.log('Global ad hiding style applied');
     }
-    
-    // دالة إظهار الإعلانات
+
     function showAllAds() {
-        const style = document.getElementById('vip-ad-free-style');
+        const style = document.getElementById('global-ad-free-style');
         if (style) {
             style.remove();
-            console.log('Ad-Control: Ads style removed (Showing Ads)');
+            logger.log('Ad hiding style removed - ads visible');
         }
     }
+
+    // ==========================================================
+    // ✅ 14. التنظيف
+    // ==========================================================
+    function cleanup() {
+        if (checkInterval) {
+            clearInterval(checkInterval);
+            checkInterval = null;
+        }
+        if (window.adControlStorageHandler) {
+            window.removeEventListener('storage', window.adControlStorageHandler);
+        }
+        isInitialized = false;
+        logger.log('Ad control system cleaned up');
+    }
+
+    // جعل دالة التنظيف متاحة globally إذا لزم الأمر
+    window.adControlCleanup = cleanup;
+
 })();
