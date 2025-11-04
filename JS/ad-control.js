@@ -92,7 +92,7 @@
             padding: '12px 24px',
             borderRadius: '8px',
             zIndex: '10000',
-            maxWidth: '90%',
+            maxWidth: '100%',
             fontSize: '14px',
             textAlign: 'center',
             boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
