@@ -143,6 +143,19 @@
     }
 
     // ==========================================================
+    // ✅ إدارة كلاس js-antiadblocker
+    // ==========================================================
+    function toggleAntiAdblockerClass(shouldAdd) {
+        if (shouldAdd) {
+            document.body.classList.add('js-antiadblocker');
+            console.log('Ad-Control: Added js-antiadblocker class to body');
+        } else {
+            document.body.classList.remove('js-antiadblocker');
+            console.log('Ad-Control: Removed js-antiadblocker class from body');
+        }
+    }
+
+    // ==========================================================
     // ✅ تطبيق القواعد الرئيسية
     // ==========================================================
     function applyAdRules(userProfile) {
@@ -154,19 +167,22 @@
         if (isAdmin) {
             // 🔧 حالة المدير (لأغراض الاختبار)
             statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
-            showAllAds(); 
+            showAllAds();
+            toggleAntiAdblockerClass(false); // إزالة الكلاس للمدير
         
         } else if (userIsAdFree) {
             // 🎉 حالة المستخدم المعفي
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             console.log('Ad-Control: VIP mode. Hiding ads.');
-            hideAllAds(); 
+            hideAllAds();
+            toggleAntiAdblockerClass(true); // إضافة الكلاس للمستخدم المعفي
 
         } else {
             // 👤 حالة المستخدم العادي
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
             console.log('Ad-Control: Normal user mode. Showing ads.');
-            showAllAds(); 
+            showAllAds();
+            toggleAntiAdblockerClass(false); // إزالة الكلاس للمستخدم العادي
         }
 
         // عرض الإشعار مرة واحدة فقط
@@ -252,6 +268,8 @@
             clearInterval(checkInterval);
             checkInterval = null;
         }
+        // إزالة الكلاس عند التنظيف
+        toggleAntiAdblockerClass(false);
         isInitialized = false;
         console.log('Ad control system cleaned up');
     }
