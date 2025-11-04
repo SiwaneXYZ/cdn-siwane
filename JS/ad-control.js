@@ -319,7 +319,7 @@
         if (shouldShowToast && isLoggedIn) {
             
             // 6 دقائق بالمللي ثانية (6 * 60 * 1000)
-            const COOLDOWN_DURATION = 360000; 
+            const COOLDOWN_DURATION = 7000; 
             const now = Date.now();
 
             // 1. جلب آخر وقت تم عرض الإشعار فيه
