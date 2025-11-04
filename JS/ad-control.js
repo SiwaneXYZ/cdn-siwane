@@ -52,7 +52,16 @@
         try {
             const userDataString = localStorage.getItem('firebaseUserProfileData');
             if (!userDataString) return null;
-            return JSON.parse(userDataString);
+            
+            const profile = JSON.parse(userDataString);
+            
+            // التحقق من وجود UID (مستخدم مسجل الدخول)
+            if (!profile.uid) {
+                console.log('Ad-Control: No user logged in');
+                return null;
+            }
+            
+            return profile;
         } catch (e) {
             console.error('Failed to parse user profile data', e);
             return null;
@@ -60,38 +69,73 @@
     }
     
     // ==========================================================
-    // ✅ نظام الإشعارات
+    // ✅ نظام الإشعارات المحسّن
     // ==========================================================
     function showToast(message) {
-        const toastContainer = document.createElement('div');
-        toastContainer.className = 'ad-control-toast'; 
-        toastContainer.style.cssText = `
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            background: #333; 
-            color: white; 
-            padding: 12px 20px; 
-            border-radius: 4px; 
-            z-index: 10000; 
-            max-width: 300px;
-            font-size: 14px;
-        `;
-        
-        const toastMessage = document.createElement('div');
-        toastMessage.textContent = message;
-        toastContainer.appendChild(toastMessage);
-        
+        // إزالة أي toast سابق
         const existingToast = document.querySelector('.ad-control-toast');
         if (existingToast) { 
             existingToast.remove(); 
         }
+
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'ad-control-toast'; 
         
+        // تنسيق Toast في أسفل الصفحة في المنتصف
+        Object.assign(toastContainer.style, {
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#333',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            zIndex: '10000',
+            maxWidth: '90%',
+            fontSize: '14px',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            animation: 'fadeInUp 0.3s ease-out'
+        });
+
+        // إضافة رسالة الـ Toast
+        const toastMessage = document.createElement('div');
+        toastMessage.textContent = message;
+        toastMessage.style.cssText = 'margin: 0; padding: 0;';
+        toastContainer.appendChild(toastMessage);
+        
+        // إضافة الـ Toast إلى الصفحة
         document.body.appendChild(toastContainer);
+
+        // إضافة أنيميشن إذا لم تكن موجودة
+        if (!document.querySelector('#ad-control-animations')) {
+            const style = document.createElement('style');
+            style.id = 'ad-control-animations';
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
+        // إزالة الـ Toast بعد 5 ثواني
         setTimeout(() => {
             if (toastContainer.parentNode) {
-                toastContainer.remove();
+                toastContainer.style.animation = 'fadeInUp 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (toastContainer.parentNode) {
+                        toastContainer.remove();
+                    }
+                }, 300);
             }
         }, 5000); 
     }
@@ -156,37 +200,42 @@
     }
 
     // ==========================================================
-    // ✅ تطبيق القواعد الرئيسية
+    // ✅ تطبيق القواعد الرئيسية المحسّنة
     // ==========================================================
     function applyAdRules(userProfile) {
         const userIsAdFree = isUserAdFree(userProfile);
         const isAdmin = userProfile ? userProfile.isAdmin : false;
+        const isLoggedIn = userProfile && userProfile.uid; // التحقق من تسجيل الدخول
         
         let statusMessage = '';
+        let shouldShowToast = false;
         
         if (isAdmin) {
             // 🔧 حالة المدير (لأغراض الاختبار)
             statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
             showAllAds();
-            toggleAntiAdblockerClass(false); // إزالة الكلاس للمدير
+            toggleAntiAdblockerClass(false);
+            shouldShowToast = true;
         
         } else if (userIsAdFree) {
             // 🎉 حالة المستخدم المعفي
             statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
             console.log('Ad-Control: VIP mode. Hiding ads.');
             hideAllAds();
-            toggleAntiAdblockerClass(true); // إضافة الكلاس للمستخدم المعفي
+            toggleAntiAdblockerClass(true);
+            shouldShowToast = true;
 
         } else {
             // 👤 حالة المستخدم العادي
             statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
             console.log('Ad-Control: Normal user mode. Showing ads.');
             showAllAds();
-            toggleAntiAdblockerClass(false); // إزالة الكلاس للمستخدم العادي
+            toggleAntiAdblockerClass(false);
+            shouldShowToast = true;
         }
 
-        // عرض الإشعار مرة واحدة فقط
-        if (!window.__ad_control_toast_shown) {
+        // عرض الإشعار فقط إذا كان المستخدم مسجل الدخول ومرة واحدة فقط
+        if (shouldShowToast && isLoggedIn && !window.__ad_control_toast_shown) {
             showToast(statusMessage);
             window.__ad_control_toast_shown = true;
             
