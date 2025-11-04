@@ -81,21 +81,31 @@
         const toastContainer = document.createElement('div');
         toastContainer.className = 'ad-control-toast'; 
         
-        // تنسيق Toast في أسفل الصفحة في المنتصف
+        // تنسيق Toast محسّن - منع التفاف النص وحواف شبه دائرية
         Object.assign(toastContainer.style, {
-            position:fixed;inset-inline-start:25px;bottom:-70px;display:inline-flex;align-items:center;text-align:center;justify-content:center;z-index:99;background:#323232;color:rgba(255,255,255,.8);font-size:14px;font-family:var(--fontB);border-radius:3px;padding:13px 24px;box-shadow:0 10px 40px rgba(0,0,0,.2);opacity:0;transition:var(--trans-1);animation:slidein 5s ease forwards;-webkit-animation:slidein 5s ease forwards}
-@media screen and (max-width:500px){
-.ad-control-toast >*{inset-inline-start:20px;inset-inline-end:20px;font-size:13px}
-/* alternate style */
-.ad-control-toast >*{inset-inline-start:0px;inset-inline-end:0px;margin-bottom:-25px;justify-content:start;text-align:start;font-size:15px;padding:15px 24px;border-radius:0}
-}
-            
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#333',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '4px', // حواف شبه دائرية 4px
+            zIndex: '10000',
+            maxWidth: 'none', // إزالة الحد الأقصى للعرض
+            whiteSpace: 'nowrap', // منع التفاف النص
+            fontSize: '14px',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            animation: 'fadeInUp 0.3s ease-out',
+            fontFamily: 'Arial, sans-serif',
+            lineHeight: '1.4'
         });
 
         // إضافة رسالة الـ Toast
         const toastMessage = document.createElement('div');
         toastMessage.textContent = message;
-        toastMessage.style.cssText = 'margin: 0; padding: 0;';
+        toastMessage.style.cssText = 'margin: 0; padding: 0; white-space: nowrap;';
         toastContainer.appendChild(toastMessage);
         
         // إضافة الـ Toast إلى الصفحة
