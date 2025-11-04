@@ -1,4 +1,3 @@
-// ad-control.js - إصدار v112 (إدارة الاستثناءات + إصلاح التمرير)
 (function() {
     'use strict';
 
@@ -70,11 +69,33 @@
             return null;
         }
     }
+
+    // ==========================================================
+    // 🌟 جديد: مساعد تنسيق الوقت المتبقي
+    // ==========================================================
+    function formatRemainingTime(expiryTimestamp) {
+        const now = Date.now();
+        const remainingMs = expiryTimestamp - now;
+        if (remainingMs <= 0) return '(منتهي الصلاحية)';
+
+        const seconds = Math.floor(remainingMs / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 1) return `(باقي ${days} أيام)`;
+        if (days === 1) return `(باقي يوم واحد)`;
+        if (hours > 1) return `(باقي ${hours} ساعات)`;
+        if (hours === 1) return `(باقي ساعة واحدة)`;
+        if (minutes > 1) return `(باقي ${minutes} دقائق)`;
+        
+        return '(ينتهي قريباً)';
+    }
     
     // ==========================================================
-    // ✅ نظام الإشعارات المحسّن مع تأخير ذكي
+    // ✅ نظام الإشعارات المحسّن (🔄 معدل: يقبل مدة عرض متغيرة)
     // ==========================================================
-    function showToast(message, delay = 0) {
+    function showToast(message, delay = 0, duration = 5000) { // 🔄 إضافة duration
         // إزالة أي toast سابق وأي timeout pending
         const existingToast = document.querySelector('.ad-control-toast');
         if (existingToast) { 
@@ -89,7 +110,7 @@
             const toastContainer = document.createElement('div');
             toastContainer.className = 'ad-control-toast'; 
             
-            // تنسيق Toast محسّن - منع التفاف النص وحواف شبه دائرية
+            // (نفس التنسيقات السابقة)
             Object.assign(toastContainer.style, {
                 position: 'fixed',
                 bottom: '20px',
@@ -117,7 +138,7 @@
             
             document.body.appendChild(toastContainer);
 
-            // إضافة أنيميشن إذا لم تكن موجودة
+            // (نفس كود الأنيميشن)
             if (!document.querySelector('#ad-control-animations')) {
                 const style = document.createElement('style');
                 style.id = 'ad-control-animations';
@@ -136,7 +157,7 @@
                 document.head.appendChild(style);
             }
             
-            // إزالة الـ Toast بعد 5 ثواني
+            // 🔄 إزالة الـ Toast بعد المدة المحددة
             setTimeout(() => {
                 if (toastContainer.parentNode) {
                     toastContainer.style.animation = 'fadeInUp 0.3s ease-out reverse';
@@ -146,7 +167,7 @@
                         }
                     }, 300);
                 }
-            }, 5000);
+            }, duration); // 🔄 استخدام المتغير duration
         };
 
         if (delay > 0) {
@@ -157,27 +178,31 @@
     }
     
     // ==========================================================
-    // ✅ التحقق من حالة الإعفاء
+    // ✅ التحقق من حالة الإعفاء (🔄 معدل: إرجاع كائن بالحالة)
     // ==========================================================
-    function isUserAdFree(userProfile) {
-        if (!userProfile) return false;
+    function getAdFreeStatus(userProfile) {
+        // 🔄 المستخدم هو زائر أو لم يسجل الدخول
+        if (!userProfile || !userProfile.uid) {
+            return { isAdFree: false, reason: 'guest' };
+        }
 
         // ✅ حساب مدير (لأغراض الاختبار)
         if (userProfile.isAdmin) {
             console.log('Ad-Control: Admin user (Showing Ads for testing)');
-            return false;
+            // المدير يرى الإعلانات للاختبار
+            return { isAdFree: false, reason: 'admin_testing' };
         }
         
         // ✅ حساب معفي عبر isVip
         if (userProfile.isVip === true) {
             console.log('Ad-Control: Active (via isVip = true)');
-            return true;
+            return { isAdFree: true, reason: 'vip' };
         }
 
         // ✅ حساب معفي دائم (adFreeExpiry = null)
         if (userProfile.adFreeExpiry === null) {
             console.log('Ad-Control: Active (Permanent via adFreeExpiry = null)');
-            return true; 
+            return { isAdFree: true, reason: 'permanent' };
         }
 
         // ✅ حساب معفي مؤقت (تاريخ انتهاء صالح)
@@ -186,7 +211,12 @@
             const expiryTimestampMs = adFreeExpiry.seconds * 1000;
             if (expiryTimestampMs > Date.now()) {
                 console.log('Ad-Control: Active (Temporary via adFreeExpiry)');
-                return true; 
+                // 🔄 إرجاع كائن يتضمن تاريخ الانتهاء
+                return { 
+                    isAdFree: true, 
+                    reason: 'temporary', 
+                    expiryTimestamp: expiryTimestampMs 
+                };
             }
         }
         
@@ -194,16 +224,16 @@
         const accountTypeLower = (userProfile.accountType || 'normal').toLowerCase();
         if (accountTypeLower === 'vipp' || userProfile.adStatus === 'vipp') {
             console.log('Ad-Control: Active (Backward compatibility via old "vipp" status)');
-            return true;
+            return { isAdFree: true, reason: 'legacy_vip' };
         }
         
         // ❌ حساب عادي
         console.log('Ad-Control: Inactive (Showing Ads)');
-        return false;
+        return { isAdFree: false, reason: 'normal' };
     }
 
     // ==========================================================
-    // ✅ إدارة كلاس js-antiadblocker
+    // ✅ إدارة كلاس js-antiadblocker (كما هو)
     // ==========================================================
     function toggleAntiAdblockerClass(shouldAdd) {
         if (shouldAdd) {
@@ -216,52 +246,108 @@
     }
 
     // ==========================================================
-    // ✅ تطبيق القواعد الرئيسية المحسّنة مع تأخير Toast
+    // ✅ تطبيق القواعد (🔄 معدل: يستخدم كائن الحالة ورسائل مخصصة)
     // ==========================================================
     function applyAdRules(userProfile) {
-        const userIsAdFree = isUserAdFree(userProfile);
-        const isAdmin = userProfile ? userProfile.isAdmin : false;
+        const status = getAdFreeStatus(userProfile); // 🔄 الحصول على كائن الحالة
         const isLoggedIn = userProfile && userProfile.uid;
         
         let statusMessage = '';
+        let toastDuration = 5000; // 🌟 مدة افتراضية
         let shouldShowToast = false;
         
-        // تطبيق القواعد فوراً (بدون تأخير)
-        if (isAdmin) {
-            statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
-            showAllAds();
-            toggleAntiAdblockerClass(false);
-            shouldShowToast = true;
-        
-        } else if (userIsAdFree) {
-            statusMessage = 'تم تفعيل الإعفاء من الإعلانات بنجاح! 🎉';
-            console.log('Ad-Control: VIP mode. Hiding ads.');
-            hideAllAds();
-            toggleAntiAdblockerClass(true);
-            shouldShowToast = true;
+        // 🔄 استخدام switch/case للتعامل مع كل حالة
+        switch (status.reason) {
+            case 'admin_testing':
+                statusMessage = 'وضع المراقبة: أنت مسؤول، الإعلانات ظاهرة لاختبار النظام. ⚠️';
+                showAllAds();
+                toggleAntiAdblockerClass(false);
+                shouldShowToast = true;
+                toastDuration = 6000; // مدة أطول للمسؤول
+                break;
+            
+            case 'vip':
+                statusMessage = 'تم تفعيل إعفاء (VIP) من الإعلانات. 🎉';
+                hideAllAds();
+                toggleAntiAdblockerClass(true);
+                shouldShowToast = true;
+                break;
 
-        } else {
-            statusMessage = 'لم يتم تفعيل الإعفاء من الإعلانات لحسابك.';
-            console.log('Ad-Control: Normal user mode. Showing ads.');
-            showAllAds();
-            toggleAntiAdblockerClass(false);
-            shouldShowToast = true;
+            case 'permanent':
+                statusMessage = 'تم تفعيل الإعفاء الدائم من الإعلانات. 💎';
+                hideAllAds();
+                toggleAntiAdblockerClass(true);
+                shouldShowToast = true;
+                break;
+            
+            case 'temporary':
+                // 🌟 استخدام الدالة الجديدة لتنسيق الوقت
+                const remainingTime = formatRemainingTime(status.expiryTimestamp);
+                statusMessage = `تم تفعيل الإعفاء المؤقت ${remainingTime} ⏳`;
+                hideAllAds();
+                toggleAntiAdblockerClass(true);
+                shouldShowToast = true;
+                toastDuration = 7000; // 🌟 مدة أطول لقراءة الوقت
+                break;
+
+            case 'legacy_vip':
+                statusMessage = 'تم تفعيل الإعفاء (حساب قديم) بنجاح. ✨';
+                hideAllAds();
+                toggleAntiAdblockerClass(true);
+                shouldShowToast = true;
+                break;
+
+            case 'normal':
+                statusMessage = 'الإعلانات مفعلة لهذا الحساب.'; // 🔄 رسالة أكثر حيادية
+                showAllAds();
+                toggleAntiAdblockerClass(false);
+                shouldShowToast = true;
+                toastDuration = 4000; // 🌟 مدة أقصر
+                break;
+
+            case 'guest':
+            default:
+                // زائر أو حالة غير معروفة: لا تعرض إشعار
+                console.log('Ad-Control: Guest mode. Showing ads.');
+                showAllAds();
+                toggleAntiAdblockerClass(false);
+                shouldShowToast = false;
+                break;
         }
 
-        // عرض الإشعار مع تأخير ذكي لضمان تحميل البيانات
-        if (shouldShowToast && isLoggedIn && !window.__ad_control_toast_shown) {
-            // تأخير 800ms لضمان اكتمال تحميل الصفحة والبيانات
-            showToast(statusMessage, 800);
-            window.__ad_control_toast_shown = true;
+        // 🌟 عرض الإشعار مع فترة سماح (Cooldown) 6 دقائق
+        if (shouldShowToast && isLoggedIn) {
             
-            setTimeout(() => {
-                window.__ad_control_toast_shown = false;
-            }, 60000);
+            // 6 دقائق بالمللي ثانية (6 * 60 * 1000)
+            const COOLDOWN_DURATION = 360000; 
+            const now = Date.now();
+
+            // 1. جلب آخر وقت تم عرض الإشعار فيه
+            let lastToastTime = localStorage.getItem('adControl_lastToastTime');
+            lastToastTime = lastToastTime ? parseInt(lastToastTime, 10) : 0;
+
+            // 2. التحقق مما إذا كانت فترة الـ 6 دقائق قد انتهت
+            if (now - lastToastTime > COOLDOWN_DURATION) {
+                
+                // نعم، اعرض الإشعار
+                console.log('Ad-Control: Showing toast and starting 6 min cooldown.');
+                
+                // تأخير 800ms لضمان اكتمال تحميل الصفحة والبيانات
+                showToast(statusMessage, 800, toastDuration); 
+                
+                // 3. تخزين الوقت الحالي "الآن" كآخر وقت للعرض
+                localStorage.setItem('adControl_lastToastTime', now.toString());
+
+            } else {
+                // لا، ما زلنا في فترة السماح
+                const remaining = Math.round((COOLDOWN_DURATION - (now - lastToastTime)) / 60000);
+                console.log(`Ad-Control: Toast hidden due to 6 min cooldown (Remaining: ${remaining} min).`);
+            }
         }
     }
 
     // ==========================================================
-    // ✅ إدارة الإعلانات
+    // ✅ إدارة الإعلانات (كما هو)
     // ==========================================================
     function hideAllAds() {
         const styleId = 'ad-control-hide-ads';
@@ -317,7 +403,7 @@
     }
 
     // ==========================================================
-    // ✅ التنظيف
+    // ✅ التنظيف (كما هو)
     // ==========================================================
     function cleanup() {
         if (checkInterval) {
