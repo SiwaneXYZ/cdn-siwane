@@ -250,6 +250,17 @@
     // ==========================================================
     function applyAdRules(userProfile) {
         const status = getAdFreeStatus(userProfile); // 🔄 الحصول على كائن الحالة
+        
+        // ==========================================================
+        // 🎯 [هنا الإضافة المطلوبة] التحكم في البريلودر
+        // ==========================================================
+        const preloader = document.querySelector('#preloader');
+        if (preloader && status.isAdFree) {
+            console.log('Ad-Control: Ad-free user. Hiding preloader immediately.');
+            preloader.classList.add('h'); // 'h' هو الكلاس المستخدم في البريلودر لإخفائه
+        }
+        // ==========================================================
+
         const isLoggedIn = userProfile && userProfile.uid;
         
         let statusMessage = '';
