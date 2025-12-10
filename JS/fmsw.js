@@ -3,11 +3,10 @@
 // 📍 يجب رفعه على استضافة HTTPS (مثل GitHub Pages)
 // 🔗 ثم الإشارة إليه في كود بلوجر
 
-// استيراد مكتبات Firebase
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js');
 
-// 🔥 إعدادات Firebase (استخدم نفس إعدادات بلوجر)
+// 🔥 إعدادات Firebase (نفس إعدادات بلوجر)
 firebase.initializeApp({
   apiKey: "AIzaSyDjtocK9vJsjCbHt8e-v7GielFSvTsRZlI",
   authDomain: "si1xyz.firebaseapp.com",
@@ -18,19 +17,17 @@ firebase.initializeApp({
   measurementId: "G-RNBFQ1SX9J"
 });
 
-// الحصول على كائن المراسلة
 const messaging = firebase.messaging();
 
-// 📨 معالجة الرسائل في الخلفية
+// 📨 معالجة الإشعارات في الخلفية
 messaging.onBackgroundMessage((payload) => {
-  console.log('📩 [Service Worker] استقبال إشعار:', payload);
+  console.log('[Service Worker] 📩 استقبال إشعار:', payload);
   
-  // إعداد خيارات الإشعار
   const notificationOptions = {
-    body: payload.notification?.body || 'مقال جديد على المدونة',
-    icon: payload.notification?.image || '/favicon.ico',
-    badge: '/badge.png',
-    dir: 'rtl', // للنصوص العربية
+    body: payload.notification?.body || 'مقال جديد على مدونة سيو ويب',
+    icon: payload.notification?.image || 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijy6aG0a5IBr39ytM5bhYWHEPOCvu5Yf44_Ny1ScyfPb2mObhO64LeWk3QHGbmV4uZc0l5VC5xRrQzAQfOEozsrDZTF2nGiuZSwx1gxhQQvfTKu4ulfFCH2tlhE5vAIZiXlh6IaNfxXgU9rdlC8KkF2MWgwkPS6PRMkoIwh2iHcQPSl0TSIf9X2x_w_oc/s150/siwanelogo.webp',
+    badge: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijy6aG0a5IBr39ytM5bhYWHEPOCvu5Yf44_Ny1ScyfPb2mObhO64LeWk3QHGbmV4uZc0l5VC5xRrQzAQfOEozsrDZTF2nGiuZSwx1gxhQQvfTKu4ulfFCH2tlhE5vAIZiXlh6IaNfxXgU9rdlC8KkF2MWgwkPS6PRMkoIwh2iHcQPSl0TSIf9X2x_w_oc/s150/siwanelogo.webp',
+    dir: 'rtl',
     lang: 'ar',
     data: payload.data || {},
     actions: [
@@ -41,12 +38,11 @@ messaging.onBackgroundMessage((payload) => {
     ],
     tag: 'blog-notification',
     renotify: true,
-    requireInteraction: true // يبقى حتى ينقر عليه المستخدم
+    requireInteraction: true
   };
   
-  // عرض الإشعار
   self.registration.showNotification(
-    payload.notification?.title || 'إشعار من المدونة',
+    payload.notification?.title || 'إشعار من مدونة سيو ويب',
     notificationOptions
   );
 });
@@ -55,46 +51,24 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   console.log('🎯 تم النقر على الإشعار');
   
-  // إغلاق الإشعار
   event.notification.close();
   
-  // فتح رابط المقال
-  const رابط = event.notification.data?.رابط || 
-                event.notification.data?.post_url || 
+  const رابط = event.notification.data?.post_url || 
+                event.notification.data?.رابط || 
                 'https://www.siwane.xyz';
   
-  // فتح النافذة/التبويب
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // البحث عن تبويب مفتوح بالفعل
         for (const client of clientList) {
           if (client.url === رابط && 'focus' in client) {
             return client.focus();
           }
         }
         
-        // إذا لم يوجد، فتح تبويب جديد
         if (clients.openWindow) {
           return clients.openWindow(رابط);
         }
       })
   );
-});
-
-// ℹ️ معالجة إغلاق الإشعار
-self.addEventListener('notificationclose', (event) => {
-  console.log('👋 تم إغلاق الإشعار:', event.notification.tag);
-  // يمكنك إرسال إحصائية هنا إذا أردت
-});
-
-// 🔔 تسجيل Service Worker
-self.addEventListener('install', (event) => {
-  console.log('✅ Service Worker مثبت');
-  self.skipWaiting(); // التنشيط الفوري
-});
-
-self.addEventListener('activate', (event) => {
-  console.log('🚀 Service Worker نشط');
-  return self.clients.claim();
 });
