@@ -1,252 +1,311 @@
 $(document).ready(function() {
-  // 🔹 استخراج المعلومات من URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const episode = urlParams.get('episode');
-  const sheetName = urlParams.get('sheet');
-  const fromEpisodes = urlParams.get('from') === 'episodes';
-  
-  // 🔹 الحصول على الإعدادات
-  const config = window.siwanePlayerConfig || {};
-  
-  // 🔹 السيناريو 1: إذا كان في مقال الحلقات الرئيسي
-  if (fromEpisodes && config.PAGE_TYPE === 'episodes') {
-    loadEpisodesPage();
+  const config = window.siwanePlayerConfig;
+
+  // Validate essential config
+  if (!config || !config.GAS_WEB_APP_URL || !config.CONTENT_SHEET_NAME) {
+      console.error("Siwane Player Config is missing essential parameters.");
+      return;
+  }
+
+  // Set initial titles
+  $('title').text(`جميع حلقات ${config.CONTENT_SHEET_NAME}`);
+  $('#siwane-episode-title').text(`جميع حلقات ${config.CONTENT_SHEET_NAME}`);
+
+  // 🔥 صفحة الحلقات الرئيسية
+  if (config.PAGE_TYPE === 'episodes') {
+    loadAllEpisodes();
+  } 
+  // 🔥 صفحة المشغل العادية
+  else if (config.CONTENT_TYPE === 'series' && config.EPISODE_NUMBER !== undefined) {
+    initSeriesPlayer();
+  } 
+  // 🔥 صفحة الأفلام
+  else if (config.CONTENT_TYPE === 'movie' && config.MOVIE_TITLE !== undefined) {
+    initMoviePlayer();
+  }
+  // 🔥 مقال عادي بدون episode
+  else {
+    // لا تظهر أي شيء
+    $('.siwane-container').hide();
     return;
   }
-  
-  // 🔹 السيناريو 2: إذا جاء من مقال الحلقات إلى مقال عشوائي
-  if (episode && sheetName) {
-    loadPlayerForEpisode(episode, sheetName);
-    return;
-  }
-  
-  // 🔹 السيناريو 3: إذا كان في مقال عادي بدون episode
-  hidePlayerCompletely();
+
+  // 🔥 دالة الجسيمات
+  createParticles();
 });
 
-// 🔹 صفحة الحلقات الرئيسية
-function loadEpisodesPage() {
+// 🔥 تحميل جميع الحلقات
+function loadAllEpisodes() {
   const config = window.siwanePlayerConfig;
-  
-  // إخفاء أجزاء المشغل
-  $('.siwane-server-container, .siwane-video-container').hide();
-  
-  // جلب الحلقات من Google Sheet
+  const serversGrid = $("#siwane-servers-grid");
+
+  serversGrid.empty();
+  serversGrid.html('<p style="color: var(--linkC); text-align: center;">جاري تحميل الحلقات...</p>');
+
+  // 🔥 الطلب الجديد للحصول على الحلقات
   $.ajax({
-    url: config.GAS_WEB_APP_URL + '?getAllEpisodes=true&contentSheetName=' + 
-          encodeURIComponent(config.CONTENT_SHEET_NAME),
+    url: config.GAS_WEB_APP_URL + '?getAllEpisodes=true&contentSheetName=' + encodeURIComponent(config.CONTENT_SHEET_NAME),
+    type: 'GET',
+    dataType: 'json',
     success: function(episodes) {
+      serversGrid.empty();
+
       if (episodes.error) {
-        showError(episodes.error);
+        serversGrid.html(`<p style="color: red; text-align: center;">${episodes.error}</p>`);
         return;
       }
-      
-      // إنشاء أزرار الحلقات
-      const container = $('<div class="siwane-episodes-grid"></div>');
-      
-      episodes.forEach(ep => {
-        const btn = $(`
-          <div class="siwane-episode-btn" 
-               data-episode="${ep}" 
-               data-sheet="${config.CONTENT_SHEET_NAME}">
-            الحلقة ${ep}
+
+      if (!Array.isArray(episodes) || episodes.length === 0) {
+        serversGrid.html('<p style="color: var(--linkC); text-align: center;">لا توجد حلقات متاحة.</p>');
+        return;
+      }
+
+      // 🔥 تغيير العنوان
+      $('#siwane-episode-title').text(`جميع حلقات ${config.CONTENT_SHEET_NAME}`);
+      $('.siwane-server-container h2').text('اختر الحلقة للعرض');
+
+      // 🔥 تغيير الكلاس ليكون episodes-grid بدلاً من servers-grid
+      serversGrid.removeClass('siwane-servers-grid').addClass('siwane-episodes-grid');
+
+      // 🔥 إنشاء أزرار الحلقات
+      episodes.forEach(episode => {
+        const episodeBtn = $(`
+          <div class="siwane-episode-btn" data-episode="${episode}">
+            <span>الحلقة ${episode}</span>
           </div>
         `);
-        container.append(btn);
+        serversGrid.append(episodeBtn);
       });
-      
-      // استبدال محتوى الحلقات
-      $('.siwane-server-container').before(container);
-      
-      // حدث النقر على الحلقة
-      $('.siwane-episode-btn').click(function() {
-        const episode = $(this).data('episode');
-        const sheet = $(this).data('sheet');
-        redirectToRandomArticle(episode, sheet);
+
+      // 🔥 حدث النقر على الحلقة
+      $(".siwane-episode-btn").off('click').on('click', function() {
+        const selectedEpisode = $(this).data('episode');
+        findRandomArticle(selectedEpisode, config.CONTENT_SHEET_NAME);
       });
+
     },
-    error: function() {
-      showError('فشل في تحميل الحلقات');
+    error: function(xhr, status, error) {
+      serversGrid.html('<p style="color: red; text-align: center;">فشل في تحميل الحلقات. يرجى المحاولة لاحقًا.</p>');
     }
   });
 }
 
-// 🔹 توجيه إلى مقال عشوائي
-function redirectToRandomArticle(episode, sheetName) {
-  // حفظ المعلومات في sessionStorage
-  sessionStorage.setItem('siwane_episode', episode);
-  sessionStorage.setItem('siwane_sheet', sheetName);
-  sessionStorage.setItem('siwane_from', 'episodes');
+// 🔥 البحث عن مقال عشوائي
+function findRandomArticle(episodeNumber, sheetName) {
+  const serversGrid = $("#siwane-servers-grid");
   
-  // البحث عن مقالات المدونة
+  serversGrid.html('<p style="color: var(--linkC); text-align: center;">🔍 جاري البحث عن مقال عشوائي...</p>');
+
+  // البحث في المدونة عن مقالات
   $.ajax({
     url: '/',
+    type: 'GET',
     success: function(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      const tempDiv = $('<div>').html(html);
+      const articleLinks = [];
       
-      // جمع روابط المقالات
-      const articles = [];
-      const selectors = [
-        'a[href*="/p/"]',
-        'a[href*="/search/label/"]',
-        'a.post-title',
-        '.post-title a',
-        'article h2 a',
-        '.entry-title a'
-      ];
-      
-      selectors.forEach(selector => {
-        doc.querySelectorAll(selector).forEach(link => {
-          const href = link.href;
-          if (href && href.includes(location.hostname) && !href.includes('#')) {
-            articles.push(href);
-          }
-        });
+      // البحث عن روابط المقالات
+      tempDiv.find('a').each(function() {
+        const href = $(this).attr('href');
+        if (href && 
+            (href.includes('/p/') || 
+             href.includes('/search/label/') ||
+             href.match(/\/\d{4}\/\d{2}\/.*\.html$/)) &&
+            !href.includes('#') &&
+            !href.includes('?episode=')) {
+          articleLinks.push(href);
+        }
       });
-      
-      // اختيار مقال عشوائي
-      if (articles.length > 0) {
-        const randomArticle = articles[Math.floor(Math.random() * articles.length)];
-        const finalUrl = randomArticle + 
-                        (randomArticle.includes('?') ? '&' : '?') +
-                        `episode=${episode}&sheet=${encodeURIComponent(sheetName)}&from=episodes`;
+
+      if (articleLinks.length > 0) {
+        // اختيار مقال عشوائي
+        const randomIndex = Math.floor(Math.random() * articleLinks.length);
+        const targetArticle = articleLinks[randomIndex];
         
-        location.href = finalUrl;
+        // إضافة معلمات الحلقة
+        const separator = targetArticle.includes('?') ? '&' : '?';
+        const finalUrl = targetArticle + separator + 'episode=' + episodeNumber + '&sheet=' + encodeURIComponent(sheetName) + '&fromEpisodes=true';
+        
+        window.location.href = finalUrl;
       } else {
-        // إذا لم يجد مقالات، يذهب للصفحة الرئيسية
-        location.href = '/?episode=' + episode + '&sheet=' + encodeURIComponent(sheetName) + '&from=episodes';
+        // إذا لم يجد مقالات
+        window.location.href = '/?episode=' + episodeNumber + '&sheet=' + encodeURIComponent(sheetName) + '&fromEpisodes=true';
       }
     },
     error: function() {
-      // حل احتياطي
-      location.href = '/?episode=' + episode + '&sheet=' + encodeURIComponent(sheetName) + '&from=episodes';
+      window.location.href = '/?episode=' + episodeNumber + '&sheet=' + encodeURIComponent(sheetName) + '&fromEpisodes=true';
     }
   });
 }
 
-// 🔹 تحميل المشغل في المقال العشوائي
-function loadPlayerForEpisode(episode, sheetName) {
+// 🔥 المشغل العادي (للسيناريو القديم)
+function initSeriesPlayer() {
   const config = window.siwanePlayerConfig;
   
-  // إظهار المشغل
-  $('.siwane-container').show();
+  $('title').text(`الحلقة ${config.EPISODE_NUMBER} - ${config.CONTENT_SHEET_NAME}`);
+  $('#siwane-episode-title').text(`الحلقة ${config.EPISODE_NUMBER} - ${config.CONTENT_SHEET_NAME}`);
   
-  // تحديث العنوان
-  $('#siwane-episode-title').text(`الحلقة ${episode}`);
-  
-  // جلب السيرفرات
+  loadServers();
+}
+
+// 🔥 المشغل العادي للسيرفرات (الوظيفة الأصلية)
+function loadServers() {
+  const config = window.siwanePlayerConfig;
+  const serversGrid = $("#siwane-servers-grid");
+
+  serversGrid.empty();
+  serversGrid.addClass('loading-state');
+
+  let loadingMessage = "";
+  let ajaxUrl = config.GAS_WEB_APP_URL + '?contentSheetName=' + encodeURIComponent(config.CONTENT_SHEET_NAME);
+
+  if (config.CONTENT_TYPE === 'series') {
+      loadingMessage = `<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الحلقة ${config.EPISODE_NUMBER}...</p>`;
+      ajaxUrl += '&episodeNumber=' + encodeURIComponent(config.EPISODE_NUMBER);
+  } else if (config.CONTENT_TYPE === 'movie') {
+      loadingMessage = `<p style='color: #a9d6e5; text-align: center;'>جاري تحميل سيرفرات الفيلم ${config.MOVIE_TITLE}...</p>`;
+      ajaxUrl += '&movieTitle=' + encodeURIComponent(config.MOVIE_TITLE);
+  }
+
+  serversGrid.html(loadingMessage);
+
   $.ajax({
-    url: config.GAS_WEB_APP_URL + '?contentSheetName=' + encodeURIComponent(sheetName) + 
-         '&episodeNumber=' + episode,
+    url: ajaxUrl,
+    type: 'GET',
+    dataType: 'json',
     success: function(servers) {
-      if (servers.error) {
-        $('#siwane-servers-grid').html(`<p style="color:red">${servers.error}</p>`);
+      serversGrid.removeClass('loading-state');
+      serversGrid.css({
+          'display': 'grid',
+          'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
+          'gap': '12px'
+      });
+
+      serversGrid.empty();
+
+      if (servers.length === 0) {
+        const noServersMessage = (config.CONTENT_TYPE === 'series') ?
+          `لا توجد سيرفرات متاحة للحلقة ${config.EPISODE_NUMBER}.` :
+          `لا توجد سيرفرات متاحة للفيلم ${config.MOVIE_TITLE}.`;
+        serversGrid.html(`<p style='color: #a9d6e5; text-align: center;'>${noServersMessage}</p>`);
         return;
       }
-      
-      const grid = $('#siwane-servers-grid');
-      grid.empty();
-      
+
       servers.forEach(server => {
-        const btn = $(`
-          <div class="siwane-server-btn" 
-               data-id="${server.id}" 
-               data-sheet="${sheetName}">
+        const serverBtn = $(`
+          <div class="siwane-server-btn"
+               data-server-id="${server.id}"
+               data-content-sheet-name="${config.CONTENT_SHEET_NAME}">
             <div class="siwane-server-icon">${server.icon}</div>
             <span>${server.title}</span>
           </div>
         `);
-        grid.append(btn);
+        serversGrid.append(serverBtn);
       });
-      
-      // حدث النقر على السيرفر
-      $('.siwane-server-btn').click(function() {
-        const serverId = $(this).data('id');
-        const sheet = $(this).data('sheet');
-        playVideo(serverId, sheet);
-      });
-    },
-    error: function() {
-      $('#siwane-servers-grid').html('<p style="color:red">فشل في تحميل السيرفرات</p>');
-    }
-  });
-  
-  // إنشاء الجسيمات
-  createParticles();
-}
 
-// 🔹 تشغيل الفيديو
-function playVideo(serverId, sheetName) {
-  const config = window.siwanePlayerConfig;
-  
-  // إظهار العد التنازلي
-  $('#siwane-countdown-display').show();
-  $('#siwane-video-frame').hide();
-  
-  let countdown = config.COUNTDOWN_DURATION || 15;
-  $('#siwane-countdown').text(countdown);
-  $('#siwane-countdown-text').text('جاري تحضير الفيديو...');
-  
-  // طلب فك التشفير
-  $.ajax({
-    url: config.GAS_WEB_APP_URL + '?id=' + serverId + '&contentSheetName=' + encodeURIComponent(sheetName),
-    success: function(response) {
-      if (response.url) {
-        startCountdown(response.url);
-      } else {
-        $('#siwane-countdown-text').text('خطأ: ' + (response.error || 'رابط غير متوفر'));
-      }
+      $(".siwane-server-btn[data-server-id]").off('click').on('click', function() {
+        $(".siwane-server-btn[data-server-id]").removeClass("active");
+        $(this).addClass("active");
+
+        const serverId = $(this).data("server-id");
+        const contentSheetNameForDecryption = $(this).data("content-sheet-name");
+
+        $.ajax({
+          url: config.GAS_WEB_APP_URL + '?id=' + encodeURIComponent(serverId) + '&contentSheetName=' + encodeURIComponent(contentSheetNameForDecryption),
+          type: 'GET',
+          dataType: 'json',
+          success: function(response) {
+            if (response.url) {
+              startCountdownAndPlay(response.url);
+            } else if (response.error) {
+              alert("خطأ في جلب الفيديو: " + response.error);
+              $("#siwane-countdown-text").text("حدث خطأ: " + response.error);
+            }
+          },
+          error: function(xhr, status, error) {
+            alert("خطأ في الاتصال بالخادم: " + error);
+            $("#siwane-countdown-text").text("خطأ في الاتصال بالسيرفر.");
+          }
+        });
+      });
     },
-    error: function() {
-      $('#siwane-countdown-text').text('خطأ في الاتصال');
+    error: function(xhr, status, error) {
+      serversGrid.removeClass('loading-state');
+      serversGrid.css({
+          'display': 'grid',
+          'grid-template-columns': 'repeat(auto-fill, minmax(150px, 1fr))',
+          'gap': '12px'
+      });
+
+      alert("فشل في تحميل قائمة السيرفرات: " + error);
+      serversGrid.html("<p style='color: red; text-align: center;'>فشل في تحميل السيرفرات. يرجى المحاولة لاحقًا.</p>");
     }
   });
 }
 
-// 🔹 العد التنازلي
-function startCountdown(videoUrl) {
+// 🔥 دالة الأفلام
+function initMoviePlayer() {
   const config = window.siwanePlayerConfig;
-  let countdown = config.COUNTDOWN_DURATION || 15;
   
-  const timer = setInterval(() => {
-    countdown--;
-    $('#siwane-countdown').text(countdown);
-    
-    if (countdown <= 0) {
-      clearInterval(timer);
-      $('#siwane-countdown-display').hide();
-      $('#siwane-video-frame').attr('src', videoUrl).show();
-    }
-  }, 1000);
+  $('title').text(`${config.MOVIE_TITLE} - ${config.CONTENT_SHEET_NAME}`);
+  $('#siwane-episode-title').text(`${config.MOVIE_TITLE} - ${config.CONTENT_SHEET_NAME}`);
+  
+  loadServers();
 }
 
-// 🔹 إنشاء الجسيمات
+// 🔥 دالة الجسيمات (كما هي)
 function createParticles() {
   const container = $("#siwane-particles-container");
   if (!container.length) return;
   
   container.empty();
-  
-  for (let i = 0; i < 80; i++) {
+
+  for (let i = 0; i < 100; i++) {
     const particle = $('<div class="siwane-particle"></div>');
     particle.css({
       left: `${Math.random() * 100}%`,
       top: `${Math.random() * 100}%`,
-      animationDuration: `${Math.random() * 3 + 2}s`,
-      animationDelay: `${Math.random()}s`,
-      opacity: Math.random() * 0.3 + 0.1
+      animationDuration: `${Math.random() * 4 + 3}s`,
+      animationDelay: `${Math.random() * 2}s`,
+      width: `${Math.random() * 4 + 1}px`,
+      height: `${Math.random() * 4 + 1}px`,
+      opacity: Math.random() * 0.5 + 0.2
     });
     container.append(particle);
   }
 }
 
-// 🔹 إخفاء المشغل
-function hidePlayerCompletely() {
-  $('.siwane-container').hide();
-}
+// 🔥 العد التنازلي (كما هي)
+function startCountdownAndPlay(videoUrl) {
+  const config = window.siwanePlayerConfig;
+  let countdownInterval;
+  let countdownValue = config.COUNTDOWN_DURATION;
 
-// 🔹 عرض خطأ
-function showError(message) {
-  $('.siwane-container').html(`<div style="color:red; text-align:center; padding:20px;">${message}</div>`);
+  clearInterval(countdownInterval);
+  countdownValue = config.COUNTDOWN_DURATION;
+  $("#siwane-countdown").text(countdownValue);
+  $("#siwane-countdown-text").text("جاري تحضير الفيديو...");
+  $("#siwane-countdown-display").show();
+  $("#siwane-video-frame").hide();
+  createParticles();
+
+  $('html, body').animate({
+    scrollTop: $("#siwane-countdown-display").offset().top - 20
+  }, 800);
+
+  countdownInterval = setInterval(() => {
+    countdownValue--;
+    $("#siwane-countdown").text(countdownValue);
+
+    if (countdownValue <= 0) {
+      clearInterval(countdownInterval);
+      $("#siwane-countdown-text").text("جاري تشغيل الفيديو...");
+
+      setTimeout(() => {
+        $("#siwane-video-frame").attr("src", videoUrl);
+        $("#siwane-countdown-display").hide();
+        $("#siwane-video-frame").show();
+      }, 1000);
+    }
+  }, 1000);
 }
