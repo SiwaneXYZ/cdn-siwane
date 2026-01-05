@@ -38,7 +38,7 @@ $(document).ready(function() {
     // دوال اللوبي (إنشاء قائمة الحلقات)
     // ---------------------------------------------------------
     function initLobby(gasUrl, sheetName, container) {
-        container.html('<div style="text-align:center;padding:20px;color:var(--bodyC)">جاري جلب الحلقات...</div>');
+        container.html('<p class="note">جاري جلب الحلقات...</p>');
         
         $.ajax({
             url: `${gasUrl}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`,
