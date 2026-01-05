@@ -53,11 +53,15 @@ $(document).ready(function() {
                         <div class="siwane-episodes-grid">`;
                     
                     res.episodes.forEach(ep => {
-                        html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}')">${ep}</div>`;
+                        // [تحديث هام]: التحقق من أن القيمة رقم وليست null قبل الرسم
+                        if (ep !== null && ep !== "null" && !isNaN(ep)) {
+                            html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}')">${ep}</div>`;
+                        }
                     });
                     
                     html += `</div></div>`;
                     
+                    // تعريف دالة التوجيه لتكون عامة
                     window.siwaneRedirect = (s, e) => redirectToRandom(s, e);
                     container.html(html);
                 } else {
@@ -170,7 +174,7 @@ $(document).ready(function() {
 
     function decryptAndPlay(serverId, config) {
         $("#siwane-video-frame").hide();
-        $("#siwane-countdown-display").css('display', 'flex'); // flex للحفاظ على التوسط
+        $("#siwane-countdown-display").css('display', 'flex'); 
         $("#siwane-countdown-text").text("جاري فك تشفير الرابط...");
         
         $.ajax({
@@ -218,7 +222,6 @@ $(document).ready(function() {
     function createParticles() {
         const con = $("#siwane-particles-container");
         con.empty();
-        // الستايل موجود بالفعل في CSS الذي أضفته للقالب
         for (let i = 0; i < 50; i++) {
             const p = $('<div class="siwane-particle"></div>');
             p.css({
