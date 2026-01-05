@@ -65,7 +65,7 @@ $(document).ready(function() {
                     window.siwaneRedirect = (s, e) => redirectToRandom(s, e);
                     container.html(html);
                 } else {
-                    container.html('<p class="notewr>لا توجد حلقات متاحة.</p>');
+                    container.html('<p class="notewr">لا توجد حلقات متاحة.</p>');
                 }
             },
             error: function() { container.html('خطأ في الاتصال.'); }
