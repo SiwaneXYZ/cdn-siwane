@@ -3,54 +3,40 @@ $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    // ==========================================
-    // الحالة 1: وضع المشاهدة (Watch Mode)
-    // ==========================================
     if (mode === 'watch') {
         const sheetName = urlParams.get('sheet');
-        const episode = urlParams.get('ep');     // للمسلسلات
-        const movie = urlParams.get('movie');    // للأفلام
+        const episode = urlParams.get('ep');
+        const movie = urlParams.get('movie');
         
         if (sheetName && globalConfig.GAS_URL) {
             const playerConfig = {
                 GAS_URL: globalConfig.GAS_URL,
                 COUNTDOWN: globalConfig.COUNTDOWN || 10,
                 SHEET: decodeURIComponent(sheetName),
-                // تحديد النوع بناءً على البارامتر الموجود
                 TYPE: movie ? 'movie' : 'series',
                 ID: movie ? decodeURIComponent(movie) : episode
             };
             
-            // شرط الأمان: يجب توفر معرف (حلقة أو اسم فيلم)
             if(playerConfig.ID) {
                 injectWatchInterface(playerConfig);
             }
         }
-    } 
-    // ==========================================
-    // الحالة 2: وضع اللوبي (Lobby Mode)
-    // ==========================================
-    else {
+    } else {
         const lobby = $('#siwane-lobby');
         if (lobby.length > 0 && globalConfig.GAS_URL) {
             const sheetName = lobby.data('sheet');
-            const movieTitle = lobby.data('movie'); // خاصية جديدة للأفلام
+            const movieTitle = lobby.data('movie');
 
             if (sheetName) {
                 if (movieTitle) {
-                    // إذا وجد اسم فيلم -> وضع الفيلم
                     initMovieLobby(sheetName, movieTitle, lobby);
                 } else {
-                    // إذا لم يجد اسم فيلم -> وضع المسلسل (جلب الحلقات)
                     initSeriesLobby(globalConfig.GAS_URL, sheetName, lobby);
                 }
             }
         }
     }
 
-    // ---------------------------------------------------------
-    // دوال اللوبي للمسلسلات (Series Lobby)
-    // ---------------------------------------------------------
     function initSeriesLobby(gasUrl, sheetName, container) {
         container.html('<p class="note">جاري جلب الحلقات...</p>');
         
@@ -82,11 +68,7 @@ $(document).ready(function() {
         });
     }
 
-    // ---------------------------------------------------------
-    // دوال اللوبي للأفلام (Movie Lobby) - [جديد]
-    // ---------------------------------------------------------
     function initMovieLobby(sheetName, movieTitle, container) {
-        // عرض زر واحد مباشر لمشاهدة الفيلم
         let html = `
         <div class="siwane-episodes-container">
             <h2>مشاهدة الفيلم</h2>
@@ -101,9 +83,6 @@ $(document).ready(function() {
         container.html(html);
     }
 
-    // ---------------------------------------------------------
-    // دالة التحويل العشوائي (الموحدة)
-    // ---------------------------------------------------------
     async function redirectToRandom(sheet, id, type) {
         try {
             let r = await fetch('/feeds/posts/summary?alt=json&max-results=150');
@@ -114,7 +93,6 @@ $(document).ready(function() {
                 let link = rnd.link.find(l => l.rel === 'alternate').href;
                 let sep = link.includes('?') ? '&' : '?';
                 
-                // تحديد البارامتر بناءً على النوع
                 let typeParam = (type === 'movie') ? `&movie=${encodeURIComponent(id)}` : `&ep=${id}`;
                 
                 window.location.href = `${link}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}${typeParam}`;
@@ -122,22 +100,20 @@ $(document).ready(function() {
         } catch(e) { alert('خطأ في التحويل.'); }
     }
 
-    // ---------------------------------------------------------
-    // دوال المشاهدة والحقن (Inject Logic)
-    // ---------------------------------------------------------
     function injectWatchInterface(config) {
         const postBody = $('.post-body, .entry-content, #post-body').first();
         if (postBody.length === 0) return;
 
-        // صياغة العنوان بناءً على النوع مع تمييز الأنمي
+        // صياغة العنوان بناءً على النوع
         let displayTitle;
         if (config.TYPE === 'movie') {
             displayTitle = `فيلم: ${config.ID}`;
         } else {
-            // تمييز الأنمي من اسم الورقة
+            // التحقق إذا كان اسم الورقة يحتوي على "انمي" أو "anime"
             const sheetLower = config.SHEET.toLowerCase();
             const isAnime = sheetLower.includes('انمي') || sheetLower.includes('anime');
             
+            // عرض "أنمي" فقط إذا كان انمي، و"مسلسل" فقط إذا كان مسلسل
             displayTitle = isAnime 
                 ? `أنمي ${config.SHEET} : الحلقة ${config.ID}`
                 : `مسلسل ${config.SHEET} : الحلقة ${config.ID}`;
@@ -183,12 +159,11 @@ $(document).ready(function() {
     function loadServers(config) {
         const grid = $("#siwane-servers-grid");
         
-        // [هام]: تكوين الرابط بناءً على النوع ليتوافق مع GAS
         let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
         if (config.TYPE === 'movie') {
-            params += `&movieTitle=${encodeURIComponent(config.ID)}`; // للأفلام
+            params += `&movieTitle=${encodeURIComponent(config.ID)}`;
         } else {
-            params += `&episodeNumber=${config.ID}`; // للمسلسلات
+            params += `&episodeNumber=${config.ID}`;
         }
 
         const url = `${config.GAS_URL}?${params}`;
