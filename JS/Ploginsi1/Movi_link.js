@@ -129,10 +129,19 @@ $(document).ready(function() {
         const postBody = $('.post-body, .entry-content, #post-body').first();
         if (postBody.length === 0) return;
 
-        // صياغة العنوان بناءً على النوع
-        let displayTitle = (config.TYPE === 'movie') 
-            ? `فيلم: ${config.ID}` 
-            : `مسلسل ${config.SHEET} : الحلقة ${config.ID}`;
+        // صياغة العنوان بناءً على النوع مع تمييز الأنمي
+        let displayTitle;
+        if (config.TYPE === 'movie') {
+            displayTitle = `فيلم: ${config.ID}`;
+        } else {
+            // تمييز الأنمي من اسم الورقة
+            const sheetLower = config.SHEET.toLowerCase();
+            const isAnime = sheetLower.includes('انمي') || sheetLower.includes('anime');
+            
+            displayTitle = isAnime 
+                ? `أنمي ${config.SHEET} : الحلقة ${config.ID}`
+                : `مسلسل ${config.SHEET} : الحلقة ${config.ID}`;
+        }
 
         document.title = `مشاهدة ${displayTitle}`;
 
