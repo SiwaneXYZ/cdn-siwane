@@ -48,7 +48,7 @@ $(document).ready(function() {
                 if (res.episodes && res.episodes.length > 0) {
                     let html = `
                     <div class="siwane-episodes-container">
-                        <h2>قائمة حلقات ${sheetName}</h2>
+                        <h2>${sheetName}</h2>
                         <div class="siwane-episodes-grid">`;
                     
                     res.episodes.forEach(ep => {
@@ -71,10 +71,10 @@ $(document).ready(function() {
     function initMovieLobby(sheetName, movieTitle, container) {
         let html = `
         <div class="siwane-episodes-container">
-            <h2>مشاهدة الفيلم</h2>
+            <h2>${movieTitle}</h2>
             <div class="siwane-episodes-grid" style="grid-template-columns: 1fr;">
                 <div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${movieTitle}', 'movie')">
-                    شاهد الفيلم الآن
+                    شاهد الآن
                 </div>
             </div>
         </div>`;
@@ -104,19 +104,12 @@ $(document).ready(function() {
         const postBody = $('.post-body, .entry-content, #post-body').first();
         if (postBody.length === 0) return;
 
-        // صياغة العنوان بناءً على النوع
+        // عرض اسم المحتوى مباشرة بدون إضافة "مسلسل" أو "أنمي"
         let displayTitle;
         if (config.TYPE === 'movie') {
-            displayTitle = `فيلم: ${config.ID}`;
+            displayTitle = `${config.ID}`; // اسم الفيلم فقط
         } else {
-            // التحقق إذا كان اسم الورقة يحتوي على "انمي" أو "anime"
-            const sheetLower = config.SHEET.toLowerCase();
-            const isAnime = sheetLower.includes('انمي') || sheetLower.includes('anime');
-            
-            // عرض "أنمي" فقط إذا كان انمي، و"مسلسل" فقط إذا كان مسلسل
-            displayTitle = isAnime 
-                ? `أنمي ${config.SHEET} : الحلقة ${config.ID}`
-                : `مسلسل ${config.SHEET} : الحلقة ${config.ID}`;
+            displayTitle = `${config.SHEET} - الحلقة ${config.ID}`; // اسم الورقة ورقم الحلقة فقط
         }
 
         document.title = `مشاهدة ${displayTitle}`;
