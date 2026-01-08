@@ -48,7 +48,7 @@ $(document).ready(function() {
                 if (res.episodes && res.episodes.length > 0) {
                     let html = `
                     <div class="siwane-episodes-container">
-                        <h2>${sheetName}</h2>
+                        <h2>حلقات ${sheetName}</h2>
                         <div class="siwane-episodes-grid">`;
                     
                     res.episodes.forEach(ep => {
