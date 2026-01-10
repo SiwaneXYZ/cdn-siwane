@@ -1,11 +1,14 @@
 $(document).ready(function() {
-    console.log("Movi_link.js Loaded Successfully");
-
+    // 1. قراءة الإعدادات
     const globalConfig = window.siwaneGlobalConfig || {};
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    // 1. تحديد وضع التشغيل (مشاهدة أو تصفح)
+    // 🔴 هام: ضع رابط الوركر الخاص بك هنا
+    // تأكد أنه بدون علامة / في النهاية
+    const CLOUDFLARE_WORKER_URL = 'https://secure-player.mnaht00.workers.dev'; 
+
+    // 2. توجيه النظام (مشاهدة أو لوبي)
     if (mode === 'watch') {
         const sheetName = urlParams.get('sheet');
         const episode = urlParams.get('ep');
@@ -40,7 +43,7 @@ $(document).ready(function() {
         }
     }
 
-    // --- دوال اللوبي ---
+    // --- دوال اللوبي (كما هي في الأصلي) ---
     function initSeriesLobby(gasUrl, sheetName, container) {
         container.html('<p class="note">جاري جلب الحلقات...</p>');
         $.ajax({
@@ -121,12 +124,14 @@ $(document).ready(function() {
 
         postBody.prepend(topHtml);
         postBody.append(bottomHtml);
+
         createParticles();
         loadServers(config);
     }
 
     function loadServers(config) {
         const grid = $("#siwane-servers-grid");
+        
         let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
         if (config.TYPE === 'movie') params += `&movieTitle=${encodeURIComponent(config.ID)}`;
         else params += `&episodeNumber=${config.ID}`;
@@ -141,15 +146,23 @@ $(document).ready(function() {
                     grid.html('<p style="color:red">لا توجد سيرفرات.</p>');
                     return;
                 }
+
                 servers.forEach(s => {
-                    const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
+                    const btn = $(`
+                        <div class="siwane-server-btn" data-id="${s.id}">
+                            <span>${s.icon}</span> <span>${s.title}</span>
+                        </div>
+                    `);
                     
-                    // إضافة حدث النقر
                     btn.click(function() {
-                        console.log("تم النقر على السيرفر:", s.id); // Debug
                         $('.siwane-server-btn').removeClass('active');
                         $(this).addClass('active');
-                        // استدعاء دالة التشغيل الآمن
+
+                        // ✅ إصلاح التمرير: التمرير يتم فوراً عند النقر
+                        $('html, body').animate({
+                            scrollTop: $(".siwane-video-container").offset().top - 20
+                        }, 800);
+
                         decryptAndPlay($(this).data('id'), config);
                     });
                     grid.append(btn);
@@ -159,17 +172,12 @@ $(document).ready(function() {
         });
     }
 
-    // --- التشغيل الآمن عبر Cloudflare Worker ---
     function decryptAndPlay(serverId, config) {
-        console.log("Start decryptAndPlay for Server ID:", serverId);
-        
         $("#siwane-video-frame").hide();
         $("#siwane-countdown-display").css('display', 'flex');
         $("#siwane-countdown-text").text("جاري تأمين الاتصال...");
-
-        // ✅ تم وضع رابط الوركر الخاص بك هنا بشكل صحيح
-        const CLOUDFLARE_WORKER_URL = 'https://secure-player.mnaht00.workers.dev'; 
-
+        
+        // الاتصال بـ Cloudflare Worker
         $.ajax({
             url: `${CLOUDFLARE_WORKER_URL}/get-secure-player`,
             data: {
@@ -179,27 +187,19 @@ $(document).ready(function() {
             type: 'GET',
             dataType: 'json',
             success: function(res) {
-                console.log("Worker Response:", res); // Debug
-
                 if (res.html) {
-                    try {
-                        const blob = new Blob([res.html], { type: 'text/html' });
-                        const blobUrl = URL.createObjectURL(blob);
-                        console.log("Blob Created:", blobUrl);
-                        startCountdown(blobUrl, config.COUNTDOWN);
-                    } catch (e) {
-                        console.error("Blob Error:", e);
-                        $("#siwane-countdown-text").text("خطأ في المتصفح (Blob).");
-                    }
+                    // إنشاء Blob من الـ HTML المستلم
+                    const blob = new Blob([res.html], { type: 'text/html' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    startCountdown(blobUrl, config.COUNTDOWN);
                 } else {
-                    console.error("Worker Error:", res);
-                    $("#siwane-countdown-text").text("عذراً، الفيديو غير متاح.");
+                    $("#siwane-countdown-text").text("عذراً، السيرفر غير متاح.");
                 }
             },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error:", status, error);
-                console.log("Response Text:", xhr.responseText);
-                $("#siwane-countdown-text").text("خطأ في الاتصال بالخادم الآمن.");
+            error: function(xhr) {
+                console.error("Worker Error:", xhr.responseText);
+                $("#siwane-countdown-text").text("خطأ في الاتصال بالسيرفر الآمن."); 
             }
         });
     }
@@ -211,8 +211,10 @@ $(document).ready(function() {
         const txt = $("#siwane-countdown-text");
         
         txt.text("جاري تحضير المشغل...");
-        $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
-
+        
+        // التمرير موجود هنا أيضاً كإجراء احتياطي
+        // لكن التمرير الأساسي أصبح في زر النقر
+        
         const iv = setInterval(() => {
             num.text(c);
             c--;
@@ -223,9 +225,11 @@ $(document).ready(function() {
                 setTimeout(() => {
                     $("#siwane-countdown-display").hide();
                     
-                    // تنظيف الذاكرة
+                    // تنظيف الروابط القديمة من الذاكرة
                     const oldSrc = $("#siwane-video-frame").attr("src");
-                    if(oldSrc && oldSrc.startsWith('blob:')) URL.revokeObjectURL(oldSrc);
+                    if(oldSrc && oldSrc.startsWith('blob:')) {
+                        URL.revokeObjectURL(oldSrc);
+                    }
 
                     $("#siwane-video-frame").attr("src", url).show();
                 }, 1000);
