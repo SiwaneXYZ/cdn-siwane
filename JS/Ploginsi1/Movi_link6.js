@@ -3,7 +3,6 @@ $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    // رابط الوركر الخاص بك
     const WORKER_BASE_URL = 'https://secure-player.mnaht00.workers.dev';
 
     if (mode === 'watch') {
@@ -33,63 +32,28 @@ $(document).ready(function() {
         }
     }
 
-    // --- وظائف العرض والقوائم ---
-    function initSeriesLobby(gasUrl, sheetName, container) {
-        container.html('<p class="note">جاري جلب الحلقات...</p>');
-        $.ajax({
-            url: `${gasUrl}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`,
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                if (res.episodes && res.episodes.length > 0) {
-                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheetName}</h2><div class="siwane-episodes-grid">`;
-                    res.episodes.forEach(ep => {
-                        if (ep !== null && !isNaN(ep)) {
-                            html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}', 'series')">الحلقة ${ep}</div>`;
-                        }
-                    });
-                    html += `</div></div>`;
-                    window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
-                    container.html(html);
-                } else { container.html('<p class="note wr">لا توجد حلقات متاحة.</p>'); }
-            }
-        });
-    }
-
-    function initMovieLobby(sheetName, movieTitle, container) {
-        let html = `<div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns: 1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${movieTitle}', 'movie')">شاهد الآن</div></div></div>`;
-        window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
-        container.html(html);
-    }
-
-    async function redirectToRandom(sheet, id, type) {
-        try {
-            let r = await fetch('/feeds/posts/summary?alt=json&max-results=150');
-            let d = await r.json();
-            let posts = d.feed.entry;
-            if (posts && posts.length > 0) {
-                let rnd = posts[Math.floor(Math.random() * posts.length)];
-                let link = rnd.link.find(l => l.rel === 'alternate').href;
-                let sep = link.includes('?') ? '&' : '?';
-                let typeParam = (type === 'movie') ? `&movie=${encodeURIComponent(id)}` : `&ep=${id}`;
-                window.location.href = `${link}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}${typeParam}`;
-            }
-        } catch(e) { alert('خطأ في التحويل.'); }
-    }
-
+    // --- واجهة المشاهدة (تم تعديل الترتيب هنا) ---
     function injectWatchInterface(config) {
         const postBody = $('.post-body, .entry-content, #post-body').first();
         if (postBody.length === 0) return;
+        
         let displayTitle = (config.TYPE === 'movie') ? config.ID : `${config.SHEET} - الحلقة ${config.ID}`;
         document.title = `مشاهدة ${displayTitle}`;
 
-        const ui = $(`
+        // 1. الجزء العلوي (السيرفرات)
+        const topHtml = $(`
             <div class="siwane-container">
                 <header class="siwane-header"><h1>${displayTitle}</h1></header>
                 <div class="siwane-server-container">
                     <h2>اختر سيرفر المشاهدة</h2>
                     <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات...</p></div>
                 </div>
+            </div>
+        `);
+
+        // 2. الجزء السفلي (شاشة الفيديو)
+        const bottomHtml = $(`
+            <div class="siwane-container">
                 <div class="siwane-video-container">
                     <h2>شاشة العرض</h2>
                     <div id="siwane-countdown-display">
@@ -101,11 +65,16 @@ $(document).ready(function() {
                 </div>
             </div>
         `);
-        postBody.prepend(ui);
+
+        // إعادة الترتيب الأصلي: السيرفرات فوق، الفيديو تحت
+        postBody.prepend(topHtml); // يوضع في بداية المقال
+        postBody.append(bottomHtml); // يوضع في نهاية المقال
+
         createParticles();
         loadServers(config);
     }
 
+    // بقية الدوال كما هي (loadServers, decryptAndPlay, etc.)
     function loadServers(config) {
         const grid = $("#siwane-servers-grid");
         let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
@@ -118,11 +87,16 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(servers) {
                 grid.removeClass('loading-state').empty();
+                if (!servers || servers.length === 0) {
+                    grid.html('<p style="color:red">لا توجد سيرفرات.</p>');
+                    return;
+                }
                 servers.forEach(s => {
                     const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
                     btn.click(function() {
                         $('.siwane-server-btn').removeClass('active');
                         $(this).addClass('active');
+                        // التمرير لشاشة الفيديو في الأسفل عند النقر
                         $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
                         decryptAndPlay($(this).data('id'), config);
                     });
@@ -132,7 +106,6 @@ $(document).ready(function() {
         });
     }
 
-    // --- الوظيفة الأساسية: الاتصال بالوركر وإنشاء الـ Blob ---
     function decryptAndPlay(serverId, config) {
         $("#siwane-video-frame").hide();
         $("#siwane-countdown-display").css('display', 'flex');
@@ -145,7 +118,6 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.realUrl) {
-                    // إنشاء محتوى Iframe داخل Blob لإخفاء الرابط الأصلي وتخطي حماية المنصات
                     const playerHtml = `
                         <body style="margin:0;padding:0;overflow:hidden;background:#000;">
                             <iframe src="${res.realUrl}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
@@ -180,8 +152,52 @@ $(document).ready(function() {
         }, 1000);
     }
 
+    function initSeriesLobby(gasUrl, sheetName, container) {
+        container.html('<p class="note">جاري جلب الحلقات...</p>');
+        $.ajax({
+            url: `${gasUrl}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.episodes && res.episodes.length > 0) {
+                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheetName}</h2><div class="siwane-episodes-grid">`;
+                    res.episodes.forEach(ep => {
+                        if (ep !== null && ep !== "null" && !isNaN(ep)) {
+                            html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}', 'series')">الحلقة ${ep}</div>`;
+                        }
+                    });
+                    html += `</div></div>`;
+                    window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
+                    container.html(html);
+                }
+            }
+        });
+    }
+
+    function initMovieLobby(sheetName, movieTitle, container) {
+        let html = `<div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns: 1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${movieTitle}', 'movie')">شاهد الآن</div></div></div>`;
+        window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
+        container.html(html);
+    }
+
+    async function redirectToRandom(sheet, id, type) {
+        try {
+            let r = await fetch('/feeds/posts/summary?alt=json&max-results=150');
+            let d = await r.json();
+            let posts = d.feed.entry;
+            if (posts && posts.length > 0) {
+                let rnd = posts[Math.floor(Math.random() * posts.length)];
+                let link = rnd.link.find(l => l.rel === 'alternate').href;
+                let sep = link.includes('?') ? '&' : '?';
+                let typeParam = (type === 'movie') ? `&movie=${encodeURIComponent(id)}` : `&ep=${id}`;
+                window.location.href = `${link}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}${typeParam}`;
+            }
+        } catch(e) { alert('خطأ في التحويل.'); }
+    }
+
     function createParticles() {
-        const con = $("#siwane-particles-container");
+        const con = $(".siwane-particles-container");
+        con.empty();
         for (let i = 0; i < 30; i++) {
             const p = $('<div class="siwane-particle"></div>');
             p.css({ left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', animationDuration: (Math.random() * 4 + 3) + 's' });
