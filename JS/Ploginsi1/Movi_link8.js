@@ -3,7 +3,7 @@ $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    // رابط الوركر الخاص بك (تأكد من صحته)
+    // رابط الوركر الخاص بك
     const WORKER_BASE_URL = 'https://secure-player.mnaht00.workers.dev';
 
     if (mode === 'watch') {
@@ -65,8 +65,8 @@ $(document).ready(function() {
             </div>
         `);
 
-        postBody.prepend(topHtml); // السيرفرات فوق
-        postBody.append(bottomHtml); // الفيديو تحت
+        postBody.prepend(topHtml);
+        postBody.append(bottomHtml);
         createParticles();
         loadServers(config);
     }
@@ -97,11 +97,11 @@ $(document).ready(function() {
         });
     }
 
-    // --- التشغيل الآمن مع رسالة المتطفل ---
+    // --- التشغيل الآمن مع تشفير الرابط ورسالة المتطفل ---
     function decryptAndPlay(serverId, config) {
         $("#siwane-video-frame").hide();
         $("#siwane-countdown-display").css('display', 'flex');
-        $("#siwane-countdown-text").text("جاري تأمين الرابط...");
+        $("#siwane-countdown-text").text("جاري تأمين الاتصال...");
 
         $.ajax({
             url: `${WORKER_BASE_URL}/get-secure-player`,
@@ -110,10 +110,14 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.realUrl) {
+                    // تشفير الرابط: Base64 + Reverse لمنع القراءة المباشرة في المتصفح
+                    const encryptedLink = btoa(res.realUrl).split('').reverse().join('');
+
                     const playerHtml = `
                         <!DOCTYPE html>
                         <html>
                         <head>
+                            <meta charset="UTF-8">
                             <style>
                                 body { margin:0; padding:0; overflow:hidden; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; }
                                 .security-msg { padding:20px; border:2px solid #ff4444; border-radius:10px; background:rgba(255,0,0,0.1); direction:rtl; }
@@ -129,13 +133,17 @@ $(document).ready(function() {
                                     var host = "";
                                     try { host = window.parent.location.hostname; } catch(e) { host = "blocked"; }
                                     var container = document.getElementById("c");
+                                    
                                     if (host !== allowed && host !== "athar.news") {
                                         container.innerHTML = '<div class="security-msg"><h1>أوبس جمال اكتشفك ايها المتطفل!</h1><p>شاهد الحلقة ولا تسرق مجهودنا 😊</p></div>';
                                     } else {
-                                        container.innerHTML = '<iframe src="${res.realUrl}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>';
+                                        // فك التشفير برمجياً عند التشغيل فقط
+                                        var key = "${encryptedLink}";
+                                        var raw = atob(key.split('').reverse().join(''));
+                                        container.innerHTML = '<iframe src="' + raw + '" style="width:100%;height:100%;border:none;" allowfullscreen><\/iframe>';
                                     }
                                 })();
-                            </script>
+                            <\/script>
                         </body>
                         </html>
                     `;
@@ -169,7 +177,6 @@ $(document).ready(function() {
         }, 1000);
     }
 
-    // --- دوال القوائم (Lobby) ---
     function initSeriesLobby(gasUrl, sheetName, container) {
         container.html('<p class="note">جاري جلب الحلقات...</p>');
         $.ajax({
