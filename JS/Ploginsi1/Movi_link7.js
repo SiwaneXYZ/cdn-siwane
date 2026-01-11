@@ -3,6 +3,7 @@ $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
+    // رابط الوركر الخاص بك (تأكد من صحته)
     const WORKER_BASE_URL = 'https://secure-player.mnaht00.workers.dev';
 
     if (mode === 'watch') {
@@ -32,7 +33,7 @@ $(document).ready(function() {
         }
     }
 
-    // --- واجهة المشاهدة (تم تعديل الترتيب هنا) ---
+    // --- واجهة المشاهدة والترتيب الأصلي ---
     function injectWatchInterface(config) {
         const postBody = $('.post-body, .entry-content, #post-body').first();
         if (postBody.length === 0) return;
@@ -40,7 +41,6 @@ $(document).ready(function() {
         let displayTitle = (config.TYPE === 'movie') ? config.ID : `${config.SHEET} - الحلقة ${config.ID}`;
         document.title = `مشاهدة ${displayTitle}`;
 
-        // 1. الجزء العلوي (السيرفرات)
         const topHtml = $(`
             <div class="siwane-container">
                 <header class="siwane-header"><h1>${displayTitle}</h1></header>
@@ -51,7 +51,6 @@ $(document).ready(function() {
             </div>
         `);
 
-        // 2. الجزء السفلي (شاشة الفيديو)
         const bottomHtml = $(`
             <div class="siwane-container">
                 <div class="siwane-video-container">
@@ -66,15 +65,12 @@ $(document).ready(function() {
             </div>
         `);
 
-        // إعادة الترتيب الأصلي: السيرفرات فوق، الفيديو تحت
-        postBody.prepend(topHtml); // يوضع في بداية المقال
-        postBody.append(bottomHtml); // يوضع في نهاية المقال
-
+        postBody.prepend(topHtml); // السيرفرات فوق
+        postBody.append(bottomHtml); // الفيديو تحت
         createParticles();
         loadServers(config);
     }
 
-    // بقية الدوال كما هي (loadServers, decryptAndPlay, etc.)
     function loadServers(config) {
         const grid = $("#siwane-servers-grid");
         let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
@@ -87,16 +83,11 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(servers) {
                 grid.removeClass('loading-state').empty();
-                if (!servers || servers.length === 0) {
-                    grid.html('<p style="color:red">لا توجد سيرفرات.</p>');
-                    return;
-                }
                 servers.forEach(s => {
                     const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
                     btn.click(function() {
                         $('.siwane-server-btn').removeClass('active');
                         $(this).addClass('active');
-                        // التمرير لشاشة الفيديو في الأسفل عند النقر
                         $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
                         decryptAndPlay($(this).data('id'), config);
                     });
@@ -106,6 +97,7 @@ $(document).ready(function() {
         });
     }
 
+    // --- التشغيل الآمن مع رسالة المتطفل ---
     function decryptAndPlay(serverId, config) {
         $("#siwane-video-frame").hide();
         $("#siwane-countdown-display").css('display', 'flex');
@@ -119,9 +111,34 @@ $(document).ready(function() {
             success: function(res) {
                 if (res.realUrl) {
                     const playerHtml = `
-                        <body style="margin:0;padding:0;overflow:hidden;background:#000;">
-                            <iframe src="${res.realUrl}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>
-                        </body>`;
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <style>
+                                body { margin:0; padding:0; overflow:hidden; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; }
+                                .security-msg { padding:20px; border:2px solid #ff4444; border-radius:10px; background:rgba(255,0,0,0.1); direction:rtl; }
+                                h1 { font-size:22px; color:#ff4444; margin-bottom:10px; }
+                                p { font-size:16px; margin:0; }
+                            </style>
+                        </head>
+                        <body>
+                            <div id="c" style="width:100%;height:100%;"></div>
+                            <script>
+                                (function() {
+                                    var allowed = "www.athar.news";
+                                    var host = "";
+                                    try { host = window.parent.location.hostname; } catch(e) { host = "blocked"; }
+                                    var container = document.getElementById("c");
+                                    if (host !== allowed && host !== "athar.news") {
+                                        container.innerHTML = '<div class="security-msg"><h1>أوبس جمال اكتشفك ايها المتطفل!</h1><p>شاهد الحلقة ولا تسرق مجهودنا 😊</p></div>';
+                                    } else {
+                                        container.innerHTML = '<iframe src="${res.realUrl}" style="width:100%;height:100%;border:none;" allowfullscreen></iframe>';
+                                    }
+                                })();
+                            </script>
+                        </body>
+                        </html>
+                    `;
                     const blob = new Blob([playerHtml], { type: 'text/html' });
                     const blobUrl = URL.createObjectURL(blob);
                     startCountdown(blobUrl, config.COUNTDOWN);
@@ -152,6 +169,7 @@ $(document).ready(function() {
         }, 1000);
     }
 
+    // --- دوال القوائم (Lobby) ---
     function initSeriesLobby(gasUrl, sheetName, container) {
         container.html('<p class="note">جاري جلب الحلقات...</p>');
         $.ajax({
