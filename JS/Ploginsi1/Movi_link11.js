@@ -3,7 +3,7 @@ $(document).ready(function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode');
 
-    // المصدر الوحيد للبيانات هو الوركر الآن (لحل مشكلة فيسبوك)
+    // رابط الوركر الخاص بك
     const WORKER_BASE_URL = 'https://secure-player.mnaht00.workers.dev';
 
     if (mode === 'watch') {
@@ -11,8 +11,9 @@ $(document).ready(function() {
         const episode = urlParams.get('ep');
         const movie = urlParams.get('movie');
         
-        if (sheetName) {
+        if (sheetName && globalConfig.GAS_URL) {
             const playerConfig = {
+                GAS_URL: globalConfig.GAS_URL,
                 COUNTDOWN: globalConfig.COUNTDOWN || 10,
                 SHEET: decodeURIComponent(sheetName),
                 TYPE: movie ? 'movie' : 'series',
@@ -22,52 +23,96 @@ $(document).ready(function() {
         }
     } else {
         const lobby = $('#siwane-lobby');
-        if (lobby.length > 0) {
+        if (lobby.length > 0 && globalConfig.GAS_URL) {
             const sheetName = lobby.data('sheet');
             const movieTitle = lobby.data('movie');
             if (sheetName) {
                 if (movieTitle) initMovieLobby(sheetName, movieTitle, lobby);
-                else initSeriesLobby(sheetName, lobby);
+                else initSeriesLobby(globalConfig.GAS_URL, sheetName, lobby);
             }
         }
     }
 
+    // --- واجهة المشاهدة والترتيب الأصلي ---
+    function injectWatchInterface(config) {
+        const postBody = $('.post-body, .entry-content, #post-body').first();
+        if (postBody.length === 0) return;
+        
+        let displayTitle = (config.TYPE === 'movie') ? config.ID : `${config.SHEET} - الحلقة ${config.ID}`;
+        document.title = `مشاهدة ${displayTitle}`;
+
+        const topHtml = $(`
+            <div class="siwane-container">
+                <header class="siwane-header"><h1>${displayTitle}</h1></header>
+                <div class="siwane-server-container">
+                    <h2>اختر سيرفر المشاهدة</h2>
+                    <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات...</p></div>
+                </div>
+            </div>
+        `);
+
+        const bottomHtml = $(`
+            <div class="siwane-container">
+                <div class="siwane-video-container">
+                    <h2>شاشة العرض</h2>
+                    <div id="siwane-countdown-display">
+                        <div class="siwane-particles-container" id="siwane-particles-container"></div>
+                        <div id="siwane-countdown-text">الرجاء اختيار سيرفر للبدء</div>
+                        <div id="siwane-countdown"></div>
+                    </div>
+                    <iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
+                </div>
+            </div>
+        `);
+
+        postBody.prepend(topHtml);
+        postBody.append(bottomHtml);
+        createParticles();
+        loadServers(config);
+    }
+
     function loadServers(config) {
         const grid = $("#siwane-servers-grid");
-        let params = `?contentSheetName=${encodeURIComponent(config.SHEET)}`;
+        let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
         if (config.TYPE === 'movie') params += `&movieTitle=${encodeURIComponent(config.ID)}`;
         else params += `&episodeNumber=${config.ID}`;
 
-        fetch(`${WORKER_BASE_URL}${params}`, { cache: 'no-store' })
-            .then(r => r.json())
-            .then(servers => {
+        $.ajax({
+            url: `${config.GAS_URL}?${params}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(servers) {
                 grid.removeClass('loading-state').empty();
-                if (Array.isArray(servers)) {
-                    servers.forEach(s => {
-                        const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
-                        btn.click(function() {
-                            $('.siwane-server-btn').removeClass('active');
-                            $(this).addClass('active');
-                            $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
-                            decryptAndPlay($(this).data('id'), config);
-                        });
-                        grid.append(btn);
+                servers.forEach(s => {
+                    const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
+                    btn.click(function() {
+                        $('.siwane-server-btn').removeClass('active');
+                        $(this).addClass('active');
+                        $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
+                        decryptAndPlay($(this).data('id'), config);
                     });
-                }
-            }).catch(() => grid.html('<p>يرجى تحديث الصفحة..</p>'));
+                    grid.append(btn);
+                });
+            }
+        });
     }
 
+    // --- التشغيل الآمن مع تشفير الرابط ورسالة المتطفل ---
     function decryptAndPlay(serverId, config) {
         $("#siwane-video-frame").hide();
         $("#siwane-countdown-display").css('display', 'flex');
         $("#siwane-countdown-text").text("جاري تأمين الاتصال...");
 
-        // طلب فك التشفير عبر الوركر أيضاً
-        fetch(`${WORKER_BASE_URL}?contentSheetName=${encodeURIComponent(config.SHEET)}&id=${encodeURIComponent(serverId)}`)
-            .then(r => r.json())
-            .then(res => {
-                if (res.url) {
-                    const encryptedLink = btoa(res.url).split('').reverse().join('');
+        $.ajax({
+            url: `${WORKER_BASE_URL}/get-secure-player`,
+            data: { sheet: config.SHEET, id: serverId },
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.realUrl) {
+                    // تشفير الرابط: Base64 + Reverse لمنع القراءة المباشرة في المتصفح
+                    const encryptedLink = btoa(res.realUrl).split('').reverse().join('');
+
                     const playerHtml = `
                         <!DOCTYPE html>
                         <html>
@@ -88,9 +133,11 @@ $(document).ready(function() {
                                     var host = "";
                                     try { host = window.parent.location.hostname; } catch(e) { host = "blocked"; }
                                     var container = document.getElementById("c");
+                                    
                                     if (host !== allowed && host !== "athar.news") {
                                         container.innerHTML = '<div class="security-msg"><h1>أوبس جمال اكتشفك ايها المتطفل!</h1><p>شاهد الحلقة ولا تسرق مجهودنا 😊</p></div>';
                                     } else {
+                                        // فك التشفير برمجياً عند التشغيل فقط
                                         var key = "${encryptedLink}";
                                         var raw = atob(key.split('').reverse().join(''));
                                         container.innerHTML = '<iframe src="' + raw + '" style="width:100%;height:100%;border:none;" allowfullscreen><\/iframe>';
@@ -103,28 +150,14 @@ $(document).ready(function() {
                     const blob = new Blob([playerHtml], { type: 'text/html' });
                     const blobUrl = URL.createObjectURL(blob);
                     startCountdown(blobUrl, config.COUNTDOWN);
+                } else {
+                    $("#siwane-countdown-text").text("خطأ: " + (res.error || "تعذر جلب الرابط"));
                 }
-            }).catch(() => $("#siwane-countdown-text").text("فشل تأمين الرابط."));
+            },
+            error: function() { $("#siwane-countdown-text").text("فشل الاتصال بالوركر."); }
+        });
     }
 
-    function initSeriesLobby(sheetName, container) {
-        container.html('<p class="note">جاري التحميل..</p>');
-        fetch(`${WORKER_BASE_URL}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`)
-            .then(r => r.json())
-            .then(res => {
-                if (res.episodes) {
-                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheetName}</h2><div class="siwane-episodes-grid">`;
-                    res.episodes.forEach(ep => {
-                        html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}', 'series')">الحلقة ${ep}</div>`;
-                    });
-                    html += `</div></div>`;
-                    window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
-                    container.html(html);
-                }
-            });
-    }
-
-    // --- بقية الدوال (startCountdown, createParticles, etc.) تبقى كما هي ---
     function startCountdown(url, duration) {
         let c = duration;
         const num = $("#siwane-countdown"), txt = $("#siwane-countdown-text");
@@ -142,6 +175,28 @@ $(document).ready(function() {
                 }, 1000);
             }
         }, 1000);
+    }
+
+    function initSeriesLobby(gasUrl, sheetName, container) {
+        container.html('<p class="note">جاري جلب الحلقات...</p>');
+        $.ajax({
+            url: `${gasUrl}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if (res.episodes && res.episodes.length > 0) {
+                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheetName}</h2><div class="siwane-episodes-grid">`;
+                    res.episodes.forEach(ep => {
+                        if (ep !== null && ep !== "null" && !isNaN(ep)) {
+                            html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}', 'series')">الحلقة ${ep}</div>`;
+                        }
+                    });
+                    html += `</div></div>`;
+                    window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
+                    container.html(html);
+                }
+            }
+        });
     }
 
     function initMovieLobby(sheetName, movieTitle, container) {
@@ -165,18 +220,9 @@ $(document).ready(function() {
         } catch(e) { alert('خطأ في التحويل.'); }
     }
 
-    function injectWatchInterface(config) {
-        const postBody = $('.post-body, .entry-content, #post-body').first();
-        if (postBody.length === 0) return;
-        let displayTitle = (config.TYPE === 'movie') ? config.ID : `${config.SHEET} - الحلقة ${config.ID}`;
-        document.title = `مشاهدة ${displayTitle}`;
-        const topHtml = $(`<div class="siwane-container"><header class="siwane-header"><h1>${displayTitle}</h1></header><div class="siwane-server-container"><h2>اختر سيرفر المشاهدة</h2><div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات...</p></div></div></div>`);
-        const bottomHtml = $(`<div class="siwane-container"><div class="siwane-video-container"><h2>شاشة العرض</h2><div id="siwane-countdown-display"><div class="siwane-particles-container" id="siwane-particles-container"></div><div id="siwane-countdown-text">الرجاء اختيار سيرفر للبدء</div><div id="siwane-countdown"></div></div><iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe></div></div>`);
-        postBody.prepend(topHtml); postBody.append(bottomHtml); createParticles(); loadServers(config);
-    }
-
     function createParticles() {
-        const con = $(".siwane-particles-container"); con.empty();
+        const con = $(".siwane-particles-container");
+        con.empty();
         for (let i = 0; i < 30; i++) {
             const p = $('<div class="siwane-particle"></div>');
             p.css({ left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', animationDuration: (Math.random() * 4 + 3) + 's' });
