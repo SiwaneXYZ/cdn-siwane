@@ -1,232 +1,166 @@
 $(document).ready(function() {
-    const globalConfig = window.siwaneGlobalConfig || {};
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
+  // جلب الإعدادات من الكائن العالمي ومن إعدادات الصفحة
+  const globalConfig = window.siwaneGlobalConfig || {};
+  const config = window.siwanePlayerConfig;
 
-    // رابط الوركر الخاص بك
-    const WORKER_BASE_URL = 'https://secure-player.mnaht00.workers.dev';
+  // التحقق من روابط الإعلانات
+  const adLinks = globalConfig.AD_LINKS || { ad1: '#', ad2: '#', ad3: '#' };
+  let adsClickedStatus = { ad1: false, ad2: false, ad3: false };
 
-    if (mode === 'watch') {
-        const sheetName = urlParams.get('sheet');
-        const episode = urlParams.get('ep');
-        const movie = urlParams.get('movie');
+  // التحقق من الإعدادات الأساسية
+  if (!config || !config.GAS_WEB_APP_URL || !config.CONTENT_TYPE || !config.CONTENT_SHEET_NAME) {
+      console.error("Siwane Player: Missing config.");
+      $("#siwane-countdown-text").text("خطأ في الإعدادات. يرجى التحقق.");
+      return;
+  }
+
+  // إعداد العناوين
+  let displayTitle = (config.CONTENT_TYPE === 'series') 
+      ? `الحلقة ${config.EPISODE_NUMBER} - ${config.CONTENT_SHEET_NAME}`
+      : `${config.MOVIE_TITLE} - ${config.CONTENT_SHEET_NAME}`;
+  
+  $('#siwane-episode-title').text(displayTitle);
+
+  function createParticles() {
+    const container = $("#siwane-particles-container");
+    container.empty();
+    for (let i = 0; i < 60; i++) {
+      const particle = $('<div class="siwane-particle"></div>');
+      particle.css({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDuration: `${Math.random() * 4 + 3}s`,
+        width: `${Math.random() * 3 + 1}px`,
+        height: `${Math.random() * 3 + 1}px`,
+        opacity: Math.random() * 0.5 + 0.2
+      });
+      container.append(particle);
+    }
+  }
+
+  // --- وظيفة حقن أزرار الإعلانات (Ad-Gate) ---
+  function showAdGate(videoUrl) {
+    adsClickedStatus = { ad1: false, ad2: false, ad3: false };
+    $("#siwane-countdown").fadeOut(); // إخفاء رقم العداد بعد انتهائه
+    
+    const gateHTML = `
+      <div class="siwane-ad-gate">
+        <div style="color: var(--linkC); font-size: 0.95rem; margin-bottom: 12px; font-weight: 600;">
+          ⚠️ يرجى النقر على الإعلانات الـ 3 لتشغيل الفيديو
+        </div>
+        <div class="ad-btns-wrapper">
+          <button class="siwane-ad-btn ad-red" data-ad="ad1">إعلان 1</button>
+          <button class="siwane-ad-btn ad-blue" data-ad="ad2">إعلان 2</button>
+          <button class="siwane-ad-btn ad-orange" data-ad="ad3">إعلان 3</button>
+        </div>
+        <div id="unlock-area" style="display:none; margin-top: 15px;">
+           <button class="final-play-btn">▶ تشغيل الفيديو الآن</button>
+        </div>
+      </div>
+    `;
+
+    $("#siwane-countdown-text").html(gateHTML);
+
+    $(".siwane-ad-btn").on('click', function() {
+        const adId = $(this).data('ad');
+        const link = adLinks[adId];
         
-        if (sheetName && globalConfig.GAS_URL) {
-            const playerConfig = {
-                GAS_URL: globalConfig.GAS_URL,
-                COUNTDOWN: globalConfig.COUNTDOWN || 10,
-                SHEET: decodeURIComponent(sheetName),
-                TYPE: movie ? 'movie' : 'series',
-                ID: movie ? decodeURIComponent(movie) : episode
-            };
-            if(playerConfig.ID) injectWatchInterface(playerConfig);
-        }
-    } else {
-        const lobby = $('#siwane-lobby');
-        if (lobby.length > 0 && globalConfig.GAS_URL) {
-            const sheetName = lobby.data('sheet');
-            const movieTitle = lobby.data('movie');
-            if (sheetName) {
-                if (movieTitle) initMovieLobby(sheetName, movieTitle, lobby);
-                else initSeriesLobby(globalConfig.GAS_URL, sheetName, lobby);
-            }
-        }
-    }
-
-    // --- واجهة المشاهدة والترتيب الأصلي ---
-    function injectWatchInterface(config) {
-        const postBody = $('.post-body, .entry-content, #post-body').first();
-        if (postBody.length === 0) return;
+        window.open(link, '_blank');
         
-        let displayTitle = (config.TYPE === 'movie') ? config.ID : `${config.SHEET} - الحلقة ${config.ID}`;
-        document.title = `مشاهدة ${displayTitle}`;
+        // تأثير البخوت (Fading) بعد النقر
+        $(this).addClass('is-clicked');
+        adsClickedStatus[adId] = true;
 
-        const topHtml = $(`
-            <div class="siwane-container">
-                <header class="siwane-header"><h1>${displayTitle}</h1></header>
-                <div class="siwane-server-container">
-                    <h2>اختر سيرفر المشاهدة</h2>
-                    <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات...</p></div>
-                </div>
-            </div>
-        `);
+        // التحقق من اكتمال النقرات الثلاث
+        if (adsClickedStatus.ad1 && adsClickedStatus.ad2 && adsClickedStatus.ad3) {
+            $("#unlock-area").fadeIn(500);
+        }
+    });
 
-        const bottomHtml = $(`
-            <div class="siwane-container">
-                <div class="siwane-video-container">
-                    <h2>شاشة العرض</h2>
-                    <div id="siwane-countdown-display">
-                        <div class="siwane-particles-container" id="siwane-particles-container"></div>
-                        <div id="siwane-countdown-text">الرجاء اختيار سيرفر للبدء</div>
-                        <div id="siwane-countdown"></div>
-                    </div>
-                    <iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                </div>
-            </div>
-        `);
-
-        postBody.prepend(topHtml);
-        postBody.append(bottomHtml);
-        createParticles();
-        loadServers(config);
-    }
-
-    function loadServers(config) {
-        const grid = $("#siwane-servers-grid");
-        let params = `contentSheetName=${encodeURIComponent(config.SHEET)}`;
-        if (config.TYPE === 'movie') params += `&movieTitle=${encodeURIComponent(config.ID)}`;
-        else params += `&episodeNumber=${config.ID}`;
-
-        $.ajax({
-            url: `${config.GAS_URL}?${params}`,
-            type: 'GET',
-            dataType: 'json',
-            success: function(servers) {
-                grid.removeClass('loading-state').empty();
-                servers.forEach(s => {
-                    const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon}</span> <span>${s.title}</span></div>`);
-                    btn.click(function() {
-                        $('.siwane-server-btn').removeClass('active');
-                        $(this).addClass('active');
-                        $('html, body').animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
-                        decryptAndPlay($(this).data('id'), config);
-                    });
-                    grid.append(btn);
-                });
-            }
-        });
-    }
-
-    // --- التشغيل الآمن مع تشفير الرابط ورسالة المتطفل ---
-    function decryptAndPlay(serverId, config) {
-        $("#siwane-video-frame").hide();
-        $("#siwane-countdown-display").css('display', 'flex');
-        $("#siwane-countdown-text").text("جاري تأمين الاتصال...");
-
-        $.ajax({
-            url: `${WORKER_BASE_URL}/get-secure-player`,
-            data: { sheet: config.SHEET, id: serverId },
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                if (res.realUrl) {
-                    // تشفير الرابط: Base64 + Reverse لمنع القراءة المباشرة في المتصفح
-                    const encryptedLink = btoa(res.realUrl).split('').reverse().join('');
-
-                    const playerHtml = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="UTF-8">
-                            <style>
-                                body { margin:0; padding:0; overflow:hidden; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; text-align:center; font-family:sans-serif; }
-                                .security-msg { padding:20px; border:2px solid #ff4444; border-radius:10px; background:rgba(255,0,0,0.1); direction:rtl; }
-                                h1 { font-size:22px; color:#ff4444; margin-bottom:10px; }
-                                p { font-size:16px; margin:0; }
-                            </style>
-                        </head>
-                        <body>
-                            <div id="c" style="width:100%;height:100%;"></div>
-                            <script>
-                                (function() {
-                                    var allowed = "www.athar.news";
-                                    var host = "";
-                                    try { host = window.parent.location.hostname; } catch(e) { host = "blocked"; }
-                                    var container = document.getElementById("c");
-                                    
-                                    if (host !== allowed && host !== "athar.news") {
-                                        container.innerHTML = '<div class="security-msg"><h1>أوبس جمال اكتشفك ايها المتطفل!</h1><p>شاهد الحلقة ولا تسرق مجهودنا 😊</p></div>';
-                                    } else {
-                                        // فك التشفير برمجياً عند التشغيل فقط
-                                        var key = "${encryptedLink}";
-                                        var raw = atob(key.split('').reverse().join(''));
-                                        container.innerHTML = '<iframe src="' + raw + '" style="width:100%;height:100%;border:none;" allowfullscreen><\/iframe>';
-                                    }
-                                })();
-                            <\/script>
-                        </body>
-                        </html>
-                    `;
-                    const blob = new Blob([playerHtml], { type: 'text/html' });
-                    const blobUrl = URL.createObjectURL(blob);
-                    startCountdown(blobUrl, config.COUNTDOWN);
-                } else {
-                    $("#siwane-countdown-text").text("خطأ: " + (res.error || "تعذر جلب الرابط"));
-                }
-            },
-            error: function() { $("#siwane-countdown-text").text("فشل الاتصال بالوركر."); }
-        });
-    }
-
-    function startCountdown(url, duration) {
-        let c = duration;
-        const num = $("#siwane-countdown"), txt = $("#siwane-countdown-text");
-        txt.text("جاري تحضير الفيديو...");
-        const iv = setInterval(() => {
-            num.text(c); c--;
-            if (c < 0) {
-                clearInterval(iv);
-                num.text(""); txt.text("مشاهدة ممتعة!");
-                setTimeout(() => {
-                    $("#siwane-countdown-display").hide();
-                    const oldSrc = $("#siwane-video-frame").attr("src");
-                    if(oldSrc && oldSrc.startsWith('blob:')) URL.revokeObjectURL(oldSrc);
-                    $("#siwane-video-frame").attr("src", url).show();
-                }, 1000);
-            }
+    $(".final-play-btn").on('click', function() {
+        $("#siwane-countdown-text").text("جاري تحميل المشغل...");
+        setTimeout(() => {
+          $("#siwane-video-frame").attr("src", videoUrl);
+          $("#siwane-countdown-display").hide();
+          $("#siwane-video-frame").show();
         }, 1000);
-    }
+    });
+  }
 
-    function initSeriesLobby(gasUrl, sheetName, container) {
-        container.html('<p class="note">جاري جلب الحلقات...</p>');
-        $.ajax({
-            url: `${gasUrl}?contentSheetName=${encodeURIComponent(sheetName)}&action=getEpisodes`,
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                if (res.episodes && res.episodes.length > 0) {
-                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheetName}</h2><div class="siwane-episodes-grid">`;
-                    res.episodes.forEach(ep => {
-                        if (ep !== null && ep !== "null" && !isNaN(ep)) {
-                            html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${ep}', 'series')">الحلقة ${ep}</div>`;
-                        }
-                    });
-                    html += `</div></div>`;
-                    window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
-                    container.html(html);
-                }
-            }
-        });
-    }
+  let countdownInterval;
+  
+  function startCountdownAndPlay(videoUrl) {
+    clearInterval(countdownInterval);
+    // جلب مدة العداد من الإعدادات العالمية
+    let countdownValue = globalConfig.COUNTDOWN || 15;
+    
+    $("#siwane-countdown").text(countdownValue).show();
+    $("#siwane-countdown-text").text("جاري تجهيز رابط الفيديو...");
+    $("#siwane-countdown-display").show();
+    $("#siwane-video-frame").hide();
+    createParticles();
 
-    function initMovieLobby(sheetName, movieTitle, container) {
-        let html = `<div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns: 1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheetName}', '${movieTitle}', 'movie')">شاهد الآن</div></div></div>`;
-        window.siwaneRedirect = (s, id, type) => redirectToRandom(s, id, type);
-        container.html(html);
-    }
+    $('html, body').animate({
+      scrollTop: $("#siwane-countdown-display").offset().top - 20
+    }, 800);
 
-    async function redirectToRandom(sheet, id, type) {
-        try {
-            let r = await fetch('/feeds/posts/summary?alt=json&max-results=150');
-            let d = await r.json();
-            let posts = d.feed.entry;
-            if (posts && posts.length > 0) {
-                let rnd = posts[Math.floor(Math.random() * posts.length)];
-                let link = rnd.link.find(l => l.rel === 'alternate').href;
-                let sep = link.includes('?') ? '&' : '?';
-                let typeParam = (type === 'movie') ? `&movie=${encodeURIComponent(id)}` : `&ep=${id}`;
-                window.location.href = `${link}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}${typeParam}`;
-            }
-        } catch(e) { alert('خطأ في التحويل.'); }
-    }
+    countdownInterval = setInterval(() => {
+      countdownValue--;
+      $("#siwane-countdown").text(countdownValue);
 
-    function createParticles() {
-        const con = $(".siwane-particles-container");
-        con.empty();
-        for (let i = 0; i < 30; i++) {
-            const p = $('<div class="siwane-particle"></div>');
-            p.css({ left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', animationDuration: (Math.random() * 4 + 3) + 's' });
-            con.append(p);
+      if (countdownValue <= 0) {
+        clearInterval(countdownInterval);
+        showAdGate(videoUrl); // استدعاء مرحلة الإعلانات بدلاً من التشغيل المباشر
+      }
+    }, 1000);
+  }
+
+  // --- دالة تحميل السيرفرات ---
+  function loadServers() {
+    const serversGrid = $("#siwane-servers-grid");
+    serversGrid.empty().addClass('loading-state').html("<p>جاري تحميل قائمة السيرفرات...</p>");
+
+    let ajaxUrl = globalConfig.GAS_URL + '?contentSheetName=' + encodeURIComponent(config.CONTENT_SHEET_NAME);
+    if (config.CONTENT_TYPE === 'series') ajaxUrl += '&episodeNumber=' + encodeURIComponent(config.EPISODE_NUMBER);
+    else if (config.CONTENT_TYPE === 'movie') ajaxUrl += '&movieTitle=' + encodeURIComponent(config.MOVIE_TITLE);
+
+    $.ajax({
+      url: ajaxUrl,
+      type: 'GET',
+      dataType: 'json',
+      success: function(servers) {
+        serversGrid.removeClass('loading-state').empty();
+        if (servers.length === 0) {
+            serversGrid.html("<p>لا توجد سيرفرات متاحة.</p>");
+            return;
         }
-    }
+
+        servers.forEach(server => {
+          const serverBtn = $(`
+            <div class="siwane-server-btn" data-server-id="${server.id}">
+              <div class="siwane-server-icon">${server.icon}</div>
+              <span>${server.title}</span>
+            </div>
+          `);
+          serversGrid.append(serverBtn);
+        });
+
+        $(".siwane-server-btn").on('click', function() {
+          $(".siwane-server-btn").removeClass("active");
+          $(this).addClass("active");
+          
+          const serverId = $(this).data("server-id");
+          $.ajax({
+            url: globalConfig.GAS_URL + '?id=' + encodeURIComponent(serverId) + '&contentSheetName=' + encodeURIComponent(config.CONTENT_SHEET_NAME),
+            type: 'GET',
+            success: function(response) {
+              if (response.url) startCountdownAndPlay(response.url);
+            }
+          });
+        });
+      }
+    });
+  }
+
+  loadServers();
 });
