@@ -41,6 +41,7 @@ $(document).ready((function() {
                         <div id="siwane-countdown"></div>
                     </div>
                     <iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
+                  <center><a class='button' href='/p/offerwal.html'>انقر هنا انتقل و ادعمنا بالنقر</a></center>
                 </div>
             </div>
         `);
@@ -131,14 +132,14 @@ $(document).ready((function() {
                                                                         let clicked = {ad1: false, ad2: false, ad3: false};
                                                                         const adHtml = `
                                                                             <div class="ad-gate-wrapper">
-                                                                                <p style="color:#ffeb3b; font-size:14px; margin-bottom:10px;">⚠️ لفتح المشغل، اضغط على الأزرار الثلاثة:</p>
+                                                                                <p style="color:#ffeb3b; font-size:14px; margin-bottom:10px;">لفتح المشغل، اضغط على الأزرار الثلاثة:</p>
                                                                                 <div class="ad-btns-flex">
                                                                                     <button class="ad-gate-btn ad-r" data-id="ad1">إعلان 1</button>
                                                                                     <button class="ad-gate-btn ad-b" data-id="ad2">إعلان 2</button>
                                                                                     <button class="ad-gate-btn ad-o" data-id="ad3">إعلان 3</button>
                                                                                 </div>
                                                                                 <div id="final-unlock" style="display:none; margin-top:15px;">
-                                                                                    <button id="play-now" class="siwane-episode-btn" style="width:100%!important; background:var(--linkB); color:#fff; border:none;">▶ تشغيل الفيديو الآن</button>
+                                                                                    <button id="play-now" class="siwane-episode-btn" style="width:100%!important; background:var(--linkB); color:#fff; border:none;"> تشغيل الفيديو الآن</button>
                                                                                 </div>
                                                                             </div>
                                                                         `;
