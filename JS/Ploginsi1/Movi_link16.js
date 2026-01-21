@@ -15,7 +15,8 @@ $(document).ready((function() {
                 SHEET: decodeURIComponent(t),
                 TYPE: a ? "movie" : "series",
                 ID: a ? decodeURIComponent(a) : s,
-                AD_LINKS: e.AD_LINKS || {} // جلب روابط الإعلانات
+                AD_LINKS: e.AD_LINKS || {}, // روابط الإعلانات
+                AD_BUTTONS_COUNT: e.AD_BUTTONS_COUNT || 3 // عدد أزرار الإعلانات (افتراضي 3)
             };
             if (n.ID) ! function(e) {
                 const n = $(".post-body, .entry-content, #post-body").first();
@@ -122,21 +123,31 @@ $(document).ready((function() {
                                                                 });
 
                                                             // --- منطق العداد وبوابة الإعلانات المدمج ---
-                                                            ! function(e, n, r) {
+                                                            ! function(e, n, r, adCount) {
                                                                 let t = n;
                                                                 const i = $("#siwane-countdown"),
                                                                     s = $("#siwane-countdown-text");
                                                                 s.text("جاري تحضير الفيديو...");
                                                                 const a = setInterval((() => {
-                                                                    i.text(t), t--, t < 0 && (clearInterval(a), i.hide(), function(e, r) {
-                                                                        let clicked = {ad1: false, ad2: false, ad3: false};
+                                                                    i.text(t), t--, t < 0 && (clearInterval(a), i.hide(), function(e, r, adCount) {
+                                                                        // إنشاء كائن للنقرات ديناميكياً حسب عدد الأزرار
+                                                                        let clicked = {};
+                                                                        for(let i = 1; i <= adCount; i++) {
+                                                                            clicked['ad' + i] = false;
+                                                                        }
+                                                                        
+                                                                        // إنشاء أزرار الإعلانات ديناميكياً
+                                                                        let buttonsHTML = '';
+                                                                        for(let i = 1; i <= adCount; i++) {
+                                                                            const btnClass = i === 1 ? 'ad-r' : i === 2 ? 'ad-b' : 'ad-o';
+                                                                            buttonsHTML += `<button class="ad-gate-btn ${btnClass}" data-id="ad${i}" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان ${i}</button>`;
+                                                                        }
+                                                                        
                                                                         const adHtml = `
                                                                             <div style="text-align:center;width:100%;padding:5px;">
-                                                                                <p style="color:#ffeb3b;font-size:12px;margin-bottom:8px;">لفتح المشغل، اضغط على الأزرار الثلاثة:</p>
+                                                                                <p style="color:#ffeb3b;font-size:12px;margin-bottom:8px;">لفتح المشغل، اضغط على الأزرار ${adCount}:</p>
                                                                                 <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
-                                                                                    <button class="ad-gate-btn ad-r" data-id="ad1" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 1</button>
-                                                                                    <button class="ad-gate-btn ad-b" data-id="ad2" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 2</button>
-                                                                                    <button class="ad-gate-btn ad-o" data-id="ad3" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 3</button>
+                                                                                    ${buttonsHTML}
                                                                                 </div>
                                                                                 <div id="final-unlock" style="display:none;margin-top:10px;">
                                                                                     <button id="play-now" class="siwane-episode-btn" style="width:100%!important;background:var(--linkB);color:#fff;border:none;padding:8px;font-size:13px;"> تشغيل الفيديو الآن</button>
@@ -147,10 +158,22 @@ $(document).ready((function() {
                                                                         
                                                                         $(".ad-gate-btn").click(function(){
                                                                             const id = $(this).data("id");
-                                                                            window.open(r[id], '_blank');
+                                                                            // استخدم الرابط المناسب من AD_LINKS
+                                                                            if(r[id]) {
+                                                                                window.open(r[id], '_blank');
+                                                                            }
                                                                             $(this).addClass("is-faded");
                                                                             clicked[id] = true;
-                                                                            if(clicked.ad1 && clicked.ad2 && clicked.ad3) $("#final-unlock").fadeIn();
+                                                                            
+                                                                            // التحقق من جميع الأزرار
+                                                                            let allClicked = true;
+                                                                            for(let i = 1; i <= adCount; i++) {
+                                                                                if(!clicked['ad' + i]) {
+                                                                                    allClicked = false;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                            if(allClicked) $("#final-unlock").fadeIn();
                                                                         });
 
                                                                         $("#play-now").click(function(){
@@ -161,9 +184,9 @@ $(document).ready((function() {
                                                                                 n && n.startsWith("blob:") && URL.revokeObjectURL(n), $("#siwane-video-frame").attr("src", e).show()
                                                                             }), 500);
                                                                         });
-                                                                    }(e, r))
+                                                                    }(e, r, adCount))
                                                                 }), 1e3)
-                                                            }(URL.createObjectURL(i), n.COUNTDOWN, n.AD_LINKS)
+                                                            }(URL.createObjectURL(i), n.COUNTDOWN, n.AD_LINKS, n.AD_BUTTONS_COUNT)
                                                         } else $("#siwane-countdown-text").text("خطأ: " + (e.error || "تعذر جلب الرابط"))
                                                     },
                                                     error: function() {
