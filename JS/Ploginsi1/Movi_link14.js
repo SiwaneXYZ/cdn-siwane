@@ -41,7 +41,7 @@ $(document).ready((function() {
                         <div id="siwane-countdown"></div>
                     </div>
                     <iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                  <center><a class='button' href='/p/offerwal.html'>انقر هنا انتقل و ادعمنا بالنقر</a></center>
+                  <center><a class="button ln" href="/p/offerwal.html" style="width:100%;">انقر هنا انتقل وادعمنا بالنقر</a></center>
                 </div>
             </div>
         `);
