@@ -41,7 +41,7 @@ $(document).ready((function() {
                         <div id="siwane-countdown"></div>
                     </div>
                     <iframe id="siwane-video-frame" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                  <center><a class="button ln" href="/p/offerwal.html" style="width:100%;">انقر هنا انتقل وادعمنا بالنقر</a></center>
+                  <a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا انتقل وادعمنا بالنقر</a>
                 </div>
             </div>
         `);
@@ -131,15 +131,15 @@ $(document).ready((function() {
                                                                     i.text(t), t--, t < 0 && (clearInterval(a), i.hide(), function(e, r) {
                                                                         let clicked = {ad1: false, ad2: false, ad3: false};
                                                                         const adHtml = `
-                                                                            <div class="ad-gate-wrapper">
-                                                                                <p style="color:#ffeb3b; font-size:14px; margin-bottom:10px;">لفتح المشغل، اضغط على الأزرار الثلاثة:</p>
-                                                                                <div class="ad-btns-flex">
-                                                                                    <button class="ad-gate-btn ad-r" data-id="ad1">إعلان 1</button>
-                                                                                    <button class="ad-gate-btn ad-b" data-id="ad2">إعلان 2</button>
-                                                                                    <button class="ad-gate-btn ad-o" data-id="ad3">إعلان 3</button>
+                                                                            <div style="text-align:center;width:100%;padding:5px;">
+                                                                                <p style="color:#ffeb3b;font-size:12px;margin-bottom:8px;">لفتح المشغل، اضغط على الأزرار الثلاثة:</p>
+                                                                                <div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+                                                                                    <button class="ad-gate-btn ad-r" data-id="ad1" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 1</button>
+                                                                                    <button class="ad-gate-btn ad-b" data-id="ad2" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 2</button>
+                                                                                    <button class="ad-gate-btn ad-o" data-id="ad3" style="padding:6px 10px;font-size:11px;min-width:70px;">إعلان 3</button>
                                                                                 </div>
-                                                                                <div id="final-unlock" style="display:none; margin-top:15px;">
-                                                                                    <button id="play-now" class="siwane-episode-btn" style="width:100%!important; background:var(--linkB); color:#fff; border:none;"> تشغيل الفيديو الآن</button>
+                                                                                <div id="final-unlock" style="display:none;margin-top:10px;">
+                                                                                    <button id="play-now" class="siwane-episode-btn" style="width:100%!important;background:var(--linkB);color:#fff;border:none;padding:8px;font-size:13px;"> تشغيل الفيديو الآن</button>
                                                                                 </div>
                                                                             </div>
                                                                         `;
