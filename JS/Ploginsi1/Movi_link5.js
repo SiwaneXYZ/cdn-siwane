@@ -6,10 +6,10 @@ $(document).ready((function() {
 
     let countdownInterval = null;
 
-    // تنظيف العناوين ومنع تكرار كلمة "مسلسل"
+    // دالة تنظيف العناوين لمنع تكرار كلمة "مسلسل" في الهيدر
     const formatTitle = (text) => text ? text.trim().replace(/^مسلسل\s+/i, "") : "";
 
-    // نظام حماية الوصول (التوكن)
+    // نظام حماية الوصول (التوكن) لضمان الدخول من الدومين فقط
     const isInternalNavigation = document.referrer.indexOf(window.location.hostname) !== -1;
     const hasAccessFlag = sessionStorage.getItem("siwane_access_token") === "true";
     const canViewContent = isInternalNavigation || hasAccessFlag;
@@ -46,7 +46,7 @@ $(document).ready((function() {
                         </a>
                     </div>
                     <p id="scroll-msg" style="display:none; color: #d35400; font-weight: bold; font-size: 13px;">
-                        يرجى التمرير للأسفل لتأمين المحتوى...
+                        يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
                     </p>
                 </div>
             </div>
@@ -61,7 +61,7 @@ $(document).ready((function() {
             $(window).on('scroll.siwaneAuth', function() {
                 if (!scrollTriggered) {
                     scrollTriggered = true;
-                    $("#scroll-msg").html('<i class="fa fa-spinner fa-spin"></i> جاري جلب البيانات...');
+                    $("#scroll-msg").html('<i class="fa fa-spinner fa-spin"></i> جاري استخراج البيانات...');
                     setTimeout(function() {
                         $("#siwane-auth-wrapper").fadeOut(300, function() {
                             if (movie) loadMovieLobby(rawSheet, movie, lobbyElement, config);
@@ -75,7 +75,7 @@ $(document).ready((function() {
     }
 
     // ==========================================
-    // 📺 جلب الحلقات (حل مشكلة "الأخيرة" والتكرار)
+    // 📺 جلب الحلقات (حل مشكلة "الأخيرة" وتكرار السيرفرات)
     // ==========================================
     function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
@@ -85,13 +85,14 @@ $(document).ready((function() {
             type: "GET", dataType: "json",
             success: function(response) {
                 if (response.episodes && response.episodes.length > 0) {
-                    // ميزة التنقية: إزالة التكرار الناتج عن تعدد السيرفرات في الشيت
-                    const uniqueEpisodes = [...new Set(response.episodes.filter(e => e !== null))];
+                    // ميزة التنقية: تحويل الـ 6 أسطر المكررة في الشيت إلى قيمة فريدة واحدة لكل حلقة
+                    const uniqueEpisodes = [...new Set(response.episodes.filter(e => e !== null && e !== ""))];
                     
                     let html = `<div class="siwane-container"><div class="siwane-episodes-container"><h2>حلقات مسلسل ${cleanName}</h2><div class="siwane-episodes-grid">`;
                     uniqueEpisodes.forEach(ep => {
-                        // الآن يقبل "الأخيرة" وأي نص آخر بجانب الأرقام
-                        html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${ep}', 'series')">الحلقة ${ep}</div>`;
+                        // الآن يقبل كلمة "الأخيرة" أو الأرقام ويحقنها في الزر مباشرة
+                        let btnLabel = isNaN(ep) ? ep : `الحلقة ${ep}`;
+                        html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${ep}', 'series')">${btnLabel}</div>`;
                     });
                     html += `</div></div></div>`;
                     window.siwaneRedirect = (s, e, t) => redirectToWatchPage(s, e, t);
@@ -107,7 +108,7 @@ $(document).ready((function() {
     }
 
     // ==========================================
-    // 🔗 التحويل والذاكرة الذكية (بدون تعارض)
+    // 🔗 التحويل والذاكرة الذكية (بدون تعارض مع الحماية)
     // ==========================================
     async function redirectToWatchPage(sheet, id, type) {
         try {
@@ -116,7 +117,7 @@ $(document).ready((function() {
             if (data.feed.entry) {
                 const randomPost = data.feed.entry[Math.floor(Math.random() * data.feed.entry.length)];
                 const postUrl = randomPost.link.find(link => link.rel === "alternate").href;
-                sessionStorage.setItem("siwane_access_token", "true"); // توكن الحماية
+                sessionStorage.setItem("siwane_access_token", "true"); // تفعيل توكن الحماية
                 const sep = postUrl.includes("?") ? "&" : "?";
                 window.location.href = `${postUrl}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}&${type==='movie'?'movie':'ep'}=${encodeURIComponent(id)}`;
             }
@@ -134,7 +135,7 @@ $(document).ready((function() {
             };
             initializeWatchPage(params);
 
-            // استعادة السيرفر تلقائياً (الذاكرة الذكية)
+            // ميزة الذاكرة الذكية: العثور على السيرفر الأخير وتفعيله تلقائياً
             const saved = sessionStorage.getItem("siwane_last_server");
             if (saved) {
                 const data = JSON.parse(saved);
@@ -147,10 +148,13 @@ $(document).ready((function() {
 
     function playSelectedServer(serverId, params) {
         if (countdownInterval) clearInterval(countdownInterval);
+        // حفظ السيرفر المختار في sessionStorage لنتذكره عند العودة
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
+        
         $("#siwane-countdown-text").text("جاري تأمين المشغل...");
         $("#siwane-countdown-display").css("display", "flex");
         $("#siwane-video-frame").hide();
+        
         $.ajax({
             url: `${WORKER_URL}/get-secure-player`,
             data: { sheet: params.SHEET, id: serverId },
