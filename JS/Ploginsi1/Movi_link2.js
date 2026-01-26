@@ -1,5 +1,5 @@
 $(document).ready((function() {
-    // 1. الإعدادات العامة
+    // 1. الإعدادات والبارامترات
     const config = window.siwaneGlobalConfig || {},
         urlParams = new URLSearchParams(window.location.search),
         mode = urlParams.get("mode"),
@@ -7,23 +7,22 @@ $(document).ready((function() {
 
     let countdownInterval = null;
 
-    // --- نظام الحماية من الزيارات المباشرة ---
+    // --- نظام الحماية الذكي ---
     const isInternalNavigation = document.referrer.indexOf(window.location.hostname) !== -1;
     const hasAccessFlag = sessionStorage.getItem("siwane_access_token") === "true";
     const canViewContent = isInternalNavigation || hasAccessFlag;
 
-    // التحقق من المسار: هل نحن في صفحة مشاهدة أم في اللوبي؟
     if ("watch" === mode && canViewContent) {
         handleWatchRoute();
     } else if ("watch" === mode && !canViewContent) {
-        console.warn("Direct access blocked. Redirecting to normal view.");
+        console.warn("Direct access blocked.");
     } else {
-        // تفعيل نظام اللوبي مع الحماية الثلاثية (نقرة + تمرير + تأخير)
+        // تشغيل اللوبي بنظام الحماية المخصص (فيلم / مسلسل)
         initializeLobbyWithProtection(config);
     }
 
     // ==========================================
-    // 🛡️ الجزء الأول: نظام حماية اللوبي (Human Verification)
+    // 🛡️ نظام حماية اللوبي المخصص (Level Up)
     // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = $("#siwane-lobby");
@@ -32,56 +31,77 @@ $(document).ready((function() {
         const sheet = lobbyElement.data("sheet");
         const movie = lobbyElement.data("movie");
 
-        // حقن زر التفعيل الأصلي بكلاساتك وتنسيقك
+        // تخصيص النصوص والأيقونات بناءً على نوع المحتوى
+        let actionText, headerText, scrollContext;
+        if (movie) {
+            headerText = `بوابة مشاهدة فيلم: ${movie}`;
+            actionText = `<i class="fa fa-play-circle"></i> بدء مشاهدة الفيلم الآن`;
+            scrollContext = "رابط الفيلم";
+        } else {
+            headerText = `قائمة حلقات مسلسل: ${sheet}`;
+            actionText = `<i class="fa fa-list-ul"></i> استعراض حلقات المسلسل`;
+            scrollContext = "قائمة الحلقات";
+        }
+
+        // حقن الحاوية باستخدام كلاسات الهوية البصرية الخاصة بك
         lobbyElement.html(`
-            <div id="siwane-activation-wrapper" style="text-align:center; padding:20px; border:1px dashed #ccc; border-radius:12px; background:rgba(0,0,0,0.02);">
-                <p id="activation-status" style="margin-bottom:12px; font-size:14px; font-weight:bold; color:#555;">محتوى آمن: يرجى تفعيل قائمة العرض</p>
-                <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; margin:0 auto; max-width:300px;">
-                   انقر هنا لعرض الحلقات / الفيلم
-                </a>
+            <div class="siwane-container" id="siwane-auth-wrapper">
+                <div class="siwane-server-container" style="text-align:center;">
+                    <h2 id="activation-status">${headerText}</h2>
+                    <div style="padding: 25px 0;">
+                        <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
+                           ${actionText}
+                        </a>
+                    </div>
+                    <p id="scroll-msg" style="display:none; color: #d35400; font-weight: bold; font-size: 13px; animation: pulse 1.5s infinite;">
+                        <i class="fa fa-mouse-pointer"></i> خطوة أمان: يرجى تمرير الصفحة للأسفل لتأمين ${scrollContext}...
+                    </p>
+                </div>
             </div>
         `);
 
+        // منطق التفعيل (نقرة -> تمرير -> تأخير)
         $("#activate-trigger").click(function(e) {
             e.preventDefault();
             const triggerBtn = $(this);
-            const statusText = $("#activation-status");
+            const statusHeader = $("#activation-status");
+            const scrollMsg = $("#scroll-msg");
 
-            // أ. المرحلة الأولى: طلب التمرير
             triggerBtn.fadeOut(200);
-            statusText.html('<span style="color:#d35400;"><i class="fa fa-mouse-pointer"></i> خطوة أخيرة: يرجى تمرير الصفحة للأسفل قليلاً...</span>');
+            statusHeader.text("جاري فحص الاتصال البشري...");
+            scrollMsg.fadeIn();
 
-            // ب. المرحلة الثانية: مراقبة التمرير البشري
             let scrollTriggered = false;
             $(window).on('scroll.siwaneAuth', function() {
                 if (!scrollTriggered) {
                     scrollTriggered = true;
-                    statusText.html('<i class="fa fa-spinner fa-spin"></i> جاري فحص الأمان وتأمين الاتصال (2 ثانية)...');
+                    scrollMsg.html('<i class="fa fa-spinner fa-spin"></i> جاري استخراج البيانات المشفرة (2 ثانية)...');
 
-                    // ج. المرحلة الثالثة: التأخير الزمني (انعاش النظام)
                     setTimeout(function() {
-                        statusText.hide();
-                        $("#siwane-activation-wrapper").fadeOut(300, function() {
-                            // التنفيذ الفعلي وجلب البيانات من Sheets
+                        $("#siwane-auth-wrapper").fadeOut(300, function() {
                             if (movie) loadMovieLobby(sheet, movie, lobbyElement, config);
                             else loadSeriesLobby(sheet, lobbyElement, config);
                         });
                         $(window).off('scroll.siwaneAuth');
-                    }, 2000); // ثانيتين كما طلبت
+                    }, 2000); // تأخير ثانيتين للانعاش
                 }
             });
         });
     }
 
     // ==========================================
-    // 📺 الجزء الثاني: وظائف جلب البيانات (AJAX)
+    // 📺 وظائف جلب البيانات (AJAX)
     // ==========================================
     function loadMovieLobby(sheet, movieTitle, container, config) {
         container.html(`
-            <div class="siwane-episodes-container">
-                <h2>${movieTitle}</h2>
-                <div class="siwane-episodes-grid" style="grid-template-columns: 1fr;">
-                    <div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">شاهد الفيلم الآن</div>
+            <div class="siwane-container">
+                <div class="siwane-episodes-container">
+                    <h2>${movieTitle}</h2>
+                    <div class="siwane-episodes-grid" style="grid-template-columns: 1fr;">
+                        <div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">
+                            <i class="fa fa-play"></i> تشغيل الفيلم
+                        </div>
+                    </div>
                 </div>
             </div>
         `);
@@ -89,33 +109,37 @@ $(document).ready((function() {
     }
 
     function loadSeriesLobby(sheet, container, config) {
-        container.html('<p class="note">جاري استخراج الحلقات من قاعدة البيانات...</p>');
+        container.html('<div class="siwane-container"><p class="note">جاري تحميل قائمة الحلقات...</p></div>');
         $.ajax({
             url: `${config.GAS_URL}?contentSheetName=${encodeURIComponent(sheet)}&action=getEpisodes`,
             type: "GET",
             dataType: "json",
             success: function(response) {
                 if (response.episodes && response.episodes.length > 0) {
-                    let html = `<div class="siwane-episodes-container"><h2>حلقات ${sheet}</h2><div class="siwane-episodes-grid">`;
+                    let html = `
+                        <div class="siwane-container">
+                            <div class="siwane-episodes-container">
+                                <h2>حلقات مسلسل ${sheet}</h2>
+                                <div class="siwane-episodes-grid">`;
                     
                     response.episodes.forEach(episode => {
                         if (episode !== null) {
-                            // السكربت يقرأ النص من شيتس كما هو (سواء رقم أو كلمة "الأخيرة")
+                            // يدعم الأرقام أو النصوص مثل "الحلقة الأخيرة" من الشيت مباشرة
                             html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${episode}', 'series')">الحلقة ${episode}</div>`;
                         }
                     });
                     
-                    html += "</div></div>";
+                    html += `</div></div></div>`;
                     window.siwaneRedirect = (s, e, t) => redirectToWatchPage(s, e, t);
                     container.hide().html(html).fadeIn(600);
                 }
             },
-            error: function() { container.html('<p class="error">فشل جلب البيانات، يرجى المحاولة لاحقاً.</p>'); }
+            error: function() { container.html('<div class="siwane-container"><p class="error">فشل جلب الحلقات.</p></div>'); }
         });
     }
 
     // ==========================================
-    // 🔗 الجزء الثالث: نظام التحويل المشفر (Redirect)
+    // 🔗 نظام التحويل (Redirect)
     // ==========================================
     async function redirectToWatchPage(sheet, id, type) {
         try {
@@ -125,30 +149,26 @@ $(document).ready((function() {
                 const randomPost = data.feed.entry[Math.floor(Math.random() * data.feed.entry.length)];
                 const postUrl = randomPost.link.find(link => link.rel === "alternate").href;
                 
-                // تفعيل التوكن قبل الانتقال
                 sessionStorage.setItem("siwane_access_token", "true");
                 
                 const separator = postUrl.includes("?") ? "&" : "?";
                 const idParam = type === "movie" ? `&movie=${encodeURIComponent(id)}` : `&ep=${id}`;
                 window.location.href = `${postUrl}${separator}mode=watch&sheet=${encodeURIComponent(sheet)}${idParam}`;
             }
-        } catch (error) { alert("عذراً، حدث خطأ في توجيهك."); }
+        } catch (error) { alert("خطأ في التحويل."); }
     }
 
     // ==========================================
-    // 🎬 الجزء الرابع: منطق صفحة المشاهدة (Watch Page)
+    // 🎬 الجزء الخاص بصفحة المشاهدة (Watch)
     // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), ep = urlParams.get("ep"), movie = urlParams.get("movie");
         if (sheet && config.GAS_URL) {
             initializeWatchPage({
-                GAS_URL: config.GAS_URL, 
-                COUNTDOWN: config.COUNTDOWN || 10,
-                SHEET: decodeURIComponent(sheet), 
-                TYPE: movie ? "movie" : "series",
+                GAS_URL: config.GAS_URL, COUNTDOWN: config.COUNTDOWN || 10,
+                SHEET: decodeURIComponent(sheet), TYPE: movie ? "movie" : "series",
                 ID: movie ? decodeURIComponent(movie) : ep,
-                AD_LINKS: config.AD_LINKS || {}, 
-                AD_BUTTONS_COUNT: config.AD_BUTTONS_COUNT || 3
+                AD_LINKS: config.AD_LINKS || {}, AD_BUTTONS_COUNT: config.AD_BUTTONS_COUNT || 3
             });
         }
     }
@@ -165,7 +185,7 @@ $(document).ready((function() {
                 <header class="siwane-header"><h1>${title}</h1></header>
                 <div class="siwane-server-container">
                     <h2>اختر سيرفر المشاهدة</h2>
-                    <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات الآمنة...</p></div>
+                    <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"><p>جاري تحميل السيرفرات...</p></div>
                 </div>
             </div>
         `);
@@ -180,7 +200,7 @@ $(document).ready((function() {
                         <div id="siwane-countdown"></div>
                     </div>
                     <iframe id="siwane-video-frame" style="display:none;" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                    <a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا انتقل وادعمنا بالنقر</a>
+                    <a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا ادعمنا بالنقر</a>
                 </div>
             </div>
         `);
@@ -204,8 +224,7 @@ $(document).ready((function() {
 
     function loadServers(params) {
         const serversGrid = $("#siwane-servers-grid");
-        let query = `contentSheetName=${encodeURIComponent(params.SHEET)}`;
-        query += params.TYPE === "movie" ? `&movieTitle=${encodeURIComponent(params.ID)}` : `&episodeNumber=${params.ID}`;
+        let query = `contentSheetName=${encodeURIComponent(params.SHEET)}&${params.TYPE === "movie" ? `movieTitle=${encodeURIComponent(params.ID)}` : `episodeNumber=${params.ID}`}`;
         
         $.ajax({
             url: `${params.GAS_URL}?${query}`,
@@ -223,13 +242,13 @@ $(document).ready((function() {
                     serversGrid.append(btn);
                 });
             },
-            error: function() { serversGrid.html('<p class="error">حدث خطأ في جلب السيرفرات.</p>'); }
+            error: function() { serversGrid.html('<p class="error">فشل تحميل السيرفرات.</p>'); }
         });
     }
 
     function playSelectedServer(serverId, params) {
         if (countdownInterval) clearInterval(countdownInterval);
-        $("#siwane-countdown-text").text("جاري استدعاء البيانات...");
+        $("#siwane-countdown-text").text("جاري تأمين الاتصال...");
         $("#siwane-countdown-display").css("display", "flex");
         $("#siwane-video-frame").hide();
         
@@ -242,9 +261,9 @@ $(document).ready((function() {
                     const enc = btoa(res.realUrl).split("").reverse().join("");
                     const playerBlob = createSecurePlayer(enc);
                     startCountdownAndAds(playerBlob, params);
-                } else { $("#siwane-countdown-text").text("عذراً: السيرفر غير متاح حالياً"); }
+                } else { $("#siwane-countdown-text").text("عذراً: السيرفر غير متاح"); }
             },
-            error: function() { $("#siwane-countdown-text").text("خطأ في الاتصال بالخادم."); }
+            error: function() { $("#siwane-countdown-text").text("فشل الاتصال بالخادم."); }
         });
     }
 
@@ -265,8 +284,7 @@ $(document).ready((function() {
     function startCountdownAndAds(playerUrl, params) {
         let count = params.COUNTDOWN;
         const countEl = $("#siwane-countdown"), txtEl = $("#siwane-countdown-text");
-        txtEl.text("جاري تحضير بيئة المشاهدة...");
-        
+        txtEl.text("جاري تحضير الفيديو...");
         countdownInterval = setInterval(function() {
             countEl.text(count); count--;
             if (count < 0) { clearInterval(countdownInterval); countEl.hide(); showAdGate(playerUrl, params); }
@@ -279,16 +297,15 @@ $(document).ready((function() {
         
         let btns = ''; const colors = ['ad-r', 'ad-b', 'ad-o', 'ad-g'];
         for (let i = 1; i <= count; i++) {
-            const cls = colors[i - 1] || colors[0];
-            btns += `<button class="ad-gate-btn ${cls}" data-id="ad${i}" style="padding:8px 12px; font-size:12px; min-width:80px; margin:3px; cursor:pointer; border-radius:5px; border:none; color:#fff;">إعلان ${i}</button>`;
+            btns += `<button class="ad-gate-btn ${colors[i-1] || colors[0]}" data-id="ad${i}" style="padding:8px; margin:3px; cursor:pointer; border-radius:5px; border:none; color:#fff;">إعلان ${i}</button>`;
         }
         
         txtEl.html(`
             <div style="text-align:center;">
-                <p style="color:#ffeb3b; font-size:14px; margin-bottom:10px;">لفتح المشغل، اضغط على الإعلانات التالية:</p>
+                <p style="color:#ffeb3b; font-size:14px; margin-bottom:10px;">اضغط لفتح المشغل:</p>
                 <div style="display:flex; gap:5px; justify-content:center; flex-wrap:wrap;">${btns}</div>
                 <div id="final-unlock" style="display:none; margin-top:15px;">
-                    <button id="play-now" class="siwane-episode-btn" style="width:100%; background:#27ae60; color:#fff; padding:10px; border-radius:5px; border:none; cursor:pointer;">تشغيل الفيديو الآن</button>
+                    <button id="play-now" class="siwane-episode-btn" style="width:100%; background:var(--linkC); color:#fff; padding:10px; border:none; cursor:pointer;">تشغيل الفيديو الآن</button>
                 </div>
             </div>
         `);
