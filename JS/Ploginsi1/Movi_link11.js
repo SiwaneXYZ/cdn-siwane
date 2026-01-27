@@ -23,8 +23,8 @@ $(document).ready((function() {
         initializeLobbyWithProtection(config);
     }
 
-    // ==========================================
-    // 🛡️ حماية اللوبي (النقرة + التمرير + التأخير)
+        // ==========================================
+    // 🛡️ حماية اللوبي (تعديل الواجهة فقط مع الحفاظ على الوظيفة)
     // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = $("#siwane-lobby");
@@ -39,30 +39,45 @@ $(document).ready((function() {
 
         lobbyElement.html(`
             <div class="siwane-container" id="siwane-auth-wrapper">
-                <div class="siwane-server-container" style="text-align:center;">
-                    <h2>${headerText}</h2>
-                    <div style="padding: 20px 0;">
-                        <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
-                           <i class="fa fa-play-circle"></i> ${actionText}
-                        </a>
+                <div class="siwane-server-container" style="text-align:center; min-height: 220px; display: flex; flex-direction: column; justify-content: center;">
+                    <h2 style="margin-bottom: 15px;">${headerText}</h2>
+                    
+                    <div id="siwane-interactive-area">
+                        <div style="padding: 10px 0;">
+                            <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
+                               <i class="fa fa-play-circle"></i> ${actionText}
+                            </a>
+                        </div>
                     </div>
-                    <p id="scroll-msg" style="display:none; color: #d35400; font-weight: bold; font-size: 13px;">
-                        يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
-                    </p>
+
+                    <div id="siwane-scroll-indicator" style="display:none; margin: 15px 0;">
+                        <div class="siwane-scroll-anim">
+                            <i class="fa fa-hand-pointer-o"></i>
+                        </div>
+                        <p id="scroll-msg" style="color: #d35400; font-weight: bold; font-size: 13px; margin: 0;">
+                            يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
+                        </p>
+                    </div>
                 </div>
             </div>
         `);
 
         $("#activate-trigger").click(function(e) {
             e.preventDefault();
-            $(this).fadeOut(200);
-            $("#scroll-msg").fadeIn();
+            // إخفاء الزر وإظهار الأيقونة المتحركة في نفس المكان لإلغاء الفراغ
+            $("#siwane-interactive-area").fadeOut(200, function() {
+                $("#siwane-scroll-indicator").fadeIn(300);
+            });
 
             let scrollTriggered = false;
             $(window).on('scroll.siwaneAuth', function() {
                 if (!scrollTriggered) {
                     scrollTriggered = true;
+                    // الحفاظ على منطقك الأصلي: تغيير النص عند التفاعل
                     $("#scroll-msg").html('<i class="fa fa-spinner fa-spin"></i> جاري استخراج البيانات...');
+                    // إخفاء أيقونة اليد عند بدء التحميل
+                    $(".siwane-scroll-anim").fadeOut(200);
+
                     setTimeout(function() {
                         $("#siwane-auth-wrapper").fadeOut(300, function() {
                             if (movie) loadMovieLobby(rawSheet, movie, lobbyElement, config);
