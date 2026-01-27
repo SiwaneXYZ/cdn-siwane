@@ -31,7 +31,7 @@ $(document).ready((function() {
     // ==========================================
     // 🛡️ حماية اللوبي (تحسين الواجهة بالكامل بـ SVG)
     // ==========================================
-    function initializeLobbyWithProtection(config) {
+        function initializeLobbyWithProtection(config) {
         const lobbyElement = $("#siwane-lobby");
         if (lobbyElement.length === 0 || !config.GAS_URL) return;
 
@@ -42,14 +42,15 @@ $(document).ready((function() {
         let actionText = movie ? `بدء مشاهدة فيلم: ${movie}` : `استعراض حلقات: مسلسل ${cleanName}`;
         let headerText = movie ? `بوابة الفيلم` : `قائمة الحلقات`;
 
-        // إضافة حركات الـ SVG عبر CSS
+        // تم تقليل min-height هنا من 180px إلى 100px وتصغير الهوامش
         const style = `
             <style>
-                .siwane-flex-box { min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+                .siwane-flex-box { min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+                .siwane-server-container h2 { margin-bottom: 10px; } /* تقليل الفراغ تحت العنوان */
                 @keyframes siwane-spin { to { transform: rotate(360deg); } }
                 .siwane-spin { animation: siwane-spin 0.8s linear infinite; }
-                @keyframes siwane-swipe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
-                .siwane-hand-swipe { animation: siwane-swipe 1s infinite ease-in-out; margin-bottom: 10px; }
+                @keyframes siwane-swipe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+                .siwane-hand-swipe { animation: siwane-swipe 1s infinite ease-in-out; margin-bottom: 5px; }
             </style>
         `;
 
@@ -59,14 +60,12 @@ $(document).ready((function() {
                     <h2>${headerText}</h2>
                     <div class="siwane-flex-box">
                         <div id="siwane-btn-zone" style="width:100%;">
-                            <div style="padding: 20px 0;">
-                                <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
+                            <div style="padding: 10px 0;"> <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
                                    ${icons.play} ${actionText}
                                 </a>
                             </div>
                         </div>
-                        <div id="siwane-scroll-zone" style="display:none;">
-                            ${icons.hand}
+                        <div id="siwane-scroll-zone" style="display:none; padding: 10px 0;"> ${icons.hand}
                             <p id="scroll-msg" style="color: var(--linkC); font-weight: bold; font-size: 13px; margin: 0;">
                                 يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
                             </p>
