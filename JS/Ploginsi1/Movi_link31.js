@@ -49,9 +49,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 .siwane-spin { animation: siwane-spin 0.8s linear infinite; }
                 @keyframes siwane-swipe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
                 .siwane-hand-swipe { animation: siwane-swipe 1s infinite ease-in-out; margin-bottom: 5px; }
-                .siwane-fade-out { opacity: 0; transition: opacity 0.3s ease; }
-                .siwane-fade-in { animation: fadeIn 0.5s forwards; }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                .siwane-fade-in { animation: siwane-fade-in-kf 0.5s forwards; }
+                @keyframes siwane-fade-in-kf { from { opacity: 0; } to { opacity: 1; } }
             </style>
         `;
 
@@ -78,14 +77,11 @@ document.addEventListener("DOMContentLoaded", function() {
         `;
 
         const trigger = document.getElementById("activate-trigger");
-        const btnZone = document.getElementById("siwane-btn-zone");
-        const scrollZone = document.getElementById("siwane-scroll-zone");
-
         trigger.addEventListener("click", function(e) {
             e.preventDefault();
-            btnZone.style.display = "none";
+            document.getElementById("siwane-btn-zone").style.display = "none";
+            const scrollZone = document.getElementById("siwane-scroll-zone");
             scrollZone.style.display = "block";
-            scrollZone.classList.add("siwane-fade-in");
 
             let scrollTriggered = false;
             const scrollHandler = function() {
@@ -97,7 +93,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
                     setTimeout(function() {
                         const wrapper = document.getElementById("siwane-auth-wrapper");
-                        wrapper.classList.add("siwane-fade-out");
+                        wrapper.style.opacity = "0";
+                        wrapper.style.transition = "opacity 0.3s";
                         
                         setTimeout(() => {
                             if (movie) loadMovieLobby(rawSheet, movie, lobbyElement, config);
@@ -113,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 📺 جلب المحتوى (Fetch API بدلاً من Ajax)
+    // 📺 جلب المحتوى (Fetch API)
     // ==========================================
     async function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
@@ -125,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (data.episodes && data.episodes.length > 0) {
                 const uniqueEpisodes = [...new Set(data.episodes.filter(e => e !== null && e !== "" && e !== "---"))];
-                let html = `<div class="siwane-container"><div class="siwane-episodes-container"><h2>حلقات مسلسل ${cleanName}</h2><div class="siwane-episodes-grid">`;
+                let html = `<div class="siwane-container siwane-fade-in"><div class="siwane-episodes-container"><h2>حلقات مسلسل ${cleanName}</h2><div class="siwane-episodes-grid">`;
                 uniqueEpisodes.forEach(ep => {
                     let btnLabel = (ep.toString().includes("الأخيرة")) ? ep : `الحلقة ${ep}`;
                     html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${ep}', 'series')">${btnLabel}</div>`;
@@ -134,23 +131,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 window.siwaneRedirect = (s, e, t) => redirectToWatchPage(s, e, t);
                 container.innerHTML = html;
-                container.style.display = "none";
-                container.style.display = "block";
-                container.classList.add("siwane-fade-in");
             }
-        } catch (error) {
-            console.error("Error loading series:", error);
-        }
+        } catch (error) { console.error("Error loading series:", error); }
     }
 
     function loadMovieLobby(sheet, movieTitle, container, config) {
-        container.innerHTML = `<div class="siwane-container"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">${icons.play} شاهد الآن</div></div></div></div>`;
+        container.innerHTML = `<div class="siwane-container siwane-fade-in"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">${icons.play} شاهد الآن</div></div></div></div>`;
         window.siwaneRedirect = (s, t, ty) => redirectToWatchPage(s, t, ty);
     }
 
-    // ==========================================
-    // الذاكرة والمشغل
-    // ==========================================
     async function redirectToWatchPage(sheet, id, type) {
         try {
             const response = await fetch("/feeds/posts/summary?alt=json&max-results=150");
@@ -166,6 +155,9 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (e) { alert("خطأ في التحويل."); }
     }
 
+    // ==========================================
+    // 🎥 المشغل والعداد (تعديل لضمان تكرار العداد)
+    // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), ep = urlParams.get("ep"), movie = urlParams.get("movie");
         const id = movie ? decodeURIComponent(movie) : ep;
@@ -190,15 +182,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
+        // إيقاف العداد القديم إن وجد
         if (countdownInterval) clearInterval(countdownInterval);
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
         
         const videoSection = document.querySelector(".siwane-video-container");
         window.scrollTo({ top: videoSection.offsetTop - 20, behavior: 'smooth' });
 
-        document.getElementById("siwane-countdown-text").innerHTML = `جاري تأمين المشغل و تشغيل المقطع...`;
-        document.getElementById("siwane-countdown-display").style.display = "flex";
-        document.getElementById("siwane-video-frame").style.display = "none";
+        // تصفير الواجهة وإظهار منطقة العداد
+        const countdownDisplay = document.getElementById("siwane-countdown-display");
+        const countdownEl = document.getElementById("siwane-countdown");
+        const countdownText = document.getElementById("siwane-countdown-text");
+        const videoFrame = document.getElementById("siwane-video-frame");
+
+        countdownDisplay.style.display = "flex"; 
+        countdownEl.style.display = "block"; // إعادة إظهار الرقم
+        countdownText.innerHTML = `جاري تأمين المشغل و تشغيل المقطع...`;
+        videoFrame.style.display = "none";
+        videoFrame.src = ""; // تفريغ المشغل السابق
 
         try {
             const response = await fetch(`${WORKER_URL}/get-secure-player?sheet=${encodeURIComponent(params.SHEET)}&id=${encodeURIComponent(serverId)}`);
@@ -208,102 +209,23 @@ document.addEventListener("DOMContentLoaded", function() {
                 startCountdownAndAds(createSecurePlayer(enc), params);
             }
         } catch (error) {
-            console.error("Error securing player:", error);
+            countdownText.innerHTML = "خطأ في تحميل السيرفر.";
         }
-    }
-
-    function initializeWatchPage(params) {
-        const container = document.querySelector(".post-body, .entry-content, #post-body");
-        if (!container) return;
-        
-        const title = params.TYPE === "movie" ? params.ID : `${params.SHEET} - الحلقة ${params.ID}`;
-        document.title = `مشاهدة ${title}`;
-        
-        const headerHtml = `
-            <div class="siwane-container">
-                <header class="siwane-header"><h1>${title}</h1></header>
-                <div class="siwane-server-container">
-                    <h2>اختر السيرفر</h2>
-                    <div id="siwane-servers-grid" class="siwane-servers-grid"></div>
-                </div>
-            </div>`;
-        
-        const footerHtml = `
-            <div class="siwane-container">
-                <div class="siwane-video-container">
-                    <h2>شاشة العرض</h2>
-                    <div id="siwane-countdown-display" style="display:none;">
-                        <div id="siwane-particles-container" class="siwane-particles-container"></div>
-                        <div id="siwane-countdown-text"></div>
-                        <div id="siwane-countdown"></div>
-                    </div>
-                    <iframe id="siwane-video-frame" style="display:none;" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                    <a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا للدعم والمشاهدة</a>
-                </div>
-            </div>`;
-
-        container.insertAdjacentHTML('afterbegin', headerHtml);
-        container.insertAdjacentHTML('beforeend', footerHtml);
-        
-        loadServers(params);
-        createParticles();
-    }
-
-    function createParticles() {
-        const container = document.getElementById("siwane-particles-container");
-        if (!container) return;
-        container.innerHTML = '';
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'siwane-particle';
-            particle.style.left = (Math.random() * 100) + "%";
-            particle.style.top = (Math.random() * 100) + "%";
-            particle.style.animationDuration = (Math.random() * 4 + 3) + "s";
-            container.appendChild(particle);
-        }
-    }
-
-    async function loadServers(params) {
-        const grid = document.getElementById("siwane-servers-grid");
-        grid.innerHTML = `<p style="text-align:center;">جاري جلب السيرفرات...</p>`;
-        
-        let q = `contentSheetName=${encodeURIComponent(params.SHEET)}&${params.TYPE==="movie" ? `movieTitle=${encodeURIComponent(params.ID)}` : `episodeNumber=${encodeURIComponent(params.ID)}`}`;
-        
-        try {
-            const response = await fetch(`${params.GAS_URL}?${q}`);
-            const servers = await response.json();
-            grid.innerHTML = '';
-            servers.forEach(s => {
-                const btn = document.createElement('div');
-                btn.className = 'siwane-server-btn';
-                btn.dataset.id = s.id;
-                btn.innerHTML = `<span>${s.icon || '🔗'}</span> <span>${s.title}</span>`;
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll(".siwane-server-btn").forEach(b => b.classList.remove("active"));
-                    this.classList.add("active");
-                    playSelectedServer(s.id, params);
-                });
-                grid.appendChild(btn);
-            });
-        } catch (error) {
-            grid.innerHTML = `<p>فشل تحميل السيرفرات.</p>`;
-        }
-    }
-
-    function createSecurePlayer(enc) {
-        return URL.createObjectURL(new Blob([`<html><body style="margin:0;background:#000;"><script>var k="${enc}",r=atob(k.split('').reverse().join(''));document.write('<iframe src="'+r+'" style="width:100vw;height:100vh;border:none;" allowfullscreen></iframe>');<\/script></body></html>`],{type:"text/html"}));
     }
 
     function startCountdownAndAds(url, params) {
         let count = params.COUNTDOWN;
         const countdownEl = document.getElementById("siwane-countdown");
+        countdownEl.textContent = count;
+        
         countdownInterval = setInterval(() => {
-            countdownEl.textContent = count;
             count--;
-            if(count < 0){ 
-                clearInterval(countdownInterval); 
-                countdownEl.style.display = "none"; 
-                showAdGate(url, params); 
+            if(count >= 0) {
+                countdownEl.textContent = count;
+            } else {
+                clearInterval(countdownInterval);
+                countdownEl.style.display = "none";
+                showAdGate(url, params);
             }
         }, 1000);
     }
@@ -319,30 +241,19 @@ document.addEventListener("DOMContentLoaded", function() {
             btnsHtml += `<button class="ad-gate-btn ${colors[i-1]||colors[0]}" data-id="ad${i}" style="padding:8px;margin:3px;cursor:pointer;border:none;color:#fff;border-radius:5px;">إعلان ${i}</button>`;
         }
 
-        txt.innerHTML = `
-            <div style="text-align:center;">
-                <p style="color:#ffeb3b;">اضغط على ازرار الاعلانات لفتح المشغل:</p>
-                ${btnsHtml}
-                <div id="final-unlock" style="display:none;margin-top:15px;">
-                    <button id="play-now" class="siwane-episode-btn" style="width:100%;background:var(--linkC);color:#fff;padding:10px;border:none;cursor:pointer;">تشغيل الآن</button>
-                </div>
-            </div>`;
+        txt.innerHTML = `<div style="text-align:center;"><p style="color:#ffeb3b;">اضغط على الاعلانات لفتح المشغل:</p>${btnsHtml}<div id="final-unlock" style="display:none;margin-top:15px;"><button id="play-now" class="siwane-episode-btn" style="width:100%;background:var(--linkC);color:#fff;padding:10px;border:none;cursor:pointer;">تشغيل الآن</button></div></div>`;
 
         document.querySelectorAll(".ad-gate-btn").forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.onclick = function() {
                 const id = this.dataset.id;
                 if(params.AD_LINKS[id]) window.open(params.AD_LINKS[id], '_blank');
-                this.style.opacity = "0.5";
-                this.disabled = true;
-                this.textContent = "تم الفتح";
+                this.style.opacity = "0.5"; this.disabled = true; this.textContent = "تم";
                 clicked[id] = true;
-                if(Object.values(clicked).every(v => v)) {
-                    document.getElementById("final-unlock").style.display = "block";
-                }
-            });
+                if(Object.values(clicked).every(v => v)) document.getElementById("final-unlock").style.display = "block";
+            };
         });
 
-        document.getElementById("play-now").addEventListener('click', () => {
+        document.getElementById("play-now").onclick = () => {
             txt.textContent = "مشاهدة ممتعة!";
             setTimeout(() => {
                 document.getElementById("siwane-countdown-display").style.display = "none";
@@ -350,6 +261,59 @@ document.addEventListener("DOMContentLoaded", function() {
                 frame.src = url;
                 frame.style.display = "block";
             }, 500);
-        });
+        };
+    }
+
+    // ==========================================
+    // بناء واجهة صفحة المشاهدة
+    // ==========================================
+    function initializeWatchPage(params) {
+        const container = document.querySelector(".post-body, .entry-content, #post-body");
+        if (!container) return;
+        const title = params.TYPE === "movie" ? params.ID : `${params.SHEET} - الحلقة ${params.ID}`;
+        document.title = `مشاهدة ${title}`;
+        
+        container.insertAdjacentHTML('afterbegin', `<div class="siwane-container"><header class="siwane-header"><h1>${title}</h1></header><div class="siwane-server-container"><h2>اختر السيرفر</h2><div id="siwane-servers-grid" class="siwane-servers-grid"></div></div></div>`);
+        container.insertAdjacentHTML('beforeend', `<div class="siwane-container"><div class="siwane-video-container"><h2>شاشة العرض</h2><div id="siwane-countdown-display" style="display:none;"><div id="siwane-particles-container" class="siwane-particles-container"></div><div id="siwane-countdown-text"></div><div id="siwane-countdown"></div></div><iframe id="siwane-video-frame" style="display:none;" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe><a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا للدعم والمشاهدة</a></div></div>`);
+        
+        loadServers(params);
+        createParticles();
+    }
+
+    function createParticles() {
+        const container = document.getElementById("siwane-particles-container");
+        if (!container) return;
+        for (let i = 0; i < 30; i++) {
+            const p = document.createElement('div'); p.className = 'siwane-particle';
+            p.style.left = (Math.random() * 100) + "%"; p.style.top = (Math.random() * 100) + "%";
+            p.style.animationDuration = (Math.random() * 4 + 3) + "s";
+            container.appendChild(p);
+        }
+    }
+
+    async function loadServers(params) {
+        const grid = document.getElementById("siwane-servers-grid");
+        grid.innerHTML = `<p style="text-align:center;">جاري جلب السيرفرات...</p>`;
+        let q = `contentSheetName=${encodeURIComponent(params.SHEET)}&${params.TYPE==="movie" ? `movieTitle=${encodeURIComponent(params.ID)}` : `episodeNumber=${encodeURIComponent(params.ID)}`}`;
+        try {
+            const response = await fetch(`${params.GAS_URL}?${q}`);
+            const servers = await response.json();
+            grid.innerHTML = '';
+            servers.forEach(s => {
+                const btn = document.createElement('div');
+                btn.className = 'siwane-server-btn'; btn.dataset.id = s.id;
+                btn.innerHTML = `<span>${s.icon || '🔗'}</span> <span>${s.title}</span>`;
+                btn.onclick = function() {
+                    document.querySelectorAll(".siwane-server-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    playSelectedServer(s.id, params);
+                };
+                grid.appendChild(btn);
+            });
+        } catch (e) { grid.innerHTML = `<p>فشل تحميل السيرفرات.</p>`; }
+    }
+
+    function createSecurePlayer(enc) {
+        return URL.createObjectURL(new Blob([`<html><body style="margin:0;background:#000;"><script>var k="${enc}",r=atob(k.split('').reverse().join(''));document.write('<iframe src="'+r+'" style="width:100vw;height:100vh;border:none;" allowfullscreen></iframe>');<\/script></body></html>`],{type:"text/html"}));
     }
 });
