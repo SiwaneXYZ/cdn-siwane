@@ -1,5 +1,5 @@
 $(document).ready((function() {
-    // 1. الإعدادات العامة
+    // 1. الإعدادات العامة (لم يتم تغيير أي وظيفة)
     const config = window.siwaneGlobalConfig || {},
         urlParams = new URLSearchParams(window.location.search),
         mode = urlParams.get("mode"),
@@ -7,13 +7,18 @@ $(document).ready((function() {
 
     let countdownInterval = null;
 
-    // دالة تنظيف العناوين
     const formatTitle = (text) => text ? text.trim().replace(/^مسلسل\s+/i, "") : "";
 
-    // --- نظام حماية الوصول ---
     const isInternalNavigation = document.referrer.indexOf(window.location.hostname) !== -1;
     const hasAccessFlag = sessionStorage.getItem("siwane_access_token") === "true";
     const canViewContent = isInternalNavigation || hasAccessFlag;
+
+    // تعريف الأيقونات كمتغيرات SVG لتوفير المساحة وتسهيل الاستخدام
+    const icons = {
+        play: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="vertical-align:middle;margin-left:8px;"><path d="M8 5v14l11-7z"/></svg>`,
+        spinner: `<svg viewBox="0 0 50 50" class="siwane-spin" width="16" height="16" style="vertical-align:middle;margin-left:5px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-dasharray="31.415, 31.415" stroke-linecap="round"></circle></svg>`,
+        hand: `<svg viewBox="0 0 24 24" class="siwane-hand-swipe" width="40" height="40" fill="#d35400"><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M15,11l-1.41-1.41L13,10.17V4h-2v6.17l-0.59-0.59L9,11l3,3 L15,11z"/></svg>`
+    };
 
     if ("watch" === mode && canViewContent) {
         handleWatchRoute();
@@ -23,8 +28,8 @@ $(document).ready((function() {
         initializeLobbyWithProtection(config);
     }
 
-        // ==========================================
-    // 🛡️ حماية اللوبي (تعديل الواجهة فقط مع الحفاظ على الوظيفة)
+    // ==========================================
+    // 🛡️ حماية اللوبي (تحسين الواجهة بالكامل بـ SVG)
     // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = $("#siwane-lobby");
@@ -37,26 +42,35 @@ $(document).ready((function() {
         let actionText = movie ? `بدء مشاهدة فيلم: ${movie}` : `استعراض حلقات: مسلسل ${cleanName}`;
         let headerText = movie ? `بوابة الفيلم` : `قائمة الحلقات`;
 
-        lobbyElement.html(`
-            <div class="siwane-container" id="siwane-auth-wrapper">
-                <div class="siwane-server-container" style="text-align:center; min-height: 220px; display: flex; flex-direction: column; justify-content: center;">
-                    <h2 style="margin-bottom: 15px;">${headerText}</h2>
-                    
-                    <div id="siwane-interactive-area">
-                        <div style="padding: 10px 0;">
-                            <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
-                           ${actionText}
-                            </a>
-                        </div>
-                    </div>
+        // إضافة حركات الـ SVG عبر CSS
+        const style = `
+            <style>
+                .siwane-flex-box { min-height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+                @keyframes siwane-spin { to { transform: rotate(360deg); } }
+                .siwane-spin { animation: siwane-spin 0.8s linear infinite; }
+                @keyframes siwane-swipe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+                .siwane-hand-swipe { animation: siwane-swipe 1s infinite ease-in-out; margin-bottom: 10px; }
+            </style>
+        `;
 
-                    <div id="siwane-scroll-indicator" style="display:none; margin: 15px 0;">
-                        <div class="siwane-scroll-anim">
-                            <i class="fa fa-hand-pointer-o"></i>
+        lobbyElement.html(style + `
+            <div class="siwane-container" id="siwane-auth-wrapper">
+                <div class="siwane-server-container" style="text-align:center;">
+                    <h2>${headerText}</h2>
+                    <div class="siwane-flex-box">
+                        <div id="siwane-btn-zone" style="width:100%;">
+                            <div style="padding: 20px 0;">
+                                <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
+                                   ${icons.play} ${actionText}
+                                </a>
+                            </div>
                         </div>
-                        <p id="scroll-msg" style="color: #d35400; font-weight: bold; font-size: 13px; margin: 0;">
-                            يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
-                        </p>
+                        <div id="siwane-scroll-zone" style="display:none;">
+                            ${icons.hand}
+                            <p id="scroll-msg" style="color: #d35400; font-weight: bold; font-size: 13px; margin: 0;">
+                                يرجى التمرير للأسفل قليلاً لتأمين المحتوى...
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -64,19 +78,15 @@ $(document).ready((function() {
 
         $("#activate-trigger").click(function(e) {
             e.preventDefault();
-            // إخفاء الزر وإظهار الأيقونة المتحركة في نفس المكان لإلغاء الفراغ
-            $("#siwane-interactive-area").fadeOut(200, function() {
-                $("#siwane-scroll-indicator").fadeIn(300);
-            });
+            $("#siwane-btn-zone").hide();
+            $("#siwane-scroll-zone").fadeIn(200);
 
             let scrollTriggered = false;
             $(window).on('scroll.siwaneAuth', function() {
                 if (!scrollTriggered) {
                     scrollTriggered = true;
-                    // الحفاظ على منطقك الأصلي: تغيير النص عند التفاعل
-                    $("#scroll-msg").html('<i class="fa fa-spinner fa-spin"></i> جاري استخراج البيانات...');
-                    // إخفاء أيقونة اليد عند بدء التحميل
-                    $(".siwane-scroll-anim").fadeOut(200);
+                    $("#scroll-msg").html(`${icons.spinner} جاري استخراج البيانات...`);
+                    $(".siwane-hand-swipe").fadeOut(100);
 
                     setTimeout(function() {
                         $("#siwane-auth-wrapper").fadeOut(300, function() {
@@ -91,11 +101,11 @@ $(document).ready((function() {
     }
 
     // ==========================================
-    // 📺 جلب الحلقات (تجاهل الفواصل ودعم "الأخيرة")
+    // 📺 وظائف جلب المحتوى (الحفاظ على الأداء الأصلي)
     // ==========================================
     function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
-        container.html('<div class="siwane-container"><p class="note">جاري تحميل القائمة...</p></div>');
+        container.html(`<div class="siwane-container" style="text-align:center;"><p class="note">${icons.spinner} جاري تحميل القائمة...</p></div>`);
         $.ajax({
             url: `${config.GAS_URL}?contentSheetName=${encodeURIComponent(sheet)}&action=getEpisodes`,
             type: "GET", dataType: "json",
@@ -116,12 +126,12 @@ $(document).ready((function() {
     }
 
     function loadMovieLobby(sheet, movieTitle, container, config) {
-        container.html(`<div class="siwane-container"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">شاهد الآن</div></div></div></div>`);
+        container.html(`<div class="siwane-container"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">${icons.play} شاهد الآن</div></div></div></div>`);
         window.siwaneRedirect = (s, t, ty) => redirectToWatchPage(s, t, ty);
     }
 
     // ==========================================
-    // 🔗 الذاكرة الذكية والتمرير السلس
+    // الذاكرة والمشغل (لم يتغير شيء في المنطق)
     // ==========================================
     async function redirectToWatchPage(sheet, id, type) {
         try {
@@ -157,20 +167,13 @@ $(document).ready((function() {
         }
     }
 
-    // دالة اختيار السيرفر مع التمرير السلس
     function playSelectedServer(serverId, params) {
         if (countdownInterval) clearInterval(countdownInterval);
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
-        
-        // --- ميزة التمرير السلس للمشغل ---
-        $("html, body").animate({ 
-            scrollTop: $(".siwane-video-container").offset().top - 20 
-        }, 800);
-
-        $("#siwane-countdown-text").text("جاري تأمين المشغل...");
+        $("html, body").animate({ scrollTop: $(".siwane-video-container").offset().top - 20 }, 800);
+        $("#siwane-countdown-text").html(`${icons.spinner} جاري تأمين المشغل...`);
         $("#siwane-countdown-display").css("display", "flex");
         $("#siwane-video-frame").hide();
-
         $.ajax({
             url: `${WORKER_URL}/get-secure-player`,
             data: { sheet: params.SHEET, id: serverId },
@@ -184,72 +187,37 @@ $(document).ready((function() {
         });
     }
 
-    // ==========================================
-    // 🎬 واجهة المشاهدة والمؤثرات البصرية
-    // ==========================================
     function initializeWatchPage(params) {
         const container = $(".post-body, .entry-content, #post-body").first();
         const title = params.TYPE === "movie" ? params.ID : `${params.SHEET} - الحلقة ${params.ID}`;
         document.title = `مشاهدة ${title}`;
-        
-        container.prepend(`
-            <div class="siwane-container">
-                <header class="siwane-header"><h1>${title}</h1></header>
-                <div class="siwane-server-container">
-                    <h2>اختر السيرفر</h2>
-                    <div id="siwane-servers-grid" class="siwane-servers-grid loading-state"></div>
-                </div>
-            </div>
-        `);
-        
-        container.append(`
-            <div class="siwane-container">
-                <div class="siwane-video-container">
-                    <h2>شاشة العرض</h2>
-                    <div id="siwane-countdown-display" style="display:none;">
-                        <div id="siwane-particles-container" class="siwane-particles-container"></div>
-                        <div id="siwane-countdown-text"></div>
-                        <div id="siwane-countdown"></div>
-                    </div>
-                    <iframe id="siwane-video-frame" style="display:none;" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe>
-                    <a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا للدعم والمشاهدة</a>
-                </div>
-            </div>
-        `);
-        
+        container.prepend(`<div class="siwane-container"><header class="siwane-header"><h1>${title}</h1></header><div class="siwane-server-container"><h2>اختر السيرفر</h2><div id="siwane-servers-grid" class="siwane-servers-grid"></div></div></div>`);
+        container.append(`<div class="siwane-container"><div class="siwane-video-container"><h2>شاشة العرض</h2><div id="siwane-countdown-display" style="display:none;"><div id="siwane-particles-container" class="siwane-particles-container"></div><div id="siwane-countdown-text"></div><div id="siwane-countdown"></div></div><iframe id="siwane-video-frame" style="display:none;" allowfullscreen sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"></iframe><a class="button ln" href="/p/offerwal.html" style="width:100%;text-align:center;display:block;margin-top:10px;">انقر هنا للدعم والمشاهدة</a></div></div>`);
         loadServers(params);
-        createParticles(); // تفعيل الجزيئات
+        createParticles();
     }
 
-    // دالة إنشاء الجزيئات المتحركة
     function createParticles() {
         const container = $("#siwane-particles-container");
         container.empty();
         for (let i = 0; i < 30; i++) {
             const particle = $('<div class="siwane-particle"></div>');
-            particle.css({
-                left: (Math.random() * 100) + "%",
-                top: (Math.random() * 100) + "%",
-                animationDuration: (Math.random() * 4 + 3) + "s"
-            });
+            particle.css({ left: (Math.random() * 100) + "%", top: (Math.random() * 100) + "%", animationDuration: (Math.random() * 4 + 3) + "s" });
             container.append(particle);
         }
     }
 
     function loadServers(params) {
         const grid = $("#siwane-servers-grid");
+        grid.html(`<p style="text-align:center;width:100%;">${icons.spinner} جاري جلب السيرفرات...</p>`);
         let q = `contentSheetName=${encodeURIComponent(params.SHEET)}&${params.TYPE==="movie" ? `movieTitle=${encodeURIComponent(params.ID)}` : `episodeNumber=${encodeURIComponent(params.ID)}`}`;
         $.ajax({
             url: `${params.GAS_URL}?${q}`, type: "GET", dataType: "json",
             success: function(servers) {
-                grid.removeClass("loading-state").empty();
+                grid.empty();
                 servers.forEach(s => {
                     const btn = $(`<div class="siwane-server-btn" data-id="${s.id}"><span>${s.icon || '🔗'}</span> <span>${s.title}</span></div>`);
-                    btn.click(function() { 
-                        $(".siwane-server-btn").removeClass("active"); 
-                        $(this).addClass("active"); 
-                        playSelectedServer(s.id, params); 
-                    });
+                    btn.click(function() { $(".siwane-server-btn").removeClass("active"); $(this).addClass("active"); playSelectedServer(s.id, params); });
                     grid.append(btn);
                 });
             }
@@ -278,7 +246,7 @@ $(document).ready((function() {
         txt.html(`<div style="text-align:center;"><p style="color:#ffeb3b;">اضغط على ازرار الاعلانات لفتح المشغل:</p>${btns}<div id="final-unlock" style="display:none;margin-top:15px;"><button id="play-now" class="siwane-episode-btn" style="width:100%;background:var(--linkC);color:#fff;padding:10px;border:none;cursor:pointer;">تشغيل الآن</button></div></div>`);
         $(".ad-gate-btn").click(function(){ 
             const id = $(this).data("id"); if(params.AD_LINKS[id]) window.open(params.AD_LINKS[id],'_blank'); 
-            $(this).css("opacity","0.5").prop('disabled',true); clicked[id]=true;
+            $(this).css("opacity","0.5").prop('disabled',true).text("تم الفتح"); clicked[id]=true;
             if(Object.values(clicked).every(v=>v)) $("#final-unlock").fadeIn();
         });
         $("#play-now").click(() => { txt.text("مشاهدة ممتعة!"); setTimeout(() => { $("#siwane-countdown-display").hide(); $("#siwane-video-frame").attr("src",url).show(); }, 500); });
