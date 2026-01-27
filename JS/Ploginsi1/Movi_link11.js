@@ -45,7 +45,7 @@ $(document).ready((function() {
                     <div id="siwane-interactive-area">
                         <div style="padding: 10px 0;">
                             <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
-                               <i class="fa fa-play-circle"></i> ${actionText}
+                           ${actionText}
                             </a>
                         </div>
                     </div>
