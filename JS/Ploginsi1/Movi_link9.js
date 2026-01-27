@@ -269,3 +269,70 @@ $(document).ready((function() {
         $("#play-now").click(() => { txt.text("مشاهدة ممتعة!"); setTimeout(() => { $("#siwane-countdown-display").hide(); $("#siwane-video-frame").attr("src",url).show(); }, 500); });
     }
 }));
+
+/* siwane smart anti-devtools (video-focused) */
+(function () {
+  'use strict';
+
+  let devtoolsOpen = false;
+  let poisoned = false;
+
+  // ====== 1. كشف DevTools (خفيف) ======
+  function detectDevTools() {
+    const threshold = 160;
+    const widthDiff = window.outerWidth - window.innerWidth;
+    const heightDiff = window.outerHeight - window.innerHeight;
+    return widthDiff > threshold || heightDiff > threshold;
+  }
+
+  setInterval(() => {
+    const detected = detectDevTools();
+    if (detected && !devtoolsOpen) {
+      devtoolsOpen = true;
+      poisonVideo();
+    }
+    if (!detected && devtoolsOpen) {
+      devtoolsOpen = false;
+      recoverVideo();
+    }
+  }, 1000);
+
+  // ====== 2. تسميم رابط الفيديو ======
+  function poisonVideo() {
+    if (poisoned) return;
+    poisoned = true;
+
+    const iframe = document.getElementById('siwane-video-frame');
+    if (!iframe) return;
+
+    try {
+      // قتل الرابط الحالي
+      iframe.src = 'about:blank';
+      URL.revokeObjectURL(iframe.src);
+    } catch (e) {}
+
+    // رسالة ناعمة
+    const msg = document.getElementById('siwane-countdown-text');
+    if (msg) {
+      msg.textContent = '⚠️ تم إيقاف المشغل مؤقتًا';
+    }
+
+    console.warn('[siwane] Untrusted environment detected');
+  }
+
+  // ====== 3. استرجاع المشغل ======
+  function recoverVideo() {
+    if (!poisoned) return;
+    poisoned = false;
+
+    const msg = document.getElementById('siwane-countdown-text');
+    if (msg) {
+      msg.textContent = '🔄 أعد تشغيل المشغل';
+    }
+
+    // نفرض إعادة اختيار السيرفر
+    const iframe = document.getElementById('siwane-video-frame');
+    if (iframe) iframe.removeAttribute('src');
+  }
+
+})();
