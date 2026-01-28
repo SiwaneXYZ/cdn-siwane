@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const config = window.siwaneGlobalConfig || {},
         urlParams = new URLSearchParams(window.location.search),
         mode = urlParams.get("mode"),
+        // رابط الوركر الخاص بك الذي قمت بنشره للتو
         WORKER_URL = "https://secure-player.mnaht00.workers.dev";
 
     let countdownInterval = null;
@@ -156,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 🎥 المشغل والعداد (تعديل لضمان تكرار العداد)
+    // 🎥 المشغل والعداد 
     // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), ep = urlParams.get("ep"), movie = urlParams.get("movie");
@@ -182,29 +183,28 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
-        // إيقاف العداد القديم إن وجد
         if (countdownInterval) clearInterval(countdownInterval);
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
         
         const videoSection = document.querySelector(".siwane-video-container");
         window.scrollTo({ top: videoSection.offsetTop - 20, behavior: 'smooth' });
 
-        // تصفير الواجهة وإظهار منطقة العداد
         const countdownDisplay = document.getElementById("siwane-countdown-display");
         const countdownEl = document.getElementById("siwane-countdown");
         const countdownText = document.getElementById("siwane-countdown-text");
         const videoFrame = document.getElementById("siwane-video-frame");
 
         countdownDisplay.style.display = "flex"; 
-        countdownEl.style.display = "block"; // إعادة إظهار الرقم
+        countdownEl.style.display = "block"; 
         countdownText.innerHTML = `جاري تأمين المشغل و تشغيل المقطع...`;
         videoFrame.style.display = "none";
-        videoFrame.src = ""; // تفريغ المشغل السابق
+        videoFrame.src = ""; 
 
         try {
             const response = await fetch(`${WORKER_URL}/get-secure-player?sheet=${encodeURIComponent(params.SHEET)}&id=${encodeURIComponent(serverId)}`);
             const res = await response.json();
             if (res.realUrl) {
+                // تشفير الرابط القادم من الوركر بأسلوب Base64 + Reverse
                 const enc = btoa(res.realUrl).split("").reverse().join("");
                 startCountdownAndAds(createSecurePlayer(enc), params);
             }
@@ -313,7 +313,53 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (e) { grid.innerHTML = `<p>فشل تحميل السيرفرات.</p>`; }
     }
 
+    // ==========================================
+    // 🛡️ دالة إنشاء المشغل الآمن (المحدثة لفك العكس)
+    // ==========================================
     function createSecurePlayer(enc) {
-        return URL.createObjectURL(new Blob([`<html><body style="margin:0;background:#000;"><script>var k="${enc}",r=atob(k.split('').reverse().join(''));document.write('<iframe src="'+r+'" style="width:100vw;height:100vh;border:none;" allowfullscreen></iframe>');<\/script></body></html>`],{type:"text/html"}));
+        return URL.createObjectURL(new Blob([`
+            <html>
+            <body style="margin:0;background:#000;overflow:hidden;">
+                <script>
+                    (function() {
+                        var k = "${enc}";
+                        // 1. فك التشفير الخارجي
+                        var raw = atob(k.split('').reverse().join(''));
+                        
+                        // 2. دالة إصلاح المعرف (عكس العكس)
+                        function fix(u) {
+                            var pts = [
+                                {r: /(\/videoembed\/)(\\d+)/},
+                                {r: /(id=)(\\d+)/},
+                                {r: /(oid=)(-?\\d+)/},
+                                {r: /(\/embed\/)([a-zA-Z0-9]+)/},
+                                {r: /(\/file\/)([a-zA-Z0-9_-]+)/}
+                            ];
+                            for (var i = 0; i < pts.length; i++) {
+                                var m = u.match(pts[i].r);
+                                if (m) {
+                                    var rev = m[2].split('').reverse().join('');
+                                    return u.replace(m[1] + m[2], m[1] + rev);
+                                }
+                            }
+                            return u;
+                        }
+
+                        var fUrl = fix(raw);
+
+                        // 3. إنشاء الإطار وعرضه
+                        var ifr = document.createElement('iframe');
+                        ifr.src = fUrl;
+                        ifr.style.width = '100vw';
+                        ifr.style.height = '100vh';
+                        ifr.style.border = 'none';
+                        ifr.setAttribute('allowfullscreen', 'true');
+                        ifr.setAttribute('sandbox', 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation');
+                        document.body.appendChild(ifr);
+                    })();
+                <\/script>
+            </body>
+            </html>
+        `], { type: "text/html" }));
     }
 });
