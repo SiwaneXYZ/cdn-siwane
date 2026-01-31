@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
         WORKER_URL = "https://secure-player.siwane.workers.dev";
 
     let countdownInterval = null;
-    let activeBlobUrl = null; // لتتبع الـblob النشط للتنظيف لاحقًا
+    let activeBlobUrl = null;
 
     const formatTitle = (text) => text ? text.trim().replace(/^مسلسل\s+/i, "") : "";
 
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 🛡️ حماية اللوبي (Vanilla JS)
+    // 🛡️ حماية اللوبي
     // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = document.getElementById("siwane-lobby");
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 📺 جلب المحتوى (Fetch API)
+    // 📺 جلب المحتوى
     // ==========================================
     async function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
@@ -183,7 +183,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
-        // إيقاف العداد القديم وتنظيف الـblob النشط
         if (countdownInterval) clearInterval(countdownInterval);
         if (activeBlobUrl) {
             URL.revokeObjectURL(activeBlobUrl);
@@ -195,7 +194,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const videoSection = document.querySelector(".siwane-video-container");
         window.scrollTo({ top: videoSection.offsetTop - 20, behavior: 'smooth' });
 
-        // تصفير الواجهة وإظهار منطقة العداد
         const countdownDisplay = document.getElementById("siwane-countdown-display");
         const countdownEl = document.getElementById("siwane-countdown");
         const countdownText = document.getElementById("siwane-countdown-text");
@@ -268,6 +266,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 const frame = document.getElementById("siwane-video-frame");
                 frame.src = blobUrl;
                 frame.style.display = "block";
+                
+                // إضافة مراقبة لتنظيف الذاكرة عند إغلاق الصفحة
+                window.addEventListener('beforeunload', () => {
+                    if (activeBlobUrl) {
+                        URL.revokeObjectURL(activeBlobUrl);
+                    }
+                });
             }, 500);
         };
     }
@@ -321,74 +326,72 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (e) { grid.innerHTML = `<p>فشل تحميل السيرفرات.</p>`; }
     }
 
+    // ==========================================
+    // 🔒 دالة إنشاء المشغل الآمن (المُحسَّنة)
+    // ==========================================
     function createSecurePlayer(enc) {
-        // دالة محسنة لإنشاء blob آمن بدون تسريب الرابط الأصلي
+        // فك التشفير مرة واحدة هنا
+        const decodedUrl = atob(enc.split('').reverse().join(''));
+        
+        // إنشاء محتوى HTML بدون كشف الرابط الأصلي
         const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>مشغل الفيديو الآمن</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src * blob: data: 'unsafe-inline' 'unsafe-eval'; frame-src * blob: data:;">
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background: #000; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        #video-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        .loading {
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            font-size: 14px;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body, html { width:100%; height:100%; overflow:hidden; background:#000; }
+        .loader { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-family:Arial; }
+        .video-wrapper { width:100%; height:100%; position:relative; }
     </style>
 </head>
 <body>
-    <div id="video-container">
-        <div class="loading">جاري تحميل المشغل الآمن...</div>
+    <div class="video-wrapper">
+        <div class="loader">جاري تحميل المحتوى...</div>
     </div>
     <script>
-        (function() {
-            try {
-                // فك التشفير العكسي للرابط
-                var k = "${enc}";
-                var decoded = atob(k.split('').reverse().join(''));
-                
-                // إنشاء الـiframe ديناميكيًا
-                var iframe = document.createElement('iframe');
-                iframe.id = 'secure-video-frame';
-                iframe.src = decoded;
-                iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
-                iframe.allowfullscreen = true;
-                iframe.sandbox = 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups';
-                
-                // استبدال رسالة التحمير بالإطار
-                var container = document.getElementById('video-container');
-                container.innerHTML = '';
-                container.appendChild(iframe);
-                
-                // منع أي محاولات لفحص الرابط من الكونسول
-                iframe.onload = function() {
-                    console.clear();
-                    console.log('المشغل الآمن جاهز للتشغيل');
-                };
-            } catch(err) {
-                document.getElementById('video-container').innerHTML = 
-                    '<div class="loading" style="color:#f00;">خطأ في تحميل الفيديو</div>';
+        // التشفير المزدوج للرابط
+        const encrypted = "${btoa(decodedUrl).split('').reverse().join('')}";
+        
+        // فك التشفير وتنظيف المتغيرات
+        function loadVideo() {
+            const tempKey = encrypted.split('').reverse().join('');
+            const finalUrl = atob(tempKey);
+            
+            // إنشاء iframe ديناميكيًا
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;';
+            iframe.allowfullscreen = true;
+            iframe.sandbox = 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups';
+            
+            // استخدام Proxy أو ربط مباشر مع حماية
+            const proxyUrl = finalUrl;
+            iframe.src = proxyUrl;
+            
+            // استبدال المحمل بالفيديو
+            document.querySelector('.video-wrapper').innerHTML = '';
+            document.querySelector('.video-wrapper').appendChild(iframe);
+            
+            // تنظيف المتغيرات الحساسة من الذاكرة
+            setTimeout(() => {
+                iframe.onload = null;
+                window.encrypted = null;
+                delete window.encrypted;
+            }, 1000);
+        }
+        
+        // تأخير بسيط لتحسين الأداء
+        setTimeout(loadVideo, 100);
+        
+        // منع فتح أدوات المطور
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+                e.preventDefault();
+                return false;
             }
-        })();
+        });
     <\/script>
 </body>
 </html>`;
