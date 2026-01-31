@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const config = window.siwaneGlobalConfig || {},
         urlParams = new URLSearchParams(window.location.search),
         mode = urlParams.get("mode"),
-        WORKER_URL = config.WORKER_URL || "https://siwane.xyz/secure-player";
+        WORKER_URL = config.WORKER_URL || "https://secure-player.siwane.workers.dev";
 
     let countdownInterval = null;
     let cryptoLoaded = false;
