@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const WORKER_URL = "https://secure-player.siwane.workers.dev";
 
     let countdownInterval = null;
-    let activeBlobUrl = null; // لتتبع الـ Blob النشط
+    let activeBlobUrl = null;
+    let devToolsOpen = false;
 
     const formatTitle = (text) => text ? text.trim().replace(/^مسلسل\s+/i, "") : "";
 
@@ -19,14 +20,183 @@ document.addEventListener("DOMContentLoaded", function() {
         hand: `<svg viewBox="0 0 104.31 122.88" class="siwane-hand-swipe"><path d="M25.85,63.15c-0.04-0.12-0.08-0.28-0.1-0.42c-0.22-1.89-0.43-3.98-0.62-5.78c-0.26-2.64-0.55-5.69-0.76-7.83 c-0.14-1.45-0.6-2.83-1.27-3.86c-0.45-0.66-0.95-1.15-1.51-1.39c-0.45-0.18-1-0.2-1.57,0.02c-0.78,0.3-1.65,0.93-2.62,2.03 c-0.86,0.98-1.53,2.29-2.09,3.68c-0.79,2.03-1.26,4.19-1.45,5.67c-0.02,0.1-0.02,0.18-0.06,0.26L8.42,86.07 c-0.08,0.4-0.24,0.76-0.48,1.04c-1.81,2.33-2.95,4.33-3.28,5.95c-0.24,1.19,0,2.15,0.79,2.9l19.8,19.8 c1.26,1.21,2.72,1.97,4.47,2.29c1.91,0.36,4.14,0.16,6.7-0.54c0.04,0,0.1-0.02,0.14-0.02c0.97-0.26,2.24-0.57,3.46-0.88 c5.31-1.29,9.94-2.43,14.23-6.33l5.52-5.76c0.05-0.1,0.14-0.18,0.22-0.26s0.62-0.62,1.35-1.31c3.78-3.69,8.45-8.25,5.61-12.24 l-2.21-2.21c-1.07,1.04-2.21,2.05-3.3,3.02c-1,0.88-1.93,1.69-2.78,2.55c-0.91,0.91-2.38,0.91-3.30,0c-0.91-0.92-0.91-2.38,0-3.30 c0.86-0.86,1.91-1.79,3-2.76c3.74-3.30,8.03-7.07,5.73-10.38l-2.19-2.19c-0.12-0.12-0.22-0.26-0.31-0.40c-1.26,1.29-2.64,2.52-4,3.72 c-1,0.88-1.93,1.69-2.78,2.55c-0.91,0.91-2.38,0.91-3.30,0s-0.91-2.38,0-3.30c0.86-0.86,1.91-1.79,3-2.76 c3.74-3.30,8.03-7.07,5.73-10.38l-2.19-2.19c-0.16-0.16-0.28-0.31-0.38-0.50l-6.42,6.42c-0.91,0.91-2.38,0.91-3.30,0s-0.91-2.38,0-3.30 l17.22-17.25c2.88-2.88,3.54-5.88,2.78-8.15c-0.28-0.83-0.74-1.57-1.31-2.14s-1.31-1.03-2.14-1.31c-2.24-0.74-5.23-0.06-8.19,2.90 l-30.20,30.20c-0.91,0.91-2.38,0.91-3.30,0s-0.91-2.38,0-3.30l3.07-3.07L25.85,63.15L25.85,63.15L25.85,63.15z M83.23,24.31 c-1.22,1.30-3.24,1.34-4.52,0.14c-1.30-1.22-1.34-3.24-0.14-4.52l8.82-9.39c1.22-1.30,3.25-1.34,4.52-0.14 c1.30,1.22,1.34,3.24,0.14,4.52L83.23,24.31L83.23,24.31L83.23,24.31L83.23,24.31z M43.96,23.65c1.30,1.22,1.34,3.25,0.14,4.52 c-1.22,1.30-3.25,1.34-4.52,0.14l-9.40-8.82c-1.29-1.23-1.33-3.25-0.14-4.52c1.22-1.30,3.25-1.34,4.52-0.14L43.96,23.65L43.96,23.65 L43.96,23.65z M63.69,15.96c0.05,1.76-1.34,3.24-3.09,3.30s-3.24-1.34-3.30-3.09L56.91,3.30c-0.06-1.75,1.34-3.24,3.09-3.30 c1.76-0.05,3.24,1.34,3.29,3.09L63.69,15.96L63.69,15.96L63.69,15.96z M76.88,63.31c-1.30-1.22-1.34-3.25-0.14-4.52 c1.22-1.30,3.24-1.34,4.52-0.14l9.39,8.82c1.30,1.22,1.34,3.24,0.14,4.52c-1.22,1.30-3.24,1.34-4.52,0.14L76.88,63.31L76.88,63.31 L76.88,63.31z M88.36,44.35c-1.75,0.06-3.24-1.34-3.30-3.09c-0.05-1.75,1.34-3.24,3.09-3.30l12.86-0.43c1.75-0.06,3.24,1.34,3.30,3.09 s-1.34,3.24-3.09,3.30L88.36,44.35L88.36,44.35L88.36,44.35z M60.88,58.97c0.17,0.10,0.34,0.22,0.50,0.38l2.29,2.29 c0.12,0.12,0.24,0.28,0.34,0.42c2.57,3.52,2.17,6.66,0.42,9.52c0.31,0.12,0.62,0.29,0.86,0.54l2.29,2.29 c0.12,0.12,0.24,0.28,0.34,0.42c2.76,3.80,2.07,7.12,0,10.14c0.10,0.05,0.17,0.14,0.28,0.24l2.29,2.29c0.12,0.12,0.24,0.28,0.34,0.42 c5.31,7.26-1.02,13.42-6.10,18.39l-1.31,1.31l-5.67,5.95l-0.18,0.17c-5.19,4.71-10.33,5.97-16.28,7.42c-1,0.24-2,0.50-3.40,0.86 c-0.04,0-0.06,0.02-0.10,0.02c-3.22,0.88-6.14,1.09-8.76,0.62c-2.66-0.48-4.97-1.67-6.90-3.56L2.31,99.29 c-2-1.93-2.69-4.31-2.12-7.14c0.43-2.26,1.75-4.77,3.81-7.47L9.30,54.74v-0.12c0.24-1.71,0.78-4.24,1.71-6.68 c0.71-1.83,1.67-3.62,2.92-5.07c1.51-1.71,3-2.76,4.47-3.32c1.81-0.69,3.54-0.60,5.07,0.06c1.43,0.60,2.64,1.69,3.56,3.08 c1.12,1.67,1.85,3.80,2.05,6.02c0.16,1.83,0.48,4.85,0.78,7.81l0.24,2.47L53,36.07c4.40-4.40,9.16-5.27,12.97-4.02 c1.53,0.50,2.88,1.33,4,2.45s1.95,2.47,2.45,4c1.26,3.80,0.40,8.63-3.92,12.95l-7.59,7.59L60.88,58.97L60.88,58.97L60.88,58.97z" fill="var(--linkC)"/></svg>`
     };
 
+    // ==========================================
+    // 🛡️ نظام كشف أدوات المطورين المتقدم
+    // ==========================================
+    function setupDevToolsDetection() {
+        // 1. كشف عن طريق حجم النافذة
+        const widthThreshold = window.outerWidth - window.innerWidth > 160;
+        const heightThreshold = window.outerHeight - window.innerHeight > 160;
+        
+        if (widthThreshold || heightThreshold) {
+            devToolsOpen = true;
+            console.warn('⚠️ تم اكتشاف أدوات المطورين (طريقة الحجم)');
+        }
+
+        // 2. كشف عن طريق وقت التنفيذ
+        const startTime = performance.now();
+        debugger; // هذا سيوقف التنفيذ إذا كانت DevTools مفتوحة
+        const endTime = performance.now();
+        
+        if (endTime - startTime > 100) { // أكثر من 100ms
+            devToolsOpen = true;
+            console.warn('⚠️ تم اكتشاف أدوات المطورين (طريقة الوقت)');
+        }
+
+        // 3. كشف Eruda (للهواتف)
+        const checkEruda = () => {
+            if (typeof eruda !== 'undefined') {
+                devToolsOpen = true;
+                console.warn('⚠️ تم اكتشاف Eruda على الهاتف');
+            }
+        };
+
+        // 4. كشف عن طريق الفرق في الأداء
+        const perfThreshold = 100;
+        const perfCheck = () => {
+            const start = performance.now();
+            for (let i = 0; i < 1000000; i++) Math.sqrt(i);
+            const diff = performance.now() - start;
+            
+            if (diff > perfThreshold) {
+                devToolsOpen = true;
+                console.warn('⚠️ تم اكتشاف أدوات المطورين (طريقة الأداء)');
+            }
+        };
+
+        // 5. مراقبة فتح الكونسول
+        const originalConsole = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error,
+            info: console.info
+        };
+
+        Object.keys(originalConsole).forEach(method => {
+            console[method] = function(...args) {
+                devToolsOpen = true;
+                console.warn(`⚠️ تم اكتشاف استخدام الكونسول (${method})`);
+                originalConsole[method].apply(console, args);
+                
+                // تنظيف الـ iframe إذا كان موجوداً
+                cleanVideoFrame();
+            };
+        });
+
+        // 6. كشف عن طريق اختلاف التواقيت
+        let lastCall = Date.now();
+        setInterval(() => {
+            const now = Date.now();
+            if (now - lastCall > 110) { // المفروض يكون 100ms
+                devToolsOpen = true;
+                console.warn('⚠️ تم اكتشاف أدوات المطورين (طريقة التوقيت)');
+            }
+            lastCall = now;
+        }, 100);
+
+        // تشغيل الفحوصات
+        setTimeout(checkEruda, 1000);
+        setTimeout(perfCheck, 2000);
+
+        // 7. كشف عن طريق حدث F12 و Ctrl+Shift+I
+        document.addEventListener('keydown', (e) => {
+            if (e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+                (e.ctrlKey && e.shiftKey && e.keyCode === 67)) { // Ctrl+Shift+C
+                e.preventDefault();
+                devToolsOpen = true;
+                console.warn('⚠️ تم ضغط اختصار أدوات المطورين');
+                cleanVideoFrame();
+                return false;
+            }
+        });
+
+        // 8. كشف عن طريق عناصر DOM المخفية
+        const detectHiddenElements = () => {
+            const testDiv = document.createElement('div');
+            testDiv.style.cssText = 'position:absolute;top:-9999px;left:-9999px;height:1px;width:1px;';
+            document.body.appendChild(testDiv);
+            
+            const rect = testDiv.getBoundingClientRect();
+            if (rect.top !== -9999 || rect.left !== -9999) {
+                devToolsOpen = true;
+                console.warn('⚠️ تم اكتشاف أدوات المطورين (طريقة DOM)');
+            }
+            
+            document.body.removeChild(testDiv);
+        };
+
+        setTimeout(detectHiddenElements, 3000);
+    }
+
+    // ==========================================
+    // 🧹 تنظيف إطار الفيديو من الرابط
+    // ==========================================
+    function cleanVideoFrame() {
+        if (!devToolsOpen) return;
+        
+        const videoFrame = document.getElementById('siwane-video-frame');
+        if (videoFrame && videoFrame.src) {
+            // حفظ الرابط الأصلي مؤقتاً (مشفر)
+            const originalSrc = btoa(videoFrame.src).split('').reverse().join('');
+            sessionStorage.setItem('siwane_backup_url', originalSrc);
+            
+            // تغيير الـ src إلى صفحة فارغة
+            videoFrame.src = 'about:blank';
+            
+            // إضافة رسالة تحذير
+            const warning = document.createElement('div');
+            warning.innerHTML = `
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#fff;background:rgba(0,0,0,0.8);padding:20px;border-radius:10px;z-index:9999;">
+                    <h3 style="color:#ff6b6b;">⚠️ تم اكتشاف أدوات التطوير</h3>
+                    <p>لحماية المحتوى، تم إيقاف الفيديو مؤقتاً</p>
+                    <button onclick="restoreVideo()" style="background:#4CAF50;color:#fff;border:none;padding:10px 20px;border-radius:5px;margin-top:10px;cursor:pointer;">
+                        استعادة التشغيل
+                    </button>
+                </div>
+            `;
+            warning.id = 'siwane-dev-warning';
+            
+            const container = videoFrame.parentElement;
+            container.style.position = 'relative';
+            container.appendChild(warning);
+            
+            console.warn('🔒 تم تنظيف إطار الفيديو لأسباب أمنية');
+        }
+    }
+
+    // ==========================================
+    // 🔄 استعادة الفيديو بعد التنظيف
+    // ==========================================
+    window.restoreVideo = function() {
+        const warning = document.getElementById('siwane-dev-warning');
+        if (warning) warning.remove();
+        
+        const backupUrl = sessionStorage.getItem('siwane_backup_url');
+        if (backupUrl) {
+            const videoFrame = document.getElementById('siwane-video-frame');
+            const decodedUrl = atob(backupUrl.split('').reverse().join(''));
+            videoFrame.src = decodedUrl;
+            sessionStorage.removeItem('siwane_backup_url');
+        }
+    };
+
+    // ==========================================
+    // 🎯 البداية - تشغيل كشف DevTools
+    // ==========================================
     if ("watch" === mode && canViewContent) {
+        setupDevToolsDetection();
         handleWatchRoute();
     } else if ("watch" === mode && !canViewContent) {
-        console.warn("Direct access blocked.");
+        console.warn("تم حظر الوصول المباشر.");
     } else {
         initializeLobbyWithProtection(config);
     }
 
+    // ==========================================
+    // 🛡️ حماية اللوبي
+    // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = document.getElementById("siwane-lobby");
         if (!lobbyElement || !config.GAS_URL) return;
@@ -106,6 +276,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // ==========================================
+    // 📺 جلب المحتوى
+    // ==========================================
     async function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
         container.innerHTML = `<div class="siwane-container"><p class="note">جاري تحميل القائمة...</p></div>`;
@@ -154,6 +327,9 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (e) { alert("خطأ في التحويل."); }
     }
 
+    // ==========================================
+    // 🎥 المشغل والعداد
+    // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), ep = urlParams.get("ep"), movie = urlParams.get("movie");
         const id = movie ? decodeURIComponent(movie) : ep;
@@ -178,13 +354,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
-        // تنظيف الـ Blob السابق إذا كان موجوداً
+        if (countdownInterval) clearInterval(countdownInterval);
         if (activeBlobUrl) {
             URL.revokeObjectURL(activeBlobUrl);
             activeBlobUrl = null;
         }
-        
-        if (countdownInterval) clearInterval(countdownInterval);
         
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
         
@@ -207,7 +381,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const res = await response.json();
             if (res.realUrl) {
                 const enc = btoa(res.realUrl).split("").reverse().join("");
-                startCountdownAndAds(enc, params); // مرر enc بدلاً من blob URL
+                startCountdownAndAds(enc, params);
             }
         } catch (error) {
             countdownText.innerHTML = "خطأ في تحميل السيرفر.";
@@ -226,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 clearInterval(countdownInterval);
                 countdownEl.style.display = "none";
-                showAdGate(enc, params); // مرر enc بدلاً من blob URL
+                showAdGate(enc, params);
             }
         }, 1000);
     }
@@ -258,18 +432,21 @@ document.addEventListener("DOMContentLoaded", function() {
             txt.textContent = "مشاهدة ممتعة!";
             setTimeout(() => {
                 document.getElementById("siwane-countdown-display").style.display = "none";
-                
-                // إنشاء Blob جديد
-                activeBlobUrl = createSecurePlayer(enc);
+                const blobUrl = createSecurePlayer(enc);
+                activeBlobUrl = blobUrl;
                 const frame = document.getElementById("siwane-video-frame");
-                frame.src = activeBlobUrl;
+                frame.src = blobUrl;
                 frame.style.display = "block";
                 
-                // تنظيف الذاكرة عند إغلاق الصفحة
-                window.addEventListener('beforeunload', () => {
-                    if (activeBlobUrl) {
-                        URL.revokeObjectURL(activeBlobUrl);
+                // مراقبة مستمرة لأدوات المطورين
+                setInterval(() => {
+                    if (devToolsOpen) {
+                        cleanVideoFrame();
                     }
+                }, 1000);
+                
+                window.addEventListener('beforeunload', () => {
+                    if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
                 });
             }, 500);
         };
@@ -322,76 +499,136 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 🔒 دالة إنشاء المشغل الآمن (الحل النهائي)
+    // 🔒 دالة إنشاء المشغل الآمن مع حماية مضاعفة
     // ==========================================
     function createSecurePlayer(enc) {
-        // إنشاء محتوى HTML بدون عرض الرابط الأصلي
         const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src * blob: data: 'unsafe-inline' 'unsafe-eval'; frame-src * blob: data:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; overflow:hidden; }
         body, html { width:100%; height:100%; background:#000; }
-        #video-container { width:100%; height:100%; position:relative; }
-        .loading { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-family:Arial; }
+        #video-wrapper { width:100%; height:100%; position:relative; }
+        #secure-frame { width:100%; height:100%; border:none; }
+        .warning { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); color:#fff; padding:20px; border-radius:10px; text-align:center; z-index:9999; display:none; }
     </style>
 </head>
 <body>
-    <div id="video-container">
-        <div class="loading">جاري تحميل المشغل الآمن...</div>
+    <div id="video-wrapper">
+        <iframe id="secure-frame" allowfullscreen sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+        <div class="warning" id="dev-warning">
+            <h3 style="color:#ff6b6b;">⚠️ تم اكتشاف أدوات التطوير</h3>
+            <p>لحماية المحتوى، تم إيقاف الفيديو</p>
+            <button onclick="location.reload()" style="background:#4CAF50;color:#fff;border:none;padding:10px 20px;border-radius:5px;margin-top:10px;cursor:pointer;">إعادة التحميل</button>
+        </div>
     </div>
     <script>
         (function() {
-            // حماية الرابط من الفحص
-            var encryptedUrl = "${enc}";
+            // الحماية المتقدمة داخل الـ Blob
+            let devToolsDetected = false;
+            const videoUrl = atob("${enc}".split('').reverse().join(''));
             
-            // تأخير تحميل الفيديو لمنع التتبع
-            setTimeout(function() {
-                try {
-                    // فك التشفير
-                    var decodedUrl = atob(encryptedUrl.split('').reverse().join(''));
-                    
-                    // إنشاء iframe ديناميكياً بدون استخدام document.write
-                    var iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;opacity:0;transition:opacity 1s;';
-                    iframe.allowfullscreen = true;
-                    iframe.sandbox = 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups';
-                    iframe.referrerPolicy = 'no-referrer';
-                    
-                    // إضافة الـ iframe أولاً
-                    document.getElementById('video-container').appendChild(iframe);
-                    
-                    // بعد إضافة الـ iframe، نعيّن src مع تأخير
-                    setTimeout(function() {
-                        iframe.src = decodedUrl;
-                        iframe.style.opacity = '1';
-                        document.querySelector('.loading').style.display = 'none';
-                        
-                        // تنظيف المتغيرات من الذاكرة
-                        encryptedUrl = null;
-                        decodedUrl = null;
-                    }, 100);
-                    
-                } catch(e) {
-                    document.querySelector('.loading').textContent = 'خطأ في تحميل المشغل';
+            // 1. كشف أدوات المطورين داخل الـ Blob أيضاً
+            function detectDevTools() {
+                // طريقة الحجم
+                if (window.outerWidth - window.innerWidth > 160 || 
+                    window.outerHeight - window.innerHeight > 160) {
+                    return true;
                 }
-            }, 200);
+                
+                // طريقة الوقت
+                const start = performance.now();
+                debugger;
+                if (performance.now() - start > 100) {
+                    return true;
+                }
+                
+                // طريقة الأداء
+                const perfStart = performance.now();
+                for(let i = 0; i < 1000000; i++) Math.sqrt(i);
+                if (performance.now() - perfStart > 100) {
+                    return true;
+                }
+                
+                return false;
+            }
             
-            // منع فتح أدوات المطور
-            document.addEventListener('keydown', function(e) {
-                if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+            // 2. تحميل الفيديو مع حماية
+            function loadProtectedVideo() {
+                if (detectDevTools()) {
+                    devToolsDetected = true;
+                    document.getElementById('dev-warning').style.display = 'block';
+                    document.getElementById('secure-frame').style.display = 'none';
+                    return;
+                }
+                
+                // تحميل الفيديو في طبقات متعددة
+                const iframe = document.getElementById('secure-frame');
+                
+                // إنشاء iframe داخلي للفيديو الحقيقي
+                const innerHtml = \`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <style>
+                            * { margin:0; padding:0; overflow:hidden; }
+                            body { background:#000; }
+                        </style>
+                    </head>
+                    <body>
+                        <iframe src="\${videoUrl}" 
+                                style="width:100vw;height:100vh;border:none;" 
+                                allowfullscreen
+                                sandbox="allow-scripts allow-same-origin">
+                        </iframe>
+                        <script>
+                            // منع فحص الرابط
+                            Object.defineProperty(window, 'videoSrc', {
+                                value: '\${videoUrl}',
+                                writable: false,
+                                configurable: false,
+                                enumerable: false
+                            });
+                            
+                            // تنظيف الكونسول
+                            setInterval(() => console.clear(), 500);
+                        <\\/script>
+                    </body>
+                    </html>
+                \`;
+                
+                iframe.srcdoc = innerHtml;
+                
+                // مراقبة مستمرة
+                setInterval(() => {
+                    if (detectDevTools()) {
+                        iframe.src = 'about:blank';
+                        document.getElementById('dev-warning').style.display = 'block';
+                    }
+                }, 1000);
+            }
+            
+            // 3. بدء التحميل بعد تأخير
+            setTimeout(loadProtectedVideo, 300);
+            
+            // 4. منع اختصارات DevTools
+            document.addEventListener('keydown', (e) => {
+                if (e.keyCode === 123 || 
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 67)) {
                     e.preventDefault();
+                    devToolsDetected = true;
+                    document.getElementById('secure-frame').src = 'about:blank';
+                    document.getElementById('dev-warning').style.display = 'block';
                     return false;
                 }
             });
             
-            // تنظيف الكونسول
-            setInterval(function() {
-                console.clear();
-            }, 1000);
         })();
     <\/script>
 </body>
