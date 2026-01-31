@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. الإعدادات العامة
-    const config = window.siwaneGlobalConfig || {},
-        urlParams = new URLSearchParams(window.location.search),
-        mode = urlParams.get("mode"),
-        WORKER_URL = "https://secure-player.siwane.workers.dev";
+    const config = window.siwaneGlobalConfig || {};
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get("mode");
+    const WORKER_URL = "https://secure-player.siwane.workers.dev";
 
     let countdownInterval = null;
-    let activeBlobUrl = null;
+    let activeBlobUrl = null; // لتتبع الـ Blob النشط
 
     const formatTitle = (text) => text ? text.trim().replace(/^مسلسل\s+/i, "") : "";
 
@@ -23,14 +22,11 @@ document.addEventListener("DOMContentLoaded", function() {
     if ("watch" === mode && canViewContent) {
         handleWatchRoute();
     } else if ("watch" === mode && !canViewContent) {
-        console.warn("تم حظر الوصول المباشر.");
+        console.warn("Direct access blocked.");
     } else {
         initializeLobbyWithProtection(config);
     }
 
-    // ==========================================
-    // 🛡️ حماية اللوبي
-    // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = document.getElementById("siwane-lobby");
         if (!lobbyElement || !config.GAS_URL) return;
@@ -110,9 +106,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // ==========================================
-    // 📺 جلب المحتوى
-    // ==========================================
     async function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
         container.innerHTML = `<div class="siwane-container"><p class="note">جاري تحميل القائمة...</p></div>`;
@@ -132,8 +125,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 window.siwaneRedirect = (s, e, t) => redirectToWatchPage(s, e, t);
                 container.innerHTML = html;
+            } else {
+                container.innerHTML = `<div class="siwane-container"><p class="note">لا توجد حلقات متاحة.</p></div>`;
             }
-        } catch (error) { console.error("خطأ في تحميل المسلسل:", error); }
+        } catch (error) { 
+            console.error("Error loading series:", error);
+            container.innerHTML = `<div class="siwane-container"><p class="note" style="color:#ff4444;">خطأ في تحميل الحلقات.</p></div>`;
+        }
     }
 
     function loadMovieLobby(sheet, movieTitle, container, config) {
@@ -153,12 +151,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 const sep = postUrl.includes("?") ? "&" : "?";
                 window.location.href = `${postUrl}${sep}mode=watch&sheet=${encodeURIComponent(sheet)}&${type==='movie'?'movie':'ep'}=${encodeURIComponent(id)}`;
             }
-        } catch (e) { alert("حدث خطأ في عملية التحويل."); }
+        } catch (e) { alert("خطأ في التحويل."); }
     }
 
-    // ==========================================
-    // 🎥 المشغل والعداد
-    // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), ep = urlParams.get("ep"), movie = urlParams.get("movie");
         const id = movie ? decodeURIComponent(movie) : ep;
@@ -183,11 +178,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
-        if (countdownInterval) clearInterval(countdownInterval);
+        // تنظيف الـ Blob السابق إذا كان موجوداً
         if (activeBlobUrl) {
             URL.revokeObjectURL(activeBlobUrl);
             activeBlobUrl = null;
         }
+        
+        if (countdownInterval) clearInterval(countdownInterval);
         
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ sheet: params.SHEET, id: params.ID, serverId: serverId }));
         
@@ -210,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const res = await response.json();
             if (res.realUrl) {
                 const enc = btoa(res.realUrl).split("").reverse().join("");
-                startCountdownAndAds(enc, params);
+                startCountdownAndAds(enc, params); // مرر enc بدلاً من blob URL
             }
         } catch (error) {
             countdownText.innerHTML = "خطأ في تحميل السيرفر.";
@@ -229,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 clearInterval(countdownInterval);
                 countdownEl.style.display = "none";
-                showAdGate(enc, params);
+                showAdGate(enc, params); // مرر enc بدلاً من blob URL
             }
         }, 1000);
     }
@@ -261,22 +258,23 @@ document.addEventListener("DOMContentLoaded", function() {
             txt.textContent = "مشاهدة ممتعة!";
             setTimeout(() => {
                 document.getElementById("siwane-countdown-display").style.display = "none";
-                const blobUrl = createSecurePlayer(enc);
-                activeBlobUrl = blobUrl;
+                
+                // إنشاء Blob جديد
+                activeBlobUrl = createSecurePlayer(enc);
                 const frame = document.getElementById("siwane-video-frame");
-                frame.src = blobUrl;
+                frame.src = activeBlobUrl;
                 frame.style.display = "block";
                 
+                // تنظيف الذاكرة عند إغلاق الصفحة
                 window.addEventListener('beforeunload', () => {
-                    if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
+                    if (activeBlobUrl) {
+                        URL.revokeObjectURL(activeBlobUrl);
+                    }
                 });
             }, 500);
         };
     }
 
-    // ==========================================
-    // بناء واجهة صفحة المشاهدة
-    // ==========================================
     function initializeWatchPage(params) {
         const container = document.querySelector(".post-body, .entry-content, #post-body");
         if (!container) return;
@@ -327,132 +325,79 @@ document.addEventListener("DOMContentLoaded", function() {
     // 🔒 دالة إنشاء المشغل الآمن (الحل النهائي)
     // ==========================================
     function createSecurePlayer(enc) {
-        const decodedUrl = atob(enc.split('').reverse().join(''));
-        
-        // إنشاء محتوى HTML مغلق تمامًا
+        // إنشاء محتوى HTML بدون عرض الرابط الأصلي
         const htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="referrer" content="no-referrer">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src * blob: data: 'unsafe-inline' 'unsafe-eval'; frame-src * blob: data:;">
     <style>
-        * { 
-            margin:0; 
-            padding:0; 
-            border:0; 
-            outline:0; 
-            font-size:100%; 
-            vertical-align:baseline; 
-            background:transparent; 
-        }
-        body, html { 
-            width:100%; 
-            height:100%; 
-            position:fixed; 
-            top:0; 
-            left:0; 
-            background:#000; 
-            overflow:hidden;
-        }
-        #player-wrapper {
-            width:100%;
-            height:100%;
-            position:relative;
-        }
-        .loading {
-            position:absolute;
-            top:50%;
-            left:50%;
-            transform:translate(-50%,-50%);
-            color:#fff;
-            font-family:Arial, sans-serif;
-            font-size:14px;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; overflow:hidden; }
+        body, html { width:100%; height:100%; background:#000; }
+        #video-container { width:100%; height:100%; position:relative; }
+        .loading { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-family:Arial; }
     </style>
 </head>
 <body>
-    <div id="player-wrapper">
-        <div class="loading">جاري تحضير المشغل الآمن...</div>
+    <div id="video-container">
+        <div class="loading">جاري تحميل المشغل الآمن...</div>
     </div>
     <script>
-        // منع أي فحص للكود
         (function() {
-            // الرابط المخفي في نصوص عشوائية
-            const fragments = [
-                "${btoa(decodedUrl).slice(0, 20)}",
-                "${btoa(decodedUrl).slice(20, 40)}",
-                "${btoa(decodedUrl).slice(40)}"
-            ];
+            // حماية الرابط من الفحص
+            var encryptedUrl = "${enc}";
             
-            // تجميع الرابط
-            const encodedUrl = fragments.join('');
-            
-            // تأخير التنفيذ لمنع التتبع
-            setTimeout(() => {
+            // تأخير تحميل الفيديو لمنع التتبع
+            setTimeout(function() {
                 try {
-                    const finalUrl = atob(encodedUrl);
+                    // فك التشفير
+                    var decodedUrl = atob(encryptedUrl.split('').reverse().join(''));
                     
-                    // إنشاء iframe ديناميكيًا
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;opacity:0;transition:opacity 0.5s;';
+                    // إنشاء iframe ديناميكياً بدون استخدام document.write
+                    var iframe = document.createElement('iframe');
+                    iframe.style.cssText = 'width:100%;height:100%;border:none;position:absolute;top:0;left:0;opacity:0;transition:opacity 1s;';
                     iframe.allowfullscreen = true;
                     iframe.sandbox = 'allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-popups';
                     iframe.referrerPolicy = 'no-referrer';
                     
                     // إضافة الـ iframe أولاً
-                    document.getElementById('player-wrapper').appendChild(iframe);
+                    document.getElementById('video-container').appendChild(iframe);
                     
-                    // بعد تأخير قصير، تعيين src
-                    setTimeout(() => {
-                        iframe.src = finalUrl;
+                    // بعد إضافة الـ iframe، نعيّن src مع تأخير
+                    setTimeout(function() {
+                        iframe.src = decodedUrl;
                         iframe.style.opacity = '1';
                         document.querySelector('.loading').style.display = 'none';
+                        
+                        // تنظيف المتغيرات من الذاكرة
+                        encryptedUrl = null;
+                        decodedUrl = null;
                     }, 100);
                     
-                    // حماية المتغيرات
-                    setTimeout(() => {
-                        window.finalUrl = null;
-                        window.encodedUrl = null;
-                        delete window.finalUrl;
-                        delete window.encodedUrl;
-                        
-                        // منع الفحص
-                        Object.defineProperty(window, 'finalUrl', {
-                            value: undefined,
-                            writable: false,
-                            configurable: false
-                        });
-                    }, 1000);
-                    
                 } catch(e) {
-                    document.querySelector('.loading').innerHTML = 'خطأ في تحميل المشغل';
+                    document.querySelector('.loading').textContent = 'خطأ في تحميل المشغل';
                 }
             }, 200);
             
-            // حماية من فتح أدوات المطور
-            const blockDevTools = function() {
-                const element = new Image();
-                Object.defineProperty(element, 'id', {
-                    get: function() {
-                        // هذا سيثير خطأ عند فتح الكونسول
-                        document.body.innerHTML = '<div style="color:#fff;text-align:center;padding:50px;">المشغل الآمن يعمل</div>';
-                        return '';
-                    }
-                });
-                console.log(element);
-            };
+            // منع فتح أدوات المطور
+            document.addEventListener('keydown', function(e) {
+                if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 73)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
             
-            setInterval(blockDevTools, 1000);
-            
+            // تنظيف الكونسول
+            setInterval(function() {
+                console.clear();
+            }, 1000);
         })();
     <\/script>
 </body>
 </html>`;
         
         const blob = new Blob([htmlContent], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        return blobUrl;
+        return URL.createObjectURL(blob);
     }
 });
