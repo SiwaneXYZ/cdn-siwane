@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. الإعدادات العامة
+    // الإعدادات العامة
     const config = window.siwaneGlobalConfig || {},
         urlParams = new URLSearchParams(window.location.search),
         mode = urlParams.get("mode"),
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 🛡️ حماية اللوبي (Vanilla JS)
+    // 🛡️ حماية اللوبي
     // ==========================================
     function initializeLobbyWithProtection(config) {
         const lobbyElement = document.getElementById("siwane-lobby");
@@ -41,24 +41,11 @@ document.addEventListener("DOMContentLoaded", function() {
         let actionText = movie ? `بدء مشاهدة فيلم: ${movie}` : `استعراض حلقات: مسلسل ${cleanName}`;
         let headerText = movie ? `بوابة الفيلم` : `قائمة الحلقات`;
 
-        const style = `
-            <style>
-                .siwane-flex-box { min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-                .siwane-server-container h2 { margin-bottom: 10px; }
-                @keyframes siwane-spin { to { transform: rotate(360deg); } }
-                .siwane-spin { animation: siwane-spin 0.8s linear infinite; }
-                @keyframes siwane-swipe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
-                .siwane-hand-swipe { animation: siwane-swipe 1s infinite ease-in-out; margin-bottom: 5px; }
-                .siwane-fade-in { animation: siwane-fade-in-kf 0.5s forwards; }
-                @keyframes siwane-fade-in-kf { from { opacity: 0; } to { opacity: 1; } }
-            </style>
-        `;
-
-        lobbyElement.innerHTML = style + `
+        lobbyElement.innerHTML = `
             <div class="siwane-container" id="siwane-auth-wrapper">
                 <div class="siwane-server-container" style="text-align:center;">
                     <h2>${headerText}</h2>
-                    <div class="siwane-flex-box">
+                    <div style="min-height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                         <div id="siwane-btn-zone" style="width:100%;">
                             <div style="padding: 10px 0;"> 
                                 <a href="javascript:void(0)" id="activate-trigger" class="button ln" style="width:100%; text-align:center; display:block; max-width:350px; margin: 0 auto;">
@@ -110,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 📺 جلب المحتوى (Fetch API)
+    // 📺 جلب المحتوى
     // ==========================================
     async function loadSeriesLobby(sheet, container, config) {
         const cleanName = formatTitle(sheet);
@@ -122,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (data.episodes && data.episodes.length > 0) {
                 const uniqueEpisodes = [...new Set(data.episodes.filter(e => e !== null && e !== "" && e !== "---"))];
-                let html = `<div class="siwane-container siwane-fade-in"><div class="siwane-episodes-container"><h2>حلقات مسلسل ${cleanName}</h2><div class="siwane-episodes-grid">`;
+                let html = `<div class="siwane-container"><div class="siwane-episodes-container"><h2>حلقات مسلسل ${cleanName}</h2><div class="siwane-episodes-grid">`;
                 uniqueEpisodes.forEach(ep => {
                     let btnLabel = (ep.toString().includes("الأخيرة")) ? ep : `الحلقة ${ep}`;
                     html += `<div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${ep}', 'series')">${btnLabel}</div>`;
@@ -139,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function loadMovieLobby(sheet, movieTitle, container, config) {
-        container.innerHTML = `<div class="siwane-container siwane-fade-in"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">${icons.play} شاهد الآن</div></div></div></div>`;
+        container.innerHTML = `<div class="siwane-container"><div class="siwane-episodes-container"><h2>${movieTitle}</h2><div class="siwane-episodes-grid" style="grid-template-columns:1fr;"><div class="siwane-episode-btn" onclick="siwaneRedirect('${sheet}', '${movieTitle}', 'movie')">${icons.play} شاهد الآن</div></div></div></div>`;
         window.siwaneRedirect = (s, t, ty) => redirectToWatchPage(s, t, ty);
     }
 
@@ -161,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ==========================================
-    // 🎥 المشغل والعداد (تحديث للتصميم الآمن)
+    // 🎥 المشغل والعداد
     // ==========================================
     function handleWatchRoute() {
         const sheet = urlParams.get("sheet"), 
@@ -183,7 +170,6 @@ document.addEventListener("DOMContentLoaded", function() {
             
             initializeWatchPage(params);
             
-            // محاولة استعادة السيرفر السابق
             const saved = sessionStorage.getItem("siwane_last_server");
             if (saved) {
                 const data = JSON.parse(saved);
@@ -198,23 +184,19 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function playSelectedServer(serverId, params) {
-        // إيقاف العداد القديم إن وجد
         if (countdownInterval) clearInterval(countdownInterval);
         
-        // حفظ السيرفر المختار
         sessionStorage.setItem("siwane_last_server", JSON.stringify({ 
             sheet: params.SHEET, 
             id: params.ID, 
             serverId: serverId 
         }));
         
-        // التمرير إلى قسم الفيديو
         const videoSection = document.querySelector(".siwane-video-container");
         if (videoSection) {
             window.scrollTo({ top: videoSection.offsetTop - 20, behavior: 'smooth' });
         }
 
-        // تصفير الواجهة وإظهار منطقة العداد
         const countdownDisplay = document.getElementById("siwane-countdown-display");
         const countdownEl = document.getElementById("siwane-countdown");
         const countdownText = document.getElementById("siwane-countdown-text");
@@ -227,10 +209,8 @@ document.addEventListener("DOMContentLoaded", function() {
         videoFrame.src = "";
 
         try {
-            // إنشاء رابط المشغل الآمن من الـ Worker
             const playerUrl = `${WORKER_URL}/secure-player?sheet=${encodeURIComponent(params.SHEET)}&id=${encodeURIComponent(serverId)}`;
             
-            // بدء العد التنازلي مع الإعلانات
             startCountdownAndAds(playerUrl, params);
             
         } catch (error) {
@@ -267,11 +247,14 @@ document.addEventListener("DOMContentLoaded", function() {
         for(let i = 1; i <= params.AD_BUTTONS_COUNT; i++) {
             clicked[`ad${i}`] = false;
             btnsHtml += `
-                <button class="ad-gate-btn ${colors[i-1] || colors[0]}" 
-                        data-id="ad${i}" 
-                        style="padding:8px;margin:3px;cursor:pointer;border:none;color:#fff;border-radius:5px;">
-                    إعلان ${i}
-                </button>`;
+                <div class="ad-gate-wrapper">
+                    <div class="ad-btns-flex">
+                        <button class="ad-gate-btn ${colors[i-1] || colors[0]}" 
+                                data-id="ad${i}">
+                            إعلان ${i}
+                        </button>
+                    </div>
+                </div>`;
         }
 
         txt.innerHTML = `
@@ -279,43 +262,35 @@ document.addEventListener("DOMContentLoaded", function() {
                 <p style="color:#ffeb3b; margin-bottom: 15px;">اضغط على الاعلانات لفتح المشغل:</p>
                 ${btnsHtml}
                 <div id="final-unlock" style="display:none;margin-top:15px;">
-                    <button id="play-now" class="siwane-episode-btn" 
-                            style="width:100%;background:var(--linkC);color:#fff;padding:10px;border:none;cursor:pointer;border-radius:5px;">
+                    <button id="play-now" class="siwane-episode-btn">
                         تشغيل الآن
                     </button>
                 </div>
             </div>`;
 
-        // إضافة أحداث النقر على أزرار الإعلانات
         document.querySelectorAll(".ad-gate-btn").forEach(btn => {
             btn.onclick = function() {
                 const id = this.dataset.id;
                 
-                // فتح الإعلان في نافذة جديدة
                 if(params.AD_LINKS[id]) {
                     window.open(params.AD_LINKS[id], '_blank');
                 }
                 
-                // تحديث حالة الزر
-                this.style.opacity = "0.5"; 
-                this.disabled = true; 
-                this.textContent = "تم";
+                this.classList.add("is-faded");
                 clicked[id] = true;
                 
-                // التحقق إذا تم النقر على جميع الأزرار
                 if(Object.values(clicked).every(v => v)) {
                     document.getElementById("final-unlock").style.display = "block";
                 }
             };
         });
 
-        // حدث النقر على زر التشغيل النهائي
         document.getElementById("play-now").onclick = () => {
             txt.textContent = "مشاهدة ممتعة!";
             setTimeout(() => {
                 document.getElementById("siwane-countdown-display").style.display = "none";
                 const frame = document.getElementById("siwane-video-frame");
-                frame.src = playerUrl; // تحميل المشغل الآمن من الـ Worker
+                frame.src = playerUrl;
                 frame.style.display = "block";
             }, 500);
         };
@@ -331,7 +306,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const title = params.TYPE === "movie" ? params.ID : `${params.SHEET} - الحلقة ${params.ID}`;
         document.title = `مشاهدة ${title}`;
         
-        // إضافة الهيكل الرئيسي للصفحة
         container.insertAdjacentHTML('afterbegin', `
             <div class="siwane-container">
                 <header class="siwane-header">
@@ -354,22 +328,17 @@ document.addEventListener("DOMContentLoaded", function() {
                         <div id="siwane-countdown"></div>
                     </div>
                     <iframe id="siwane-video-frame" 
-                            style="display:none; width:100%; height:500px; border:none; border-radius:10px;" 
                             allowfullscreen 
                             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox">
                     </iframe>
-                    <a class="button ln" href="/p/offerwal.html" 
-                       style="width:100%;text-align:center;display:block;margin-top:10px;">
+                    <a class="button ln" href="/p/offerwal.html">
                         انقر هنا للدعم والمشاهدة
                     </a>
                 </div>
             </div>
         `);
         
-        // تحميل السيرفرات
         loadServers(params);
-        
-        // إنشاء تأثير الجسيمات
         createParticles();
     }
 
@@ -392,7 +361,6 @@ document.addEventListener("DOMContentLoaded", function() {
         grid.innerHTML = `<p style="text-align:center;">جاري جلب السيرفرات...</p>`;
         
         try {
-            // استخدام Worker للحصول على قائمة السيرفرات
             const response = await fetch(
                 `${WORKER_URL}/get-servers?sheet=${encodeURIComponent(params.SHEET)}&contentId=${encodeURIComponent(params.ID)}&type=${params.TYPE}`
             );
@@ -416,15 +384,12 @@ document.addEventListener("DOMContentLoaded", function() {
                 `;
                 
                 btn.onclick = function() {
-                    // إزالة النشط من جميع الأزرار
                     document.querySelectorAll(".siwane-server-btn").forEach(b => {
                         b.classList.remove("active");
                     });
                     
-                    // إضافة النشط للزر المحدد
                     this.classList.add("active");
                     
-                    // تشغيل السيرفر المحدد
                     playSelectedServer(s.id, params);
                 };
                 
@@ -436,193 +401,4 @@ document.addEventListener("DOMContentLoaded", function() {
             grid.innerHTML = `<p style="color:red; text-align:center;">فشل تحميل السيرفرات. تأكد من اتصالك بالإنترنت.</p>`;
         }
     }
-
-    // ==========================================
-    // 🎨 إضافة الأنماط التلقائية
-    // ==========================================
-    const styles = `
-        <style>
-            .siwane-container {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                padding: 20px;
-                margin: 20px 0;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            .siwane-header h1 {
-                color: var(--linkC);
-                text-align: center;
-                font-size: 1.8rem;
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                border-bottom: 2px solid var(--linkC);
-            }
-            
-            .siwane-server-container h2 {
-                color: var(--linkC);
-                text-align: center;
-                font-size: 1.5rem;
-                margin-bottom: 15px;
-            }
-            
-            .siwane-servers-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 10px;
-                margin-top: 15px;
-            }
-            
-            .siwane-server-btn {
-                background: linear-gradient(135deg, var(--linkC), #4a6bff);
-                color: white;
-                padding: 12px 15px;
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: center;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                border: 2px solid transparent;
-            }
-            
-            .siwane-server-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-                border-color: rgba(255, 255, 255, 0.3);
-            }
-            
-            .siwane-server-btn.active {
-                background: linear-gradient(135deg, #ff6b6b, #ff4757);
-                border-color: #ff4757;
-            }
-            
-            .siwane-episodes-container h2 {
-                color: var(--linkC);
-                text-align: center;
-                font-size: 1.5rem;
-                margin-bottom: 20px;
-            }
-            
-            .siwane-episodes-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 10px;
-            }
-            
-            .siwane-episode-btn {
-                background: var(--linkC);
-                color: white;
-                padding: 12px;
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: center;
-                transition: all 0.3s ease;
-                font-weight: bold;
-            }
-            
-            .siwane-episode-btn:hover {
-                background: #4a6bff;
-                transform: scale(1.05);
-            }
-            
-            .siwane-video-container h2 {
-                color: var(--linkC);
-                text-align: center;
-                font-size: 1.5rem;
-                margin-bottom: 15px;
-            }
-            
-            #siwane-countdown-display {
-                position: relative;
-                min-height: 200px;
-                background: rgba(0, 0, 0, 0.8);
-                border-radius: 10px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: white;
-                margin: 20px 0;
-            }
-            
-            #siwane-countdown {
-                font-size: 4rem;
-                font-weight: bold;
-                color: #ffeb3b;
-                margin: 20px 0;
-                text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
-            }
-            
-            #siwane-countdown-text {
-                font-size: 1.2rem;
-                text-align: center;
-                margin-bottom: 20px;
-                color: #fff;
-            }
-            
-            .siwane-particles-container {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                border-radius: 10px;
-                z-index: 1;
-            }
-            
-            .siwane-particle {
-                position: absolute;
-                width: 3px;
-                height: 3px;
-                background: rgba(255, 255, 255, 0.7);
-                border-radius: 50%;
-                animation: particle-float linear infinite;
-            }
-            
-            @keyframes particle-float {
-                0% {
-                    transform: translateY(100px) rotate(0deg);
-                    opacity: 0;
-                }
-                10% {
-                    opacity: 1;
-                }
-                90% {
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(-100px) rotate(360deg);
-                    opacity: 0;
-                }
-            }
-            
-            .note {
-                text-align: center;
-                color: var(--linkC);
-                font-style: italic;
-                padding: 20px;
-            }
-            
-            @media (max-width: 768px) {
-                .siwane-servers-grid {
-                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                }
-                
-                .siwane-episodes-grid {
-                    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                }
-                
-                #siwane-countdown {
-                    font-size: 3rem;
-                }
-            }
-        </style>
-    `;
-    
-    // إضافة الأنماط إلى head المستند
-    document.head.insertAdjacentHTML('beforeend', styles);
 });
