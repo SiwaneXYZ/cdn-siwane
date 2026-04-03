@@ -183,12 +183,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                // توافق مع أبعاد الحاسوب الجديدة
+                // إحداثيات الحاسوب للعودة إلى الاصدار القديم
                 container.style.removeProperty("height");
                 container.style.removeProperty("top");
                 let keyboardHeight = window.innerHeight - vv.height;
-                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "95px", "important");
-                if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "30px", "important");
+                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
+                if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
             }
         }
     }
@@ -212,8 +212,8 @@ document.addEventListener("DOMContentLoaded", function() {
         container.style.display = "flex"; 
         if (window.innerWidth > 767) {
             container.style.position = "fixed"; 
-            container.style.right = "30px"; 
-            container.style.bottom = "95px"; // يتوافق مع CSS الحاسوب
+            container.style.right = "32px"; 
+            container.style.bottom = "142px"; 
         }
         lazyLoadMessages();
         setTimeout(function() { 
