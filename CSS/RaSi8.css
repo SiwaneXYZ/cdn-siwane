@@ -7,6 +7,9 @@
 @keyframes RaSi-chat-ping { 75%, to { transform: scale(1.6); opacity: 0; } }
 @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
 
+/* فئة التجميد (تضاف برمجياً لمنع تحرك المقال في الشاشة الكاملة) */
+body.rasi-no-scroll { overflow: hidden !important; }
+
 /* ==========================================================================
    2. زر الدردشة العائم
    ========================================================================== */
@@ -18,7 +21,10 @@
 /* ==========================================================================
    3. الحاوية الرئيسية للدردشة (الكمبيوتر)
    ========================================================================== */
-#RaSi-chat-container { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; position: fixed; bottom: 142px; right: 32px; width: 310px; max-width: 97vw; min-width: 210px; min-height: 230px; max-height: 480px; background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 18px; box-shadow: 0 3px 24px #0001; z-index: 9999; display: none; flex-direction: column; overflow: hidden; touch-action: none; user-select: none; }
+#RaSi-chat-container { 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; position: fixed; bottom: 142px; right: 32px; width: 310px; max-width: 97vw; min-width: 210px; min-height: 230px; max-height: 480px; background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 18px; box-shadow: 0 3px 24px #0001; z-index: 9999; display: none; flex-direction: column; overflow: hidden; touch-action: none; user-select: none; 
+    overscroll-behavior: none !important; /* يمنع تسرب التمرير */
+}
 
 /* ==========================================================================
    4. الرأس والإحصائيات
@@ -47,7 +53,7 @@
 /* ==========================================================================
    5. الرسائل وحقل الإدخال
    ========================================================================== */
-#RaSi-messages { flex: 1; overflow-y: auto; padding: 8px 10px !important; display: flex; flex-direction: column; gap: 6px !important; font-size: 10px; min-height: 60px; }
+#RaSi-messages { flex: 1; overflow-y: auto; padding: 8px 10px !important; display: flex; flex-direction: column; gap: 6px !important; font-size: 10px; min-height: 60px; overscroll-behavior: contain !important; /* حماية منطقة الرسائل */ }
 #RaSi-messages::-webkit-scrollbar { height: 7px; width: 5px; }
 #RaSi-messages::-webkit-scrollbar-thumb { background: var(--linkC, #2563eb); border-radius: 8px; }
 .RaSi-msg-ai, .RaSi-msg-user { max-width: 99%; margin: 2px 0 !important; animation: messageSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; transform-origin: center bottom; }
@@ -90,21 +96,20 @@
 .RaSi-fullscreen-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
 
 /* ==========================================================================
-   7. وضع الهاتف (صندوق منبثق 35%) مع جاهزية للكيبورد
+   7. وضع الهاتف (صندوق منبثق 35%)
    ========================================================================== */
 @media screen and (max-width: 767px) {
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) {
         position: fixed !important;
         top: auto !important;
-        /* تم إزالة bottom: 0 !important هنا للسماح لـ JS بالتحكم الدقيق بالكيبورد */
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
         max-width: 100vw !important;
         
-        height: 35vh !important; /* الارتفاع المطلوب */
+        height: 35vh !important; 
         max-height: 35vh !important;
-        min-height: 260px !important; /* حماية من الانكماش عند فتح الكيبورد */
+        min-height: 260px !important; 
         
         margin: 0 !important;
         border-radius: 20px 20px 0 0 !important; 
