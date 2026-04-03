@@ -1,9 +1,6 @@
 // نغلف الكود بالكامل لضمان عدم تنفيذه إلا بعد اكتمال تحميل عناصر الصفحة (HTML)
 document.addEventListener("DOMContentLoaded", function() {
     
-    // =====================================================================
-    // 1. الثوابت والمتغيرات الأساسية
-    // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
           DEV_FLAG_KEY = "RaSiDevUnlimited_v1",
@@ -12,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let messagesLoaded = false;
     let headerClickCount = 0, headerClickTimer = null;
 
-    // جلب العناصر بأمان
     const container = document.getElementById("RaSi-chat-container");
     const txt = document.getElementById("RaSi-input");
     const head = document.getElementById("RaSi-head");
@@ -20,15 +16,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const chatBtn = document.getElementById("RaSi-chat-btn");
     const messagesArea = document.getElementById("RaSi-messages");
 
-    // التحقق من وجود الزر والحاوية لمنع انهيار الكود
-    if (!chatBtn || !container) {
-        console.error("تحذير: عناصر الدردشة الأساسية غير موجودة في الصفحة.");
-        return;
-    }
+    if (!chatBtn || !container) return;
 
-    // =====================================================================
-    // 2. دوال مساعدة (Utilities & Formatting)
-    // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
 
@@ -49,9 +38,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return t;
     }
 
-    // =====================================================================
-    // 3. نظام التوكنات والاستخدام (Usage Logic)
-    // =====================================================================
     function loadUsage() { try { let e = localStorage.getItem(USAGE_KEY); if (!e) return initUsage(); let t = JSON.parse(e), n = new Date().toISOString().slice(0, 10); if (t.date !== n) return initUsage(); return t; } catch (s) { return initUsage(); } }
     function initUsage() { let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0, limit: DEFAULT_DAILY_LIMIT }; localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; }
     function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
@@ -87,9 +73,6 @@ document.addEventListener("DOMContentLoaded", function() {
         t > 0 && setTimeout(() => { n.style.display = "none" }, t); 
     }
 
-    // =====================================================================
-    // 4. إنشاء الرسائل في الواجهة (DOM Elements)
-    // =====================================================================
     function createUserMessage(e) {
         let t = document.createElement("div"); t.className = "RaSi-msg-user";
         let n = document.createElement("div"); n.className = "bubble"; n.innerHTML = renderRichText(e); t.appendChild(n);
@@ -110,9 +93,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return e;
     }
 
-    // =====================================================================
-    // 5. إدارة سياق المقال والاتصال بالخادم
-    // =====================================================================
     function getPageContext() {
         let title = document.title || "بدون عنوان";
         let bodyElement = document.querySelector('.post-body') || document.querySelector('.entry-content') || document.body;
@@ -143,9 +123,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let messagesPayload = buildConversationPayload(e), currentContext = getPageContext();
         
         try {
-            // ملاحظة: تأكد من أن متغير GAS_WEB_APP_URL معرف في HTML الخاص بك
             let endpointUrl = typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : "";
-            
             let response = await fetch(endpointUrl, {
                 method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, 
                 body: JSON.stringify({ messages: messagesPayload, context: currentContext })
@@ -190,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 6. التعامل الذكي مع الكيبورد في الهواتف
+    // 6. التعديل الجذري: إصلاح دفع الكيبورد للهيدر في وضع الشاشة الكاملة
     // =====================================================================
     function adjustForKeyboard() {
         if (!container || container.style.display !== "flex") return;
@@ -198,13 +176,24 @@ document.addEventListener("DOMContentLoaded", function() {
         if (window.visualViewport) {
             if (window.innerWidth <= 767) {
                 if (!container.classList.contains("RaSi-fullscreen")) {
-                    // حساب المسافة الدقيقة بين أسفل الشاشة الفعلية وأسفل الشاشة المرئية للكيبورد
+                    // وضع البوب-أب العادي (35%)
+                    container.style.removeProperty("height");
+                    container.style.removeProperty("top");
+                    
                     let offsetBottom = window.innerHeight - (window.visualViewport.offsetTop + window.visualViewport.height);
                     container.style.setProperty("bottom", Math.max(0, offsetBottom) + "px", "important");
                 } else {
-                    container.style.setProperty("bottom", "0px", "important");
+                    // وضع الشاشة الكاملة (حل المشكلة هنا!)
+                    // بدلاً من الاعتماد على bottom: 0 و height: 100%، نثبت الهيدر في الأعلى
+                    // ونجعل طول الصندوق مطابقاً لمساحة الشاشة المرئية بالضبط.
+                    container.style.setProperty("bottom", "auto", "important");
+                    container.style.setProperty("top", "0", "important");
+                    container.style.setProperty("height", window.visualViewport.height + "px", "important");
                 }
             } else {
+                // وضع الكمبيوتر
+                container.style.removeProperty("height");
+                container.style.removeProperty("top");
                 let keyboardHeight = window.innerHeight - window.visualViewport.height;
                 container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
                 if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
@@ -227,9 +216,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // =====================================================================
-    // 7. أحداث النقر والإغلاق والتوسيع (Event Listeners)
-    // =====================================================================
     chatBtn.addEventListener("click", function() {
         container.style.display = "flex"; 
         if (window.innerWidth > 767) {
@@ -247,6 +233,9 @@ document.addEventListener("DOMContentLoaded", function() {
         refreshUsageUI();
     });
 
+    // =====================================================================
+    // تنظيف الأنماط عند إغلاق الشاشة الكاملة ليعود للبوب أب بشكل سليم
+    // =====================================================================
     function exitFullscreenMode() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.remove('RaSi-fullscreen');
@@ -255,6 +244,8 @@ document.addEventListener("DOMContentLoaded", function() {
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
         }
         document.body.style.overflow = '';
+        container.style.removeProperty("height"); // إزالة الطول القسري
+        container.style.removeProperty("top");    // إزالة التثبيت من الأعلى
         adjustForKeyboard(); 
     }
 
@@ -266,6 +257,7 @@ document.addEventListener("DOMContentLoaded", function() {
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; 
         }
         document.body.style.overflow = 'hidden';
+        adjustForKeyboard(); // تطبيق الطول القسري المناسب
         setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 150);
     }
 
@@ -306,11 +298,9 @@ document.addEventListener("DOMContentLoaded", function() {
         txt.addEventListener("blur", function() { setTimeout(adjustForKeyboard, 50); });
     }
 
-    // منع الإغلاق الخاطئ عند النقر
     document.addEventListener("click", function(e) {
         if("flex" !== container.style.display) return;
         if(container.contains(e.target) || chatBtn.contains(e.target)) return;
-        // التحقق مما إذا كان العنصر الذي تم النقر عليه قد تم حذفه للتو (مثل الأيقونات)
         if(!document.body.contains(e.target)) return;
         container.style.display = "none";
     });
@@ -388,6 +378,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // التهيئة الأولية
     refreshUsageUI();
 });
