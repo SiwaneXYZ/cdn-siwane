@@ -166,31 +166,44 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // =====================================================================
+    // التنسيق النهائي لحركة الكيبورد مع تجنب تضارب الأوامر
+    // =====================================================================
     function adjustForKeyboard() {
         if (!container || container.style.display !== "flex") return;
 
         if (window.visualViewport) {
+            let vv = window.visualViewport;
+            
             if (window.innerWidth <= 767) {
                 if (!container.classList.contains("RaSi-fullscreen")) {
+                    // 1. حالة الصندوق المصغر (35%)
                     container.style.removeProperty("height");
                     container.style.removeProperty("top");
-                    let offsetBottom = window.innerHeight - (window.visualViewport.offsetTop + window.visualViewport.height);
+                    
+                    // حساب المسافة الدقيقة بين الكيبورد والصفحة
+                    let offsetBottom = window.innerHeight - (vv.offsetTop + vv.height);
                     container.style.setProperty("bottom", Math.max(0, offsetBottom) + "px", "important");
                 } else {
+                    // 2. حالة الشاشة الكاملة (Fullscreen)
+                    // هذا هو الحل السحري: نثبت الهيدر باستخدام إزاحة الكيبورد (offsetTop) 
+                    // بدلاً من الاعتماد على bottom لكي لا يتم دفعه للأعلى
                     container.style.setProperty("bottom", "auto", "important");
-                    container.style.setProperty("top", "0", "important");
-                    container.style.setProperty("height", window.visualViewport.height + "px", "important");
+                    container.style.setProperty("top", vv.offsetTop + "px", "important");
+                    container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
+                // وضع الكمبيوتر المكتبي
                 container.style.removeProperty("height");
                 container.style.removeProperty("top");
-                let keyboardHeight = window.innerHeight - window.visualViewport.height;
+                let keyboardHeight = window.innerHeight - vv.height;
                 container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
                 if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
             }
         }
     }
 
+    // التنصت اللحظي على حركة الكيبورد أو تمرير الشاشة
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", adjustForKeyboard);
         window.visualViewport.addEventListener("scroll", adjustForKeyboard);
@@ -223,30 +236,36 @@ document.addEventListener("DOMContentLoaded", function() {
         refreshUsageUI();
     });
 
-    // ==== تجميد السكرول في الشاشة الكاملة لحل مشكلة تسرب التمرير ====
+    // =====================================================================
+    // تنظيف الخصائص بدقة عند التحويل بين الأوضاع
+    // =====================================================================
     function exitFullscreenMode() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.remove('RaSi-fullscreen');
-        document.body.classList.remove('rasi-no-scroll'); // إزالة تجميد الصفحة
+        document.body.classList.remove('rasi-no-scroll'); 
         
         if(fullscreenBtn) {
             fullscreenBtn.title = 'الشاشة الكاملة'; 
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
         }
+        
+        // إزالة الخصائص الخاصة بالشاشة الكاملة ليعود للعمل بنظام 35%
         container.style.removeProperty("height"); 
-        container.style.removeProperty("top");    
+        container.style.removeProperty("top");
+        container.style.removeProperty("bottom"); 
         adjustForKeyboard(); 
     }
 
     function enterFullscreenMode() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.add('RaSi-fullscreen');
-        document.body.classList.add('rasi-no-scroll'); // تجميد الصفحة الخلفية برمجياً
+        document.body.classList.add('rasi-no-scroll'); 
         
         if(fullscreenBtn) {
             fullscreenBtn.title = 'تصغير'; 
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; 
         }
+        
         adjustForKeyboard(); 
         setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 150);
     }
@@ -255,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(closeBtn) {
         closeBtn.addEventListener("click", function(e) {
             e.stopPropagation(); e.preventDefault();
-            document.body.classList.remove('rasi-no-scroll'); // فك تجميد الصفحة عند الإغلاق
+            document.body.classList.remove('rasi-no-scroll'); 
             if(container.classList.contains("RaSi-fullscreen")) { 
                 exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); 
             } else { 
@@ -293,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if("flex" !== container.style.display) return;
         if(container.contains(e.target) || chatBtn.contains(e.target)) return;
         if(!document.body.contains(e.target)) return;
-        document.body.classList.remove('rasi-no-scroll'); // فك تجميد الصفحة إذا تم الإغلاق بالنقر خارجاً
+        document.body.classList.remove('rasi-no-scroll'); 
         container.style.display = "none";
     });
 
