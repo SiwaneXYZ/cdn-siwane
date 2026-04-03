@@ -89,3 +89,55 @@
 }
 .RaSi-usage .usage-item { background: 0 0 !important; border: 1px solid var(--contentL, #e3e7ef) !important; }
 .RaSi-head span { font-size: 11px !important; }
+
+/* --- ستايل البوب-أب الخاص بالهاتف (مستوحى من تصميم التعليقات) --- */
+@media (max-width: 500px) {
+    #RaSi-chat-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 85vh !important; /* يأخذ 85% من طول الشاشة ليترك مساحة بسيطة في الأعلى */
+        max-height: 85vh !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        border: none !important;
+        border-radius: 24px 24px 0 0 !important; /* حواف دائرية ناعمة من الأعلى فقط */
+        box-shadow: 0 -5px 40px rgba(0, 0, 0, 0.2) !important; /* ظل علوي يعطي إيحاء بظهور طبقة جديدة */
+        animation: slideUpPopup 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important; /* حركة صعود سلسة */
+    }
+
+    /* حركة الانبثاق من الأسفل للأعلى */
+    @keyframes slideUpPopup {
+        0% { transform: translateY(100%); }
+        100% { transform: translateY(0); }
+    }
+
+    /* ضبط الهيدر ليتماشى مع الحواف الدائرية الجديدة */
+    .RaSi-head, .RaSi-fullscreen .RaSi-head {
+        border-radius: 24px 24px 0 0 !important;
+        padding: 15px 20px !important;
+    }
+
+    /* ضبط حقل الإدخال السفلي */
+    #RaSi-chat-container .RaSi-input-wrap {
+        padding: 10px 15px 15px !important; /* مساحة أمان سفلية مريحة للإبهام */
+    }
+
+    /* إخفاء زر الدردشة العائم عندما يكون صندوق الدردشة مفتوحاً (لترتيب الشاشة) */
+    #RaSi-widget-container:has(#RaSi-chat-container[style*="display: flex"]) .RaSi-chat-btn {
+        display: none !important;
+    }
+
+    /* ضبط حجم زر الفتح الأصلي */
+    .RaSi-chat-btn {
+        position: fixed !important;
+        z-index: 9999 !important;
+        right: 20px !important;
+        bottom: 20px !important;
+    }
+
+    #RaSi-widget-container * {
+        box-sizing: border-box !important;
+    }
+}
+
