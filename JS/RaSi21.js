@@ -1,9 +1,17 @@
 document.addEventListener("DOMContentLoaded", function() {
-    
+
+    // =====================================================================
+    // 1. ربط لوحة التحكم (الإعدادات من HTML)
+    // =====================================================================
+    const CONFIG = { 
+        gasUrl: (window.RaSiChatConfig && window.RaSiChatConfig.gasUrl) ? window.RaSiChatConfig.gasUrl : (typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : ""),
+        dailyLimit: (window.RaSiChatConfig && window.RaSiChatConfig.dailyLimit) ? window.RaSiChatConfig.dailyLimit : 25,
+        excludedCategories: (window.RaSiChatConfig && window.RaSiChatConfig.excludedCategories) ? window.RaSiChatConfig.excludedCategories : []
+    };
+
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
-          DEV_FLAG_KEY = "RaSiDevUnlimited_v1",
-          DEFAULT_DAILY_LIMIT = 25;
+          DEV_FLAG_KEY = "RaSiDevUnlimited_v1";
 
     let messagesLoaded = false;
     let headerClickCount = 0, headerClickTimer = null;
@@ -18,7 +26,26 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // التجاوب الذكي والآمن مع زر PWA
+    // 2. التحكم في إظهار/إخفاء الدردشة حسب التصنيف (الميزة الجديدة)
+    // =====================================================================
+    function checkVisibility() {
+        // البحث عن اسم التصنيف في مسار التنقل (Breadcrumb) بناءً على بنية قالبك
+        const categoryEl = document.querySelector('.brdCmb .lb span[itemprop="name"]');
+        const currentCategory = categoryEl ? categoryEl.innerText.trim() : "";
+
+        // إذا كان التصنيف موجوداً في قائمة الاستبعاد، أخفِ الزر وأوقف السكربت
+        if (CONFIG.excludedCategories.includes(currentCategory)) {
+            chatBtn.style.display = "none";
+            return false;
+        }
+        return true;
+    }
+
+    // تشغيل الفحص، وإذا كان التصنيف مستبعداً، نتوقف هنا
+    if (!checkVisibility()) return;
+
+    // =====================================================================
+    // 3. التجاوب الذكي مع زر PWA
     // =====================================================================
     function setupPwaSync() {
         const updatePositions = () => {
@@ -52,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupPwaSync();
 
     // =====================================================================
-    // باقي دوال النظام
+    // 4. دوال معالجة وتنسيق النصوص 
     // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
@@ -74,19 +101,41 @@ document.addEventListener("DOMContentLoaded", function() {
         return t;
     }
 
-    function loadUsage() { try { let e = localStorage.getItem(USAGE_KEY); if (!e) return initUsage(); let t = JSON.parse(e), n = new Date().toISOString().slice(0, 10); if (t.date !== n) return initUsage(); return t; } catch (s) { return initUsage(); } }
-    function initUsage() { let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0, limit: DEFAULT_DAILY_LIMIT }; localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; }
+    // =====================================================================
+    // 5. إدارة الاستخدام 
+    // =====================================================================
+    function loadUsage() { 
+        try { 
+            let e = localStorage.getItem(USAGE_KEY); 
+            let n = new Date().toISOString().slice(0, 10);
+            if (!e) return initUsage(); 
+            let t = JSON.parse(e); 
+            if (t.date !== n) return initUsage(); 
+            return t; 
+        } catch (s) { return initUsage(); } 
+    }
+
+    function initUsage() { 
+        let e = new Date().toISOString().slice(0, 10), 
+            t = { date: e, count: 0, limit: CONFIG.dailyLimit }; 
+        localStorage.setItem(USAGE_KEY, JSON.stringify(t)); 
+        return t; 
+    }
+
     function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
-    function remainingMessages() { let e = "1" === localStorage.getItem(DEV_FLAG_KEY); if (e) return Infinity; let t = loadUsage(); return Math.max(0, t.limit - t.count); }
+
+    function remainingMessages() { 
+        let e = "1" === localStorage.getItem(DEV_FLAG_KEY); 
+        if (e) return Infinity; 
+        let t = loadUsage(); 
+        return Math.max(0, t.limit - t.count); 
+    }
 
     function refreshUsageUI() {
         let remaining = remainingMessages();
         let remElement = document.getElementById("RaSi-remaining");
         let remItem = document.getElementById("RaSi-remaining-item");
         
-        // ----------------------------------------------------
-        // 🚀 السحر البرمجي للإشعار (Notification Badge)
-        // ----------------------------------------------------
         if (chatBtn) {
             let badge = document.getElementById("RaSi-chat-badge");
             if (!badge) {
@@ -95,13 +144,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 badge.className = "RaSi-chat-badge";
                 chatBtn.appendChild(badge);
             }
-            
-            // جلب عدد الرسائل المستخدمة 
             let currentUsage = loadUsage().count;
-            // إذا كان 0 نعرض "1" لجذب الانتباه، وإذا كان أكثر نعرض العدد الحقيقي
             badge.textContent = currentUsage === 0 ? "1" : currentUsage;
         }
-        // ----------------------------------------------------
 
         if(!remElement || !remItem) return;
 
@@ -113,6 +158,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // =====================================================================
+    // 6. السجل وعناصر واجهة الرسائل 
+    // =====================================================================
     function saveHistory() {
         if(!messagesArea) return;
         try {
@@ -149,11 +197,30 @@ document.addEventListener("DOMContentLoaded", function() {
         return e;
     }
 
+    // =====================================================================
+    // 7. قراءة المقال وإرسال السياق (الميزة الجديدة)
+    // =====================================================================
     function getPageContext() {
-        let title = document.title || "بدون عنوان";
-        let bodyElement = document.querySelector('.post-body') || document.querySelector('.entry-content') || document.body;
-        let snippet = bodyElement ? bodyElement.innerText.substring(0, 800).trim() : "";
-        return `العنوان: ${title}\nالمقتطف: ${snippet}`;
+        const article = document.querySelector('article.post');
+        if (!article) return "";
+
+        // جلب العنوان
+        const titleEl = article.querySelector('h1.pTtl span');
+        const title = titleEl ? titleEl.innerText.trim() : document.title;
+        
+        // جلب المحتوى من الفقرات والعناوين لتجاهل الأكواد والصور والإعلانات
+        const contentBody = article.querySelector('#postBody');
+        let fullText = "";
+        
+        if (contentBody) {
+            const elements = contentBody.querySelectorAll('p, h2, h3, li');
+            elements.forEach(el => fullText += el.innerText + " \n");
+        } else {
+             fullText = article.innerText;
+        }
+
+        // إرجاع أول 2000 حرف لتجنب إرهاق التوكنات في Gemini
+        return `عنوان المقال: ${title}\nالمحتوى: ${fullText.substring(0, 2000)}`;
     }
 
     function buildConversationPayload(e) {
@@ -176,10 +243,15 @@ document.addEventListener("DOMContentLoaded", function() {
         
         let placeholder = t || createAiPlaceholder();
         showStatus("جاري إرسال الرسالة...");
-        let messagesPayload = buildConversationPayload(e), currentContext = getPageContext();
+        
+        // هنا نقوم بدمج سجل المحادثة مع سياق المقال المستخرج
+        let messagesPayload = buildConversationPayload(e);
+        let currentContext = getPageContext(); 
         
         try {
-            let endpointUrl = typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : "";
+            let endpointUrl = CONFIG.gasUrl;
+            
+            // إرسال كائن يحتوي على messages و context
             let response = await fetch(endpointUrl, {
                 method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, 
                 body: JSON.stringify({ messages: messagesPayload, context: currentContext })
@@ -210,6 +282,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // =====================================================================
+    // 8. التفاعل وواجهة المستخدم (UI Events & Keyboard)
+    // =====================================================================
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
@@ -245,9 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("bottom", "10px", "important");
                     if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
                 } else {
-                    if(typeof window.RaSiSyncPwaPositions === "function") {
-                        window.RaSiSyncPwaPositions();
-                    }
+                    if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
                 }
             }
         }
@@ -270,6 +343,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     chatBtn.addEventListener("click", function() {
         container.style.display = "flex"; 
+        if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
         lazyLoadMessages();
         setTimeout(function() { 
             if(txt) txt.focus(); 
