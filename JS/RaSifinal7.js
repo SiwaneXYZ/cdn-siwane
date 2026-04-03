@@ -18,45 +18,49 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // السحر البرمجي الآمن: مراقبة وتجنب زر تطبيق PWA 
+    // التجاوب الذكي والآمن مع زر PWA (يتعايشان في اليسار)
     // =====================================================================
     function setupPwaSync() {
         const updatePositions = () => {
             const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
-            // فحص هل الزر PWA موجود وظاهر في الصفحة؟
-            const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none";
+            
+            // التحقق مما إذا كان زر التطبيق ظاهراً للمستخدم حالياً
+            const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none" && getComputedStyle(pwaBtn).visibility !== "hidden";
 
-            if (window.innerWidth <= 767) {
-                // في الهاتف: إذا ظهر التطبيق ارتفع الدردشة فوقه، إذا اختفى انزل مكانه
-                chatBtn.style.setProperty("bottom", isPwaVisible ? "80px" : "20px", "important");
-            } else {
-                // في الحاسوب: التناسق مع الشاشة الكبيرة
-                chatBtn.style.setProperty("bottom", isPwaVisible ? "90px" : "30px", "important");
-                if (container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
-                    container.style.setProperty("bottom", isPwaVisible ? "150px" : "95px", "important");
-                }
+            // مكان القاعدة هو 125px (كما في الـ PWA)
+            // إذا كان PWA ظاهراً، نرفع الدردشة لتصبح فوقه بمسافة مريحة (175px)
+            const btnBottom = isPwaVisible ? "175px" : "125px";
+            
+            chatBtn.style.setProperty("bottom", btnBottom, "important");
+
+            // في الحاسوب، يجب رفع الحاوية لكي لا تغطي الزر
+            if (window.innerWidth > 767 && container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
+                const containerBottom = isPwaVisible ? "230px" : "180px";
+                container.style.setProperty("bottom", containerBottom, "important");
             }
         };
 
-        // تحديث أولي
+        // استدعاء فوري عند التحميل
         updatePositions();
         window.addEventListener("resize", updatePositions);
 
-        // مراقبة الصفحة تحسباً لظهور الزر أو اختفائه
+        // مراقبة أي تغيير يطرأ على إخفاء أو إظهار زر الـ PWA
         const observer = new MutationObserver(() => updatePositions());
-        observer.observe(document.body, { 
-            childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'style', 'class'] 
-        });
+        if (document.getElementById("app_install_button")) {
+            observer.observe(document.getElementById("app_install_button"), { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
+        } else if (document.querySelector(".pwa-button")) {
+            observer.observe(document.querySelector(".pwa-button"), { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
+        } else {
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
 
-        // تصدير دالة التحديث لاستخدامها لاحقاً
         window.RaSiSyncPwaPositions = updatePositions;
     }
     
-    // تشغيل المراقبة فوراً
     setupPwaSync();
 
     // =====================================================================
-    // باقي دوال النظام
+    // باقي الكود الخاص بآلية المحادثة وحماية الكيبورد
     // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
@@ -224,14 +228,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                let keyboardHeight = window.innerHeight - vv.height;
-                if (keyboardHeight > 150) {
-                    container.style.setProperty("bottom", "10px", "important");
-                    if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
-                } else {
-                    if(typeof window.RaSiSyncPwaPositions === "function") {
-                        window.RaSiSyncPwaPositions();
-                    }
+                if(typeof window.RaSiSyncPwaPositions === "function") {
+                    window.RaSiSyncPwaPositions();
                 }
             }
         }
@@ -277,6 +275,8 @@ document.addEventListener("DOMContentLoaded", function() {
         container.style.removeProperty("height"); 
         container.style.removeProperty("top");
         container.style.removeProperty("bottom"); 
+        
+        if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
         adjustForKeyboard(); 
     }
 
