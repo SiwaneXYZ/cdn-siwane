@@ -1,10 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
-    
-    // ربط لوحة التحكم
-    const CONFIG = window.RaSiChatConfig || { 
-        gasUrl: typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : "", 
-        dailyLimit: 25, 
-        excludedCategories: [] 
+
+    // =====================================================================
+    // 1. الإعدادات والتهيئة (مُحصن ضد أخطاء الروابط القديمة والجديدة)
+    // =====================================================================
+    const CONFIG = { 
+        gasUrl: (window.RaSiChatConfig && window.RaSiChatConfig.gasUrl) ? window.RaSiChatConfig.gasUrl : (typeof GAS_WEB_APP_URL !== 'undefined' ? GAS_WEB_APP_URL : ""),
+        dailyLimit: (window.RaSiChatConfig && window.RaSiChatConfig.dailyLimit) ? window.RaSiChatConfig.dailyLimit : 25,
+        excludedCategories: (window.RaSiChatConfig && window.RaSiChatConfig.excludedCategories) ? window.RaSiChatConfig.excludedCategories : []
     };
 
     const USAGE_KEY = "RaSiChatUsage_v1",
@@ -24,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // إخفاء الزر في تصنيفات معينة (الجديد)
+    // 2. فحص التصنيفات المستبعدة 
     // =====================================================================
     function checkVisibility() {
         const categoryEl = document.querySelector('.brdCmb .lb span');
@@ -40,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!checkVisibility()) return;
 
     // =====================================================================
-    // التجاوب الذكي والآمن مع زر PWA (نسختك المعتمدة)
+    // 3. التجاوب الذكي مع زر PWA
     // =====================================================================
     function setupPwaSync() {
         const updatePositions = () => {
@@ -74,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupPwaSync();
 
     // =====================================================================
-    // باقي دوال النظام
+    // 4. دوال معالجة وتنسيق النصوص 
     // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
@@ -96,19 +98,41 @@ document.addEventListener("DOMContentLoaded", function() {
         return t;
     }
 
-    function loadUsage() { try { let e = localStorage.getItem(USAGE_KEY); if (!e) return initUsage(); let t = JSON.parse(e), n = new Date().toISOString().slice(0, 10); if (t.date !== n) return initUsage(); return t; } catch (s) { return initUsage(); } }
-    function initUsage() { let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0, limit: CONFIG.dailyLimit }; localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; }
+    // =====================================================================
+    // 5. إدارة الاستخدام ونقطة الإشعار 
+    // =====================================================================
+    function loadUsage() { 
+        try { 
+            let e = localStorage.getItem(USAGE_KEY); 
+            let n = new Date().toISOString().slice(0, 10);
+            if (!e) return initUsage(); 
+            let t = JSON.parse(e); 
+            if (t.date !== n) return initUsage(); 
+            return t; 
+        } catch (s) { return initUsage(); } 
+    }
+
+    function initUsage() { 
+        let e = new Date().toISOString().slice(0, 10), 
+            t = { date: e, count: 0, limit: CONFIG.dailyLimit }; 
+        localStorage.setItem(USAGE_KEY, JSON.stringify(t)); 
+        return t; 
+    }
+
     function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
-    function remainingMessages() { let e = "1" === localStorage.getItem(DEV_FLAG_KEY); if (e) return Infinity; let t = loadUsage(); return Math.max(0, t.limit - t.count); }
+
+    function remainingMessages() { 
+        let e = "1" === localStorage.getItem(DEV_FLAG_KEY); 
+        if (e) return Infinity; 
+        let t = loadUsage(); 
+        return Math.max(0, t.limit - t.count); 
+    }
 
     function refreshUsageUI() {
         let remaining = remainingMessages();
         let remElement = document.getElementById("RaSi-remaining");
         let remItem = document.getElementById("RaSi-remaining-item");
         
-        // ----------------------------------------------------
-        // السحر البرمجي للإشعار (Notification Badge)
-        // ----------------------------------------------------
         if (chatBtn) {
             let badge = document.getElementById("RaSi-chat-badge");
             if (!badge) {
@@ -117,11 +141,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 badge.className = "RaSi-chat-badge";
                 chatBtn.appendChild(badge);
             }
-            
             let currentUsage = loadUsage().count;
             badge.textContent = currentUsage === 0 ? "1" : currentUsage;
         }
-        // ----------------------------------------------------
 
         if(!remElement || !remItem) return;
 
@@ -133,6 +155,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // =====================================================================
+    // 6. السجل وعناصر واجهة الرسائل 
+    // =====================================================================
     function saveHistory() {
         if(!messagesArea) return;
         try {
@@ -170,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // قراءة المقال لفهم السياق (الجديد)
+    // 7. قراءة المقال وإرسال السياق 
     // =====================================================================
     function getPageContext() {
         const article = document.querySelector('article.post');
@@ -213,10 +238,17 @@ document.addEventListener("DOMContentLoaded", function() {
         let placeholder = t || createAiPlaceholder();
         showStatus("جاري إرسال الرسالة...");
         let messagesPayload = buildConversationPayload(e);
-        let currentContext = getPageContext(); // دمج سياق المقال هنا
+        let currentContext = getPageContext(); 
         
         try {
+            // الآن نستخدم الرابط المحمي الذي تأكدنا من وجوده في بداية الكود
             let endpointUrl = CONFIG.gasUrl;
+            
+            // تحقق إضافي في حال كان الرابط فارغاً
+            if (!endpointUrl || endpointUrl === "") {
+                 throw Error("رابط الخادم غير متوفر. يرجى التحقق من إعدادات RaSiChatConfig");
+            }
+
             let response = await fetch(endpointUrl, {
                 method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, 
                 body: JSON.stringify({ messages: messagesPayload, context: currentContext })
@@ -243,10 +275,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 retryBtn.onclick = async function() { retryBtn.disabled = true; bubbleElement.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div> إعادة المحاولة...</div>`; await sendMessage(e, placeholder, true); retryBtn.disabled = false; };
             }
             saveHistory(); showStatus("تعذر الاتصال بالخادم"); 
+            console.error("Chat Error:", error); // لعرض المشكلة الحقيقية في الكونسول
             return false;
         }
     }
 
+    // =====================================================================
+    // 8. التفاعل وواجهة المستخدم (UI Events & Keyboard)
+    // =====================================================================
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
@@ -282,9 +318,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("bottom", "10px", "important");
                     if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
                 } else {
-                    if(typeof window.RaSiSyncPwaPositions === "function") {
-                        window.RaSiSyncPwaPositions();
-                    }
+                    if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
                 }
             }
         }
