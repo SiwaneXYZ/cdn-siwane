@@ -139,22 +139,18 @@ function lazyLoadMessages() {
     }
 }
 
-// ==== تحديث جوهري هنا لمنع الجافاسكريبت من العبث بتصميم الهاتف ====
+// ==== الدالة الأصلية للفتح مع توافق تام لـ CSS ====
 document.getElementById("RaSi-chat-btn").onclick = function() {
     container.style.display = "flex"; 
-    // لا تطبق هذه الأبعاد إلا إذا كان المستخدم يتصفح من الحاسوب
-    if (window.innerWidth > 767) {
-        container.style.position = "fixed"; 
-        container.style.left = ""; container.style.top = ""; 
-        container.style.right = "32px"; container.style.bottom = "142px";
-    }
+    container.style.position = "fixed"; 
+    container.style.right = "32px"; 
+    container.style.bottom = "142px";
     lazyLoadMessages();
     setTimeout(function() { document.getElementById("RaSi-input").focus(); setTimeout(() => { ensureFullMessageVisibility(); }, 200); }, 100);
     window.RaSiChatOpenedAt = Date.now(); refreshUsageUI();
 };
 
 function adjustForKeyboard() {
-    // منع وظيفة تحريك الصندوق في الهاتف ليتحكم الـ CSS بها بشكل طبيعي
     if (window.innerWidth > 767) {
         let e = window.visualViewport.height, t = window.innerHeight;
         t - e > 150 ? (document.getElementById("RaSi-chat-container").style.bottom = "10px", document.getElementById("RaSi-chat-btn").style.bottom = "10px") : (document.getElementById("RaSi-chat-container").style.bottom = "142px", document.getElementById("RaSi-chat-btn").style.bottom = "88px");
