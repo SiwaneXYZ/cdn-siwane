@@ -9,7 +9,9 @@ let headerClickCount = 0, headerClickTimer = null;
 const container = document.getElementById("RaSi-chat-container");
 const txt = document.getElementById("RaSi-input");
 const head = document.getElementById("RaSi-head");
+const charsUI = document.getElementById("RaSi-chars"); // تم استرجاع المتغير
 
+// --- دوال مساعدة وتنسيق النص ---
 function escapeHtml(e) {
     return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : ""
 }
@@ -39,6 +41,7 @@ function renderRichText(e) {
     return t;
 }
 
+// --- نظام الاستخدام (Usage) ---
 function loadUsage() {
     try {
         let e = localStorage.getItem(USAGE_KEY);
@@ -77,6 +80,7 @@ function refreshUsageUI() {
     }
 }
 
+// --- السجل والتنبيهات ---
 function saveHistory() {
     try {
         let e = [...document.getElementById("RaSi-messages").children],
@@ -94,6 +98,7 @@ function showStatus(e, t = 1600) {
     t > 0 && setTimeout(() => { n.style.display = "none" }, t);
 }
 
+// --- إنشاء عناصر الرسائل ---
 function createUserMessage(e) {
     let t = document.createElement("div"); t.className = "RaSi-msg-user";
     let n = document.createElement("div"); n.className = "bubble"; n.innerHTML = renderRichText(e);
@@ -109,22 +114,26 @@ function createAiPlaceholder() {
     t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div> جاري الكتابة...</div>`;
     e.appendChild(t);
     let n = document.createElement("div"); n.className = "meta";
-    n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button><button class="download-msg" title="تحميل الرد"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button><button class="resend-retry" title="إعادة المحاولة" style="display:none"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button></div>`;
+    // تم استرجاع جميع الأزرار هنا (التحميل، الإعجاب، النسخ، وإعادة المحاولة)
+    n.innerHTML = `<div class="msg-controls">
+        <button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+        <button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button>
+        <button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button>
+        <button class="download-msg" title="تحميل الرد"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+        <button class="resend-retry" title="إعادة المحاولة" style="display:none"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button>
+    </div>`;
     e.appendChild(n); document.getElementById("RaSi-messages").appendChild(e);
     setTimeout(() => { ensureFullMessageVisibility(); }, 100); return e;
 }
 
-// 1. الدالة الذكية لقراءة سياق المقال من بلوجر (لتوفير التوكنات وتوجيه المحادثة)
+// --- استراتيجية سياق المقال (Blogger Context) ---
 function getPageContext() {
     let title = document.title || "بدون عنوان";
-    // نحاول استخراج محتوى المقال (في بلوجر غالباً يكون داخل فئة post-body)
     let bodyElement = document.querySelector('.post-body') || document.querySelector('.entry-content') || document.body;
-    // نقتطع أول 800 حرف فقط لكي نعطي فكرة للذكاء الاصطناعي دون استهلاك كمية توكنات كبيرة!
     let snippet = bodyElement.innerText.substring(0, 800).trim();
     return `العنوان: ${title}\nالمقتطف: ${snippet}`;
 }
 
-// 2. الدالة الذكية لاقتطاع المحادثة
 function buildConversationPayload(e) {
     let htmlMessages = [...document.getElementById("RaSi-messages").children];
     let parsedMessages = [];
@@ -138,10 +147,10 @@ function buildConversationPayload(e) {
     });
     if(e) parsedMessages.push({ role: "user", content: e });
 
-    // استراتيجية توفير التوكنات: نأخذ آخر 5 رسائل فقط بدلاً من السجل كله
-    return parsedMessages.slice(-5);
+    return parsedMessages.slice(-5); // توفير التوكنات
 }
 
+// --- الاتصال بالخادم الوسيط (GAS) ---
 async function sendMessage(e, t = null, n = !1) {
     let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY);
     if (!isDev) {
@@ -152,7 +161,6 @@ async function sendMessage(e, t = null, n = !1) {
     let placeholder = t || createAiPlaceholder();
     showStatus("جاري إرسال الرسالة...");
     
-    // إرسال السجل (المصغر) والسياق
     let messagesPayload = buildConversationPayload(e);
     let currentContext = getPageContext();
     
@@ -194,7 +202,7 @@ async function sendMessage(e, t = null, n = !1) {
     }
 }
 
-// تحميل المحادثة وبقية الواجهة
+// --- واجهة المستخدم والتفاعل (UI/UX) ---
 function lazyLoadMessages() {
     if (!messagesLoaded) {
         let e = document.createElement("div"); e.className = "RaSi-msg-ai";
@@ -244,9 +252,11 @@ document.getElementById('RaSi-fullscreen').onclick = function() {
     if (container.classList.contains('RaSi-fullscreen')) { exitFullscreenMode(); } else { enterFullscreenMode(); }
 };
 
+// --- تفاعلات حقل الإدخال والأحرف ---
 txt.addEventListener("input", function(e) {
     e.target.style.height = "auto";
     e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px";
+    if(charsUI) charsUI.textContent = `${e.target.value.length} `; // استرجاع منطق العداد
 });
 
 txt.addEventListener("keydown", function(e) {
@@ -259,6 +269,7 @@ document.addEventListener("keydown", function(e) {
     if ("Escape" === e.key) container.style.display = "none";
 });
 
+// --- إدارة نقرات أزرار السجل والرسائل ---
 document.getElementById("RaSi-copy-all").onclick = function() {
     let e = [...document.getElementById("RaSi-messages").children].map(e => e.innerText).join("\n");
     navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!"));
@@ -270,9 +281,13 @@ document.getElementById("RaSi-clear").onclick = function() {
     messagesLoaded = !1; lazyLoadMessages(); showStatus("تم حذف المحادثة!");
 };
 
+// تم استرجاع المنطق الكامل للألوان والوظائف هنا!
 document.getElementById('RaSi-messages').addEventListener('click', function(e) {
-    let target = e.target.closest('button'); if (!target) return;
-    const messageElement = target.closest('.RaSi-msg-ai, .RaSi-msg-user'); if (!messageElement) return;
+    let target = e.target.closest('button'); 
+    if (!target) return;
+
+    const messageElement = target.closest('.RaSi-msg-ai, .RaSi-msg-user'); 
+    if (!messageElement) return;
     
     if (target.classList.contains('copy-reply')) {
         const text = messageElement.querySelector('.bubble').innerText || '';
@@ -287,6 +302,35 @@ document.getElementById('RaSi-messages').addEventListener('click', function(e) {
         const text = messageElement.querySelector('.bubble').innerText || '';
         txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); showStatus('تم تحميل النص للتعديل');
     }
+    // منطق التلوين للأخضر والأحمر الخاص بالإعجاب وعدم الإعجاب
+    else if (target.classList.contains('like-btn') || target.classList.contains('dislike-btn')) {
+        const likeBtn = messageElement.querySelector('.like-btn');
+        const dislikeBtn = messageElement.querySelector('.dislike-btn');
+        
+        if (target.classList.contains('like-btn')) {
+            likeBtn.classList.toggle('liked');
+            dislikeBtn.classList.remove('disliked');
+            showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب');
+        } else {
+            dislikeBtn.classList.toggle('disliked');
+            likeBtn.classList.remove('liked');
+            showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء');
+        }
+    }
+    // منطق تحميل الرسالة
+    else if (target.classList.contains('download-msg')) {
+        const text = messageElement.querySelector('.bubble').innerText || '';
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `رد-الدردشة-${new Date().toLocaleDateString('ar-SA')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showStatus('تم تحميل الرد');
+    }
 });
 
 document.getElementById("RaSi-send").onclick = async function() {
@@ -300,6 +344,8 @@ document.getElementById("RaSi-send").onclick = async function() {
     
     createUserMessage(messageText);
     txt.value = ""; txt.style.height = "auto";
+    if(charsUI) charsUI.textContent = `0 `; // تصفير عداد الأحرف بعد الإرسال
+    
     let aiMessage = createAiPlaceholder();
     setTimeout(() => {
         const messagesContainer = document.getElementById("RaSi-messages");
