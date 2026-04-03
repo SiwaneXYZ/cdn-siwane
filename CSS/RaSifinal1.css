@@ -13,7 +13,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
    2. زر الدردشة العائم ونقطة الإشعار
    ========================================================================== */
 .RaSi-chat-btn { 
-    position: fixed; z-index: 9999; 
+    position: fixed; z-index: 3 !important; 
     left: 16px !important; right: auto !important; 
     bottom: 125px !important; 
     display: flex; align-items: center; justify-content: center; 
