@@ -18,23 +18,22 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 🚀 السحر البرمجي: مراقبة وتجنب زر تطبيق PWA 
+    // السحر البرمجي الآمن: مراقبة وتجنب زر تطبيق PWA 
     // =====================================================================
     function setupPwaSync() {
-        // هذه الدالة تقرر أين يجب أن يجلس زر الدردشة والحاوية
         const updatePositions = () => {
             const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
-            // فحص هل الزر موجود وظاهر؟
+            // فحص هل الزر PWA موجود وظاهر في الصفحة؟
             const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none";
 
             if (window.innerWidth <= 767) {
-                // في الهاتف: إذا ظهر التطبيق ارتفع الدردشة، إذا اختفى انزل للأسفل
-                chatBtn.style.setProperty("bottom", isPwaVisible ? "85px" : "20px", "important");
+                // في الهاتف: إذا ظهر التطبيق ارتفع الدردشة فوقه، إذا اختفى انزل مكانه
+                chatBtn.style.setProperty("bottom", isPwaVisible ? "80px" : "20px", "important");
             } else {
                 // في الحاسوب: التناسق مع الشاشة الكبيرة
-                chatBtn.style.setProperty("bottom", isPwaVisible ? "85px" : "30px", "important");
+                chatBtn.style.setProperty("bottom", isPwaVisible ? "90px" : "30px", "important");
                 if (container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
-                    container.style.setProperty("bottom", isPwaVisible ? "145px" : "90px", "important");
+                    container.style.setProperty("bottom", isPwaVisible ? "150px" : "95px", "important");
                 }
             }
         };
@@ -43,13 +42,13 @@ document.addEventListener("DOMContentLoaded", function() {
         updatePositions();
         window.addEventListener("resize", updatePositions);
 
-        // مراقبة الصفحة تحسباً لظهور زر التطبيق أو اختفائه (مثلاً عند التثبيت)
+        // مراقبة الصفحة تحسباً لظهور الزر أو اختفائه
         const observer = new MutationObserver(() => updatePositions());
         observer.observe(document.body, { 
             childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'style', 'class'] 
         });
 
-        // تصدير دالة التحديث لاستخدامها بعد إغلاق الكيبورد
+        // تصدير دالة التحديث لاستخدامها لاحقاً
         window.RaSiSyncPwaPositions = updatePositions;
     }
     
@@ -57,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupPwaSync();
 
     // =====================================================================
-    // باقي دوال النظام (التهيئة، الدردشة، إلخ)
+    // باقي دوال النظام
     // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
@@ -208,7 +207,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // التجاوب مع الكيبورد (أعدناه يعتمد على وضع الـ PWA عند إغلاق الكيبورد)
     function adjustForKeyboard() {
         if (!container || container.style.display !== "flex") return;
 
@@ -231,7 +229,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("bottom", "10px", "important");
                     if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
                 } else {
-                    // عندما يغلق الكيبورد، نترك دالة الـ PWA تستعيد أماكن الأزرار الصحيحة
                     if(typeof window.RaSiSyncPwaPositions === "function") {
                         window.RaSiSyncPwaPositions();
                     }
