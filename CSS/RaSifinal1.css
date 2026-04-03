@@ -10,35 +10,29 @@
 body.rasi-no-scroll { overflow: hidden !important; }
 
 /* ==========================================================================
-   2. زر الدردشة العائم (تصميم الإصدار القديم كما طلبت)
+   2. زر الدردشة العائم (الوضع الافتراضي عند اختفاء زر التطبيق)
    ========================================================================== */
-.RaSi-chat-btn { position: fixed; z-index: 9999; right: 20px; bottom: 88px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 2px 12px #0002; visibility: visible; opacity: 1; transition: var(--trans-2); cursor: pointer; outline: 0; }
+.RaSi-chat-btn { 
+    position: fixed; z-index: 9999; right: 20px; 
+    bottom: 25px !important; /* المكان الأساسي في الأسفل (يأخذ مكان زر التطبيق) */
+    display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 12px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
+    transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important; /* حركة انزلاق ناعمة جداً */
+    cursor: pointer; outline: 0; 
+}
 .RaSi-chat-btn[hidden] { display: flex; visibility: hidden; opacity: 0; }
 .RaSi-chat-btn:not([disabled])::before { content: ''; position: absolute; z-index: -1; inset: 0; background: inherit; border-radius: inherit; animation: 1s cubic-bezier(0, 0, .2, 1) infinite RaSi-chat-ping; }
 .RaSi-svg-btn-n { width: 22px; height: 22px; fill: none; stroke: #fff !important; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 
 /* ==========================================================================
-   3. الحاوية الرئيسية للدردشة (الكمبيوتر)
+   3. الحاوية الرئيسية للدردشة (الكمبيوتر - الوضع الافتراضي)
    ========================================================================== */
 #RaSi-chat-container { 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     position: fixed; 
-    bottom: 142px; /* المسافة الأصلية لتناسب الزر */
-    right: 32px; /* المسافة الأصلية */
-    width: 380px; 
-    max-width: calc(100vw - 60px); 
-    height: 70vh; 
-    min-height: 450px; 
-    max-height: 750px; 
-    background: var(--contentB, #fff); 
-    border: 1px solid var(--contentL, #e3e7ef); 
-    border-radius: 20px; 
-    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); 
-    z-index: 9999; 
-    display: none; 
-    flex-direction: column; 
-    overflow: hidden; 
-    overscroll-behavior: none !important; 
+    bottom: 85px !important; /* متناسق مع الزر في الأسفل */
+    right: 32px; 
+    width: 380px; max-width: calc(100vw - 60px); height: 70vh; min-height: 450px; max-height: 750px; 
+    background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
 }
 
 /* ==========================================================================
@@ -62,8 +56,6 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .usage-item.unlimited { background: var(--success-light, #d1fae5); color: var(--success, #10b981); border-color: var(--success, #10b981); }
 .usage-item.unlimited svg.line { stroke: var(--success, #10b981) !important; }
 .usage-item.limited { background: var(--warning-light, #fef3c7); color: var(--warning, #f59e0b); border-color: var(--warning, #f59e0b); }
-.usage-item:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-.usage-item:hover svg.line { stroke: currentColor !important; }
 
 /* ==========================================================================
    5. الرسائل وحقل الإدخال
@@ -78,86 +70,51 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-msg-user .bubble { background: var(--linkC, #2563eb); color: #fff !important; border-radius: 14px 14px 14px 4px; box-shadow: 0 1px 3px #0001; }
 .RaSi-msg-ai .bubble { background: var(--contentBa, #f4f8ff); border: 1px solid var(--contentL, #e3e7ef); color: var(--bodyC, #222); border-radius: 14px 14px 4px 14px; box-shadow: 0 1px 3px #0001; word-break: break-word; }
 .RaSi-msg-ai .bubble a { color: var(--linkC, #2563eb); text-decoration: underline; }
-.RaSi-msg-ai .bubble ol { padding-right: 15px; margin: 8px 0; }
-.RaSi-msg-ai .bubble li { margin-bottom: 5px; line-height: 1.5; }
-.RaSi-msg-ai .bubble b { display: block; margin: 10px 0 5px 0; color: var(--linkC, #2563eb); }
-.RaSi-msg-ai img { max-width: 240px; border-radius: 8px; display: block; margin-top: 6px; box-shadow: 0 1px 6px rgba(0, 0, 0, .06); }
-.RaSi-msg-ai .meta { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
 .msg-controls { display: flex; gap: 6px; align-items: center; margin-top: 8px; margin-inline-start: 6px; }
 .msg-controls button { background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--notifC, #666); transition: all 0.3s ease; padding: 0; }
-.msg-controls button:hover { background: var(--linkC, #2563eb); color: var(--white); border-color: var(--linkC, #2563eb); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
+.msg-controls button:hover { background: var(--linkC, #2563eb); color: var(--white); border-color: var(--linkC, #2563eb); }
 .msg-controls button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
-.msg-controls button:active { transform: translateY(0); }
-.copy-reply:active { animation: copySuccess 0.3s ease; }
-.msg-controls .like-btn.liked { background: var(--success, #10b981); border-color: var(--success, #10b981); color: white; }
-.msg-controls .dislike-btn.disliked { background: var(--danger, #ef4444); border-color: var(--danger, #ef4444); color: white; }
 .spinner { width: 20px; height: 20px; border: 3px solid rgba(0, 0, 0, .08); border-top: 3px solid var(--linkC, #2563eb); border-radius: 50%; animation: spin 1s linear infinite; }
 #RaSi-chat-container .RaSi-input-wrap { padding: 12px 15px 10px; border-top: 1px solid var(--contentL, #e3e7ef); display: flex; align-items: center; gap: 8px; background: var(--contentBa, #fafcff); }
 #RaSi-input { flex: 1; padding: 10px 12px; border-radius: 12px; border-color: var(--linkC, #2563eb); font-size: 11px; color: var(--bodyC, #222); outline: 0; min-height: 38px; max-height: 80px; transition: border-color .3s ease; background: var(--contentBa, #f4f8ff) !important; }
 #RaSi-send { border: none; background: var(--linkC, #2563eb); color: var(--white); border-radius: 10px; padding: 0 14px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: var(--trans-2); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); cursor: pointer; }
-#RaSi-send svg, #RaSi-send svg path, #RaSi-send svg polygon, #RaSi-send svg line { color: #fff !important; stroke: white !important; fill: none !important; }
+#RaSi-send svg { color: #fff !important; stroke: white !important; fill: none !important; }
 #RaSi-status { font-size: 9px; color: var(--notifC, #888); padding: 3px 12px; background: var(--notifB, #f7f7f7); border-bottom: 1px solid var(--contentL, #e3e7ef); text-align: center; display: none; }
 
 /* ==========================================================================
    6. وضع الشاشة الكاملة
    ========================================================================== */
 .RaSi-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; border-radius: 0 !important; z-index: 10000 !important; display: flex !important; flex-direction: column !important; margin: 0 !important; transform: none !important; }
-.RaSi-fullscreen .RaSi-head { position: sticky !important; top: 0 !important; z-index: 10 !important; background: var(--contentB, #fff) !important; border-bottom: 1px solid var(--contentL, #e3e7ef) !important; border-radius: 0 !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; flex-shrink: 0 !important; padding: 12px 20px; }
-.RaSi-fullscreen #RaSi-messages { flex: 1 !important; overflow-y: auto !important; max-height: calc(100vh - 150px) !important; min-height: auto !important; padding-bottom: 10px !important; margin-top: 0 !important; }
-.RaSi-fullscreen .RaSi-input-wrap { position: sticky !important; bottom: 0 !important; background: var(--contentB, #fff) !important; border-top: 1px solid var(--contentL, #e3e7ef) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; flex-shrink: 0 !important; padding: 15px 20px !important; }
+.RaSi-fullscreen .RaSi-head { position: sticky !important; top: 0 !important; z-index: 10 !important; background: var(--contentB, #fff) !important; border-radius: 0 !important; flex-shrink: 0 !important; padding: 12px 20px; }
+.RaSi-fullscreen #RaSi-messages { flex: 1 !important; overflow-y: auto !important; max-height: calc(100vh - 150px) !important; padding-bottom: 10px !important; }
+.RaSi-fullscreen .RaSi-input-wrap { position: sticky !important; bottom: 0 !important; flex-shrink: 0 !important; padding: 15px 20px !important; }
 .RaSi-fullscreen ~ .RaSi-chat-btn { display: none !important; }
 
 /* ==========================================================================
    7. الهاتف (محمي بالكامل)
    ========================================================================== */
 @media screen and (max-width: 767px) {
-    
-    /* فرض مكان وأبعاد الزر القديم على الهاتف أيضاً للحفاظ على التناسق التام */
-    button#RaSi-chat-btn, button#RaSi-chat-btn[style] {
-        right: 20px !important;
-        bottom: 88px !important;
-        width: 40px !important;
-        height: 40px !important;
-    }
-    
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) {
-        position: fixed !important;
-        top: auto !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        
-        height: 35vh !important; 
-        max-height: 35vh !important;
-        min-height: 260px !important; 
-        
-        margin: 0 !important;
-        border-radius: 20px 20px 0 0 !important; 
-        border: none !important;
-        border-top: 1px solid var(--contentL, #e3e7ef) !important;
-        background: var(--contentB, #fff) !important;
-        box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15) !important;
-        transform-origin: bottom center !important;
-        animation: popupSlideUp 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+        position: fixed !important; top: auto !important; left: 0 !important; right: 0 !important; width: 100% !important; max-width: 100vw !important;
+        height: 35vh !important; max-height: 35vh !important; min-height: 260px !important; margin: 0 !important;
+        border-radius: 20px 20px 0 0 !important; border: none !important; border-top: 1px solid var(--contentL, #e3e7ef) !important; background: var(--contentB, #fff) !important; box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15) !important; transform-origin: bottom center !important; animation: popupSlideUp 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
+    @keyframes popupSlideUp { 0% { transform: translateY(100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-head { border-radius: 20px 20px 0 0 !important; padding: 10px 15px !important; }
+    html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-input-wrap { padding: 10px 15px 15px !important; }
+    body:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn, html:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn { display: none !important; }
+}
 
-    @keyframes popupSlideUp {
-        0% { transform: translateY(100%); opacity: 0; }
-        100% { transform: translateY(0); opacity: 1; }
-    }
+/* ==========================================================================
+   8. التجاوب الذكي مع زر PWA (تثبيت التطبيق) 🚀
+   ========================================================================== */
+/* إذا كان الزر ظاهراً في الصفحة، نرفع زر الدردشة والحاوية للأعلى */
+body:has(.pwa-button:not([hidden])) .RaSi-chat-btn {
+    bottom: 88px !important; /* يرتفع الزر ليتخطى زر التطبيق */
+}
 
-    html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-head {
-        border-radius: 20px 20px 0 0 !important;
-        padding: 10px 15px !important;
-    }
-    
-    html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-input-wrap {
-        padding: 10px 15px 15px !important; 
-    }
-
-    body:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn,
-    html:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn {
-        display: none !important;
+@media screen and (min-width: 768px) {
+    body:has(.pwa-button:not([hidden])) #RaSi-chat-container:not(.RaSi-fullscreen) {
+        bottom: 148px !important; /* ترتفع الحاوية في الكمبيوتر لتتناسق مع الزر */
     }
 }
