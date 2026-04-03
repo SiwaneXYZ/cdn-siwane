@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let e = document.createElement("div"); e.className = "RaSi-msg-ai";
         let t = document.createElement("div"); t.className = "bubble"; t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div> جاري الكتابة...</div>`; e.appendChild(t);
         let n = document.createElement("div"); n.className = "meta";
-        n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button><button class="download-msg" title="تحميل الرد"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button><button class="resend-retry" title="إعادة المحاولة" style="display:none"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button></div>`;
+        n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button></div>`;
         e.appendChild(n); 
         if(messagesArea) messagesArea.appendChild(e); 
         setTimeout(() => { ensureFullMessageVisibility(); }, 100); 
@@ -171,6 +171,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (window.visualViewport) {
             let vv = window.visualViewport;
+            
             if (window.innerWidth <= 767) {
                 if (!container.classList.contains("RaSi-fullscreen")) {
                     container.style.removeProperty("height");
@@ -183,12 +184,17 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                // إحداثيات الحاسوب للعودة إلى الاصدار القديم
-                container.style.removeProperty("height");
-                container.style.removeProperty("top");
+                // للكمبيوتر: عندما يفتح الكيبورد نتدخل بـ JS، عدا ذلك نترك التحكم لـ CSS
                 let keyboardHeight = window.innerHeight - vv.height;
-                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
-                if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
+                if (keyboardHeight > 150) {
+                    container.style.setProperty("bottom", "10px", "important");
+                    if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
+                } else {
+                    container.style.removeProperty("bottom");
+                    container.style.removeProperty("height");
+                    container.style.removeProperty("top");
+                    if(chatBtn) chatBtn.style.removeProperty("bottom");
+                }
             }
         }
     }
@@ -210,11 +216,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     chatBtn.addEventListener("click", function() {
         container.style.display = "flex"; 
-        if (window.innerWidth > 767) {
-            container.style.position = "fixed"; 
-            container.style.right = "32px"; 
-            container.style.bottom = "142px"; 
-        }
         lazyLoadMessages();
         setTimeout(function() { 
             if(txt) txt.focus(); 
