@@ -139,7 +139,6 @@ function lazyLoadMessages() {
     }
 }
 
-// ==== الدالة الأصلية للفتح مع توافق تام لـ CSS ====
 document.getElementById("RaSi-chat-btn").onclick = function() {
     container.style.display = "flex"; 
     container.style.position = "fixed"; 
@@ -173,10 +172,26 @@ document.getElementById("RaSi-chat-close").onclick = function(e) {
     if(container.classList.contains("RaSi-fullscreen")) { exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); } else { container.style.display = "none"; }
 };
 
-document.getElementById('RaSi-fullscreen').onclick = function() { if (container.classList.contains('RaSi-fullscreen')) { exitFullscreenMode(); } else { enterFullscreenMode(); } };
+// ==== إصلاح خطأ التوسيع والطي (منع الإغلاق المفاجئ) ====
+document.getElementById('RaSi-fullscreen').onclick = function(e) { 
+    e.preventDefault();
+    e.stopPropagation(); // يمنع هذا السطر نقرة الزر من الانتقال للمستند وإغلاق الدردشة
+    if (container.classList.contains('RaSi-fullscreen')) { exitFullscreenMode(); } else { enterFullscreenMode(); } 
+};
 
 txt.addEventListener("input", function(e) { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; if(charsUI) charsUI.textContent = `${e.target.value.length} `; });
 txt.addEventListener("keydown", function(e) { if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { e.preventDefault(); document.getElementById("RaSi-send").click(); return; } });
+
+// ==== تأمين إغلاق الدردشة عند النقر خارجها ====
+document.addEventListener("click", function(e) {
+    let t = document.getElementById("RaSi-chat-container"), n = document.getElementById("RaSi-chat-btn");
+    if("flex" !== t.style.display) return;
+    if(t.contains(e.target) || n.contains(e.target)) return;
+    // يمنع الإغلاق الخاطئ إذا تم النقر على أيقونة تبدلت برمجياً
+    if (!document.body.contains(e.target)) return; 
+    t.style.display = "none";
+});
+
 document.addEventListener("keydown", function(e) { if ("Escape" === e.key) container.style.display = "none"; });
 document.getElementById("RaSi-copy-all").onclick = function() { let e = [...document.getElementById("RaSi-messages").children].map(e => e.innerText).join("\n"); navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!")); };
 document.getElementById("RaSi-clear").onclick = function() { localStorage.removeItem(HISTORY_KEY); document.getElementById("RaSi-messages").innerHTML = ""; messagesLoaded = !1; lazyLoadMessages(); showStatus("تم حذف المحادثة!"); };
@@ -231,9 +246,5 @@ head.addEventListener("click", function() {
 document.getElementById("RaSi-messages").style.minHeight = "60px";
 window.visualViewport.addEventListener("resize", adjustForKeyboard); window.visualViewport.addEventListener("scroll", adjustForKeyboard);
 window.addEventListener('resize', function() { setTimeout(() => { ensureFullMessageVisibility(); }, 300); });
-document.addEventListener("click", function(e) {
-    let t = document.getElementById("RaSi-chat-container"), n = document.getElementById("RaSi-chat-btn");
-    if("flex" !== t.style.display || t.contains(e.target) || n.contains(e.target)) return; t.style.display = "none";
-});
 
 refreshUsageUI();
