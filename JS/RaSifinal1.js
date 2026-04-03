@@ -18,33 +18,25 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // التجاوب الذكي والآمن مع زر PWA (يتعايشان في اليسار)
+    // التجاوب الذكي والآمن مع زر PWA
     // =====================================================================
     function setupPwaSync() {
         const updatePositions = () => {
             const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
-            
-            // التحقق مما إذا كان زر التطبيق ظاهراً للمستخدم حالياً
             const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none" && getComputedStyle(pwaBtn).visibility !== "hidden";
 
-            // مكان القاعدة هو 125px (كما في الـ PWA)
-            // إذا كان PWA ظاهراً، نرفع الدردشة لتصبح فوقه بمسافة مريحة (175px)
             const btnBottom = isPwaVisible ? "175px" : "125px";
-            
             chatBtn.style.setProperty("bottom", btnBottom, "important");
 
-            // في الحاسوب، يجب رفع الحاوية لكي لا تغطي الزر
             if (window.innerWidth > 767 && container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
                 const containerBottom = isPwaVisible ? "230px" : "180px";
                 container.style.setProperty("bottom", containerBottom, "important");
             }
         };
 
-        // استدعاء فوري عند التحميل
         updatePositions();
         window.addEventListener("resize", updatePositions);
 
-        // مراقبة أي تغيير يطرأ على إخفاء أو إظهار زر الـ PWA
         const observer = new MutationObserver(() => updatePositions());
         if (document.getElementById("app_install_button")) {
             observer.observe(document.getElementById("app_install_button"), { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
@@ -60,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupPwaSync();
 
     // =====================================================================
-    // باقي الكود الخاص بآلية المحادثة وحماية الكيبورد
+    // باقي دوال النظام
     // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
@@ -91,6 +83,26 @@ document.addEventListener("DOMContentLoaded", function() {
         let remaining = remainingMessages();
         let remElement = document.getElementById("RaSi-remaining");
         let remItem = document.getElementById("RaSi-remaining-item");
+        
+        // ----------------------------------------------------
+        // 🚀 السحر البرمجي للإشعار (Notification Badge)
+        // ----------------------------------------------------
+        if (chatBtn) {
+            let badge = document.getElementById("RaSi-chat-badge");
+            if (!badge) {
+                badge = document.createElement("div");
+                badge.id = "RaSi-chat-badge";
+                badge.className = "RaSi-chat-badge";
+                chatBtn.appendChild(badge);
+            }
+            
+            // جلب عدد الرسائل المستخدمة 
+            let currentUsage = loadUsage().count;
+            // إذا كان 0 نعرض "1" لجذب الانتباه، وإذا كان أكثر نعرض العدد الحقيقي
+            badge.textContent = currentUsage === 0 ? "1" : currentUsage;
+        }
+        // ----------------------------------------------------
+
         if(!remElement || !remItem) return;
 
         if (remaining === Infinity) {
@@ -228,8 +240,14 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                if(typeof window.RaSiSyncPwaPositions === "function") {
-                    window.RaSiSyncPwaPositions();
+                let keyboardHeight = window.innerHeight - vv.height;
+                if (keyboardHeight > 150) {
+                    container.style.setProperty("bottom", "10px", "important");
+                    if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
+                } else {
+                    if(typeof window.RaSiSyncPwaPositions === "function") {
+                        window.RaSiSyncPwaPositions();
+                    }
                 }
             }
         }
