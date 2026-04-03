@@ -18,37 +18,47 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // الإضافة الآمنة: مراقبة زر تطبيق PWA والتجاوب معه برمجياً
+    // 🚀 السحر البرمجي: مراقبة وتجنب زر تطبيق PWA 
     // =====================================================================
-    function watchPwaButton() {
-        const pwaBtn = document.getElementById("app_install_button");
-        if (!pwaBtn || !chatBtn) return;
+    function setupPwaSync() {
+        // هذه الدالة تقرر أين يجب أن يجلس زر الدردشة والحاوية
+        const updatePositions = () => {
+            const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
+            // فحص هل الزر موجود وظاهر؟
+            const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none";
 
-        const adjustForPwa = () => {
             if (window.innerWidth <= 767) {
-                if (!pwaBtn.hidden) {
-                    // إذا كان زر التطبيق ظاهراً، ارفع زر الدردشة فوقه
-                    chatBtn.style.setProperty("bottom", "88px", "important");
-                } else {
-                    // إذا اختفى زر التطبيق، انزل زر الدردشة ليأخذ مكانه
-                    chatBtn.style.setProperty("bottom", "20px", "important");
-                }
+                // في الهاتف: إذا ظهر التطبيق ارتفع الدردشة، إذا اختفى انزل للأسفل
+                chatBtn.style.setProperty("bottom", isPwaVisible ? "85px" : "20px", "important");
             } else {
-                chatBtn.style.setProperty("bottom", "88px", "important"); // في الحاسوب يبقى ثابتاً
+                // في الحاسوب: التناسق مع الشاشة الكبيرة
+                chatBtn.style.setProperty("bottom", isPwaVisible ? "85px" : "30px", "important");
+                if (container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
+                    container.style.setProperty("bottom", isPwaVisible ? "145px" : "90px", "important");
+                }
             }
         };
 
-        // فحص مبدئي
-        adjustForPwa();
+        // تحديث أولي
+        updatePositions();
+        window.addEventListener("resize", updatePositions);
 
-        // مراقبة آمنة لاختفاء/ظهور زر التطبيق
-        const observer = new MutationObserver(adjustForPwa);
-        observer.observe(pwaBtn, { attributes: true, attributeFilter: ['hidden'] });
+        // مراقبة الصفحة تحسباً لظهور زر التطبيق أو اختفائه (مثلاً عند التثبيت)
+        const observer = new MutationObserver(() => updatePositions());
+        observer.observe(document.body, { 
+            childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'style', 'class'] 
+        });
+
+        // تصدير دالة التحديث لاستخدامها بعد إغلاق الكيبورد
+        window.RaSiSyncPwaPositions = updatePositions;
     }
     
-    // تفعيل المراقبة
-    watchPwaButton();
+    // تشغيل المراقبة فوراً
+    setupPwaSync();
 
+    // =====================================================================
+    // باقي دوال النظام (التهيئة، الدردشة، إلخ)
+    // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
 
@@ -198,12 +208,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    // التجاوب مع الكيبورد (أعدناه يعتمد على وضع الـ PWA عند إغلاق الكيبورد)
     function adjustForKeyboard() {
         if (!container || container.style.display !== "flex") return;
 
         if (window.visualViewport) {
             let vv = window.visualViewport;
-            
             if (window.innerWidth <= 767) {
                 if (!container.classList.contains("RaSi-fullscreen")) {
                     container.style.removeProperty("height");
@@ -216,10 +226,16 @@ document.addEventListener("DOMContentLoaded", function() {
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                container.style.removeProperty("height");
-                container.style.removeProperty("top");
                 let keyboardHeight = window.innerHeight - vv.height;
-                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
+                if (keyboardHeight > 150) {
+                    container.style.setProperty("bottom", "10px", "important");
+                    if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important");
+                } else {
+                    // عندما يغلق الكيبورد، نترك دالة الـ PWA تستعيد أماكن الأزرار الصحيحة
+                    if(typeof window.RaSiSyncPwaPositions === "function") {
+                        window.RaSiSyncPwaPositions();
+                    }
+                }
             }
         }
     }
@@ -241,11 +257,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     chatBtn.addEventListener("click", function() {
         container.style.display = "flex"; 
-        if (window.innerWidth > 767) {
-            container.style.position = "fixed"; 
-            container.style.right = "32px"; 
-            container.style.bottom = "142px";
-        }
         lazyLoadMessages();
         setTimeout(function() { 
             if(txt) txt.focus(); 
