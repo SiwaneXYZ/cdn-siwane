@@ -139,31 +139,68 @@ function lazyLoadMessages() {
     }
 }
 
-document.getElementById("RaSi-chat-btn").onclick = function() {
-    container.style.display = "flex"; 
-    container.style.position = "fixed"; 
-    container.style.right = "32px"; 
-    container.style.bottom = "142px";
-    lazyLoadMessages();
-    setTimeout(function() { document.getElementById("RaSi-input").focus(); setTimeout(() => { ensureFullMessageVisibility(); }, 200); }, 100);
-    window.RaSiChatOpenedAt = Date.now(); refreshUsageUI();
-};
-
+// ==== الدالة الديناميكية لحماية الصندوق وتثبيته فوق الكيبورد في الهاتف ====
 function adjustForKeyboard() {
-    if (window.innerWidth > 767) {
-        let e = window.visualViewport.height, t = window.innerHeight;
-        t - e > 150 ? (document.getElementById("RaSi-chat-container").style.bottom = "10px", document.getElementById("RaSi-chat-btn").style.bottom = "10px") : (document.getElementById("RaSi-chat-container").style.bottom = "142px", document.getElementById("RaSi-chat-btn").style.bottom = "88px");
+    let chatContainer = document.getElementById("RaSi-chat-container");
+    let chatBtn = document.getElementById("RaSi-chat-btn");
+    
+    if (!chatContainer || chatContainer.style.display !== "flex") return;
+
+    if (window.visualViewport) {
+        if (window.innerWidth <= 767) {
+            // في الهاتف: احتساب دقيق للمسافة السفلية للحفاظ على ثبات الصندوق عند التمرير والكيبورد مفتوح
+            if (!chatContainer.classList.contains("RaSi-fullscreen")) {
+                let offsetBottom = window.innerHeight - (window.visualViewport.offsetTop + window.visualViewport.height);
+                chatContainer.style.setProperty("bottom", Math.max(0, offsetBottom) + "px", "important");
+            } else {
+                chatContainer.style.setProperty("bottom", "0px", "important");
+            }
+        } else {
+            // في الكمبيوتر
+            let keyboardHeight = window.innerHeight - window.visualViewport.height;
+            chatContainer.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
+            chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
+        }
     }
 }
 
+// إضافة مستمعات الأحداث للحفاظ على الثبات الفوري أثناء التمرير
+if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", adjustForKeyboard);
+    window.visualViewport.addEventListener("scroll", adjustForKeyboard);
+}
+
+// لضمان التثبيت عند فتح الكيبورد
+txt.addEventListener("focus", function() { setTimeout(adjustForKeyboard, 50); setTimeout(ensureFullMessageVisibility, 300); });
+txt.addEventListener("blur", function() { setTimeout(adjustForKeyboard, 50); });
+
+document.getElementById("RaSi-chat-btn").onclick = function() {
+    container.style.display = "flex"; 
+    container.style.position = "fixed"; 
+    if (window.innerWidth > 767) {
+        container.style.right = "32px"; 
+        container.style.bottom = "142px";
+    }
+    lazyLoadMessages();
+    setTimeout(function() { 
+        document.getElementById("RaSi-input").focus(); 
+        adjustForKeyboard();
+        setTimeout(() => { ensureFullMessageVisibility(); }, 200); 
+    }, 100);
+    window.RaSiChatOpenedAt = Date.now(); refreshUsageUI();
+};
+
 function exitFullscreenMode() {
     const fullscreenBtn = document.getElementById('RaSi-fullscreen'); container.classList.remove('RaSi-fullscreen');
-    fullscreenBtn.title = 'الشاشة الكاملة'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; document.body.style.overflow = '';
+    fullscreenBtn.title = 'الشاشة الكاملة'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
+    document.body.style.overflow = '';
+    adjustForKeyboard(); // إعادة الضبط
 }
 
 function enterFullscreenMode() {
     const fullscreenBtn = document.getElementById('RaSi-fullscreen'); container.classList.add('RaSi-fullscreen');
-    fullscreenBtn.title = 'تصغير'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; document.body.style.overflow = 'hidden';
+    fullscreenBtn.title = 'تصغير'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; 
+    document.body.style.overflow = 'hidden';
     setTimeout(() => { const messages = document.getElementById('RaSi-messages'); if(messages) messages.scrollTop = messages.scrollHeight; }, 150);
 }
 
@@ -172,23 +209,20 @@ document.getElementById("RaSi-chat-close").onclick = function(e) {
     if(container.classList.contains("RaSi-fullscreen")) { exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); } else { container.style.display = "none"; }
 };
 
-// ==== إصلاح خطأ التوسيع والطي (منع الإغلاق المفاجئ) ====
 document.getElementById('RaSi-fullscreen').onclick = function(e) { 
-    e.preventDefault();
-    e.stopPropagation(); // يمنع هذا السطر نقرة الزر من الانتقال للمستند وإغلاق الدردشة
+    e.preventDefault(); e.stopPropagation(); // منع الإغلاق المفاجئ عند التوسيع والطي
     if (container.classList.contains('RaSi-fullscreen')) { exitFullscreenMode(); } else { enterFullscreenMode(); } 
 };
 
 txt.addEventListener("input", function(e) { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; if(charsUI) charsUI.textContent = `${e.target.value.length} `; });
 txt.addEventListener("keydown", function(e) { if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { e.preventDefault(); document.getElementById("RaSi-send").click(); return; } });
 
-// ==== تأمين إغلاق الدردشة عند النقر خارجها ====
+// منع الدردشة من الانغلاق عند التفاعل مع الأزرار
 document.addEventListener("click", function(e) {
     let t = document.getElementById("RaSi-chat-container"), n = document.getElementById("RaSi-chat-btn");
     if("flex" !== t.style.display) return;
     if(t.contains(e.target) || n.contains(e.target)) return;
-    // يمنع الإغلاق الخاطئ إذا تم النقر على أيقونة تبدلت برمجياً
-    if (!document.body.contains(e.target)) return; 
+    if(!document.body.contains(e.target)) return;
     t.style.display = "none";
 });
 
@@ -242,9 +276,5 @@ head.addEventListener("click", function() {
         if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل: غير محدود"); } refreshUsageUI();
     }
 });
-
-document.getElementById("RaSi-messages").style.minHeight = "60px";
-window.visualViewport.addEventListener("resize", adjustForKeyboard); window.visualViewport.addEventListener("scroll", adjustForKeyboard);
-window.addEventListener('resize', function() { setTimeout(() => { ensureFullMessageVisibility(); }, 300); });
 
 refreshUsageUI();
