@@ -10,17 +10,26 @@
 body.rasi-no-scroll { overflow: hidden !important; }
 
 /* ==========================================================================
-   2. زر الدردشة العائم (الأساسي)
+   2. زر الدردشة العائم (يتحرك بمرونة استجابة لزر PWA)
    ========================================================================== */
-.RaSi-chat-btn { position: fixed; z-index: 9999; right: 20px; bottom: 88px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 2px 12px #0002; visibility: visible; opacity: 1; transition: bottom 0.3s ease, transform 0.3s ease, opacity 0.3s ease !important; cursor: pointer; outline: 0; }
+.RaSi-chat-btn { 
+    position: fixed; z-index: 9999; right: 20px; bottom: 20px; /* المكان الافتراضي في الأسفل */
+    display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 15px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease, opacity 0.3s ease !important; /* حركة انزلاق ناعمة */
+    cursor: pointer; outline: 0; 
+}
 .RaSi-chat-btn[hidden] { display: flex; visibility: hidden; opacity: 0; }
 .RaSi-chat-btn:not([disabled])::before { content: ''; position: absolute; z-index: -1; inset: 0; background: inherit; border-radius: inherit; animation: 1s cubic-bezier(0, 0, .2, 1) infinite RaSi-chat-ping; }
-.RaSi-svg-btn-n { width: 22px; height: 22px; fill: none; stroke: #fff !important; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+.RaSi-svg-btn-n { width: 24px; height: 24px; fill: none; stroke: #fff !important; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 
 /* ==========================================================================
    3. الحاوية الرئيسية للدردشة (الكمبيوتر)
    ========================================================================== */
-#RaSi-chat-container { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; position: fixed; bottom: 142px; right: 32px; width: 380px; max-width: calc(100vw - 60px); height: 70vh; min-height: 450px; max-height: 750px; background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; }
+#RaSi-chat-container { 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+    position: fixed; bottom: 85px; right: 30px; width: 380px; max-width: calc(100vw - 60px); height: 70vh; min-height: 450px; max-height: 750px; 
+    background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
+}
 
 /* ==========================================================================
    4. الرأس والإحصائيات
@@ -89,7 +98,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-fullscreen ~ .RaSi-chat-btn { display: none !important; }
 
 /* ==========================================================================
-   7. الهاتف (محمي بالكامل ومستقر)
+   7. الهاتف (محمي بالكامل)
    ========================================================================== */
 @media screen and (max-width: 767px) {
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) {
