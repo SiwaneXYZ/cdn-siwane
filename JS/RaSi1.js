@@ -166,44 +166,33 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // =====================================================================
-    // التنسيق النهائي لحركة الكيبورد مع تجنب تضارب الأوامر
-    // =====================================================================
     function adjustForKeyboard() {
         if (!container || container.style.display !== "flex") return;
 
         if (window.visualViewport) {
             let vv = window.visualViewport;
-            
             if (window.innerWidth <= 767) {
                 if (!container.classList.contains("RaSi-fullscreen")) {
-                    // 1. حالة الصندوق المصغر (35%)
                     container.style.removeProperty("height");
                     container.style.removeProperty("top");
-                    
-                    // حساب المسافة الدقيقة بين الكيبورد والصفحة
                     let offsetBottom = window.innerHeight - (vv.offsetTop + vv.height);
                     container.style.setProperty("bottom", Math.max(0, offsetBottom) + "px", "important");
                 } else {
-                    // 2. حالة الشاشة الكاملة (Fullscreen)
-                    // هذا هو الحل السحري: نثبت الهيدر باستخدام إزاحة الكيبورد (offsetTop) 
-                    // بدلاً من الاعتماد على bottom لكي لا يتم دفعه للأعلى
                     container.style.setProperty("bottom", "auto", "important");
                     container.style.setProperty("top", vv.offsetTop + "px", "important");
                     container.style.setProperty("height", vv.height + "px", "important");
                 }
             } else {
-                // وضع الكمبيوتر المكتبي
+                // توافق مع أبعاد الحاسوب الجديدة
                 container.style.removeProperty("height");
                 container.style.removeProperty("top");
                 let keyboardHeight = window.innerHeight - vv.height;
-                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "142px", "important");
-                if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "88px", "important");
+                container.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "95px", "important");
+                if(chatBtn) chatBtn.style.setProperty("bottom", keyboardHeight > 150 ? "10px" : "30px", "important");
             }
         }
     }
 
-    // التنصت اللحظي على حركة الكيبورد أو تمرير الشاشة
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", adjustForKeyboard);
         window.visualViewport.addEventListener("scroll", adjustForKeyboard);
@@ -223,8 +212,8 @@ document.addEventListener("DOMContentLoaded", function() {
         container.style.display = "flex"; 
         if (window.innerWidth > 767) {
             container.style.position = "fixed"; 
-            container.style.right = "32px"; 
-            container.style.bottom = "142px";
+            container.style.right = "30px"; 
+            container.style.bottom = "95px"; // يتوافق مع CSS الحاسوب
         }
         lazyLoadMessages();
         setTimeout(function() { 
@@ -236,9 +225,6 @@ document.addEventListener("DOMContentLoaded", function() {
         refreshUsageUI();
     });
 
-    // =====================================================================
-    // تنظيف الخصائص بدقة عند التحويل بين الأوضاع
-    // =====================================================================
     function exitFullscreenMode() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.remove('RaSi-fullscreen');
@@ -249,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function() {
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
         }
         
-        // إزالة الخصائص الخاصة بالشاشة الكاملة ليعود للعمل بنظام 35%
         container.style.removeProperty("height"); 
         container.style.removeProperty("top");
         container.style.removeProperty("bottom"); 
