@@ -10,21 +10,44 @@
 body.rasi-no-scroll { overflow: hidden !important; }
 
 /* ==========================================================================
-   2. زر الدردشة العائم (متطابق تماماً مع مكان PWA)
+   2. زر الدردشة العائم ونقطة الإشعار
    ========================================================================== */
 .RaSi-chat-btn { 
     position: fixed; z-index: 9999; 
-    left: 16px !important; right: auto !important; /* نفس جهة PWA */
-    bottom: 125px !important; /* نفس ارتفاع PWA الافتراضي */
+    left: 16px !important; right: auto !important; 
+    bottom: 125px !important; 
     display: flex; align-items: center; justify-content: center; 
-    width: 40px !important; height: 40px !important; /* نفس حجم PWA */
+    width: 40px !important; height: 40px !important; 
     border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 15px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
-    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease, opacity 0.3s ease !important; /* حركة انزلاق ناعمة */
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease, opacity 0.3s ease !important; 
     cursor: pointer; outline: 0; 
 }
 .RaSi-chat-btn[hidden] { display: flex; visibility: hidden; opacity: 0; }
 .RaSi-chat-btn:not([disabled])::before { content: ''; position: absolute; z-index: -1; inset: 0; background: inherit; border-radius: inherit; animation: 1s cubic-bezier(0, 0, .2, 1) infinite RaSi-chat-ping; }
 .RaSi-svg-btn-n { width: 22px; height: 22px; fill: none; stroke: #fff !important; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+
+/* تصميم نقطة الإشعار الحمراء */
+.RaSi-chat-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--danger, #ef4444);
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--contentB, #fff);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 10;
+    pointer-events: none; /* كي لا تعيق النقر على الزر */
+    font-family: Arial, sans-serif;
+}
 
 /* ==========================================================================
    3. الحاوية الرئيسية للدردشة (الكمبيوتر)
@@ -32,8 +55,8 @@ body.rasi-no-scroll { overflow: hidden !important; }
 #RaSi-chat-container { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     position: fixed; 
-    bottom: 180px; /* مسافة متناسقة فوق الزر */
-    left: 16px; right: auto; /* تفتح من اليسار */
+    bottom: 180px; 
+    left: 16px; right: auto; 
     width: 380px; max-width: calc(100vw - 32px); height: 70vh; min-height: 450px; max-height: 750px; 
     background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
 }
