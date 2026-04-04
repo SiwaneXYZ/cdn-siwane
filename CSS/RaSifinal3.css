@@ -15,7 +15,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-chat-btn { 
     position: fixed; z-index: 3 !important; 
     left: 16px !important; right: auto !important; 
-    bottom: 175px !important; /* 👈 الوضع الافتراضي مرتفع (فوق PWA) */
+    bottom: 175px !important; /* 👈 الوضع الافتراضي فوق زر PWA (125px + 50px) */
     display: flex; align-items: center; justify-content: center; 
     width: 40px !important; height: 40px !important; 
     border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 15px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
@@ -45,7 +45,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
     border: 2px solid var(--contentB, #fff);
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     z-index: 10;
-    pointer-events: none; /* كي لا تعيق النقر على الزر */
+    pointer-events: none;
     font-family: Arial, sans-serif;
 }
 
@@ -55,7 +55,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 #RaSi-chat-container { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     position: fixed; 
-    bottom: 230px; /* 👈 الوضع الافتراضي مرتفع ليتوافق مع الزر */
+    bottom: 230px; /* 👈 الوضع الافتراضي ليتماشى مع الزر في 175px */
     left: 16px; right: auto; 
     width: 380px; max-width: calc(100vw - 32px); height: 70vh; min-height: 450px; max-height: 750px; 
     background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
