@@ -1,13 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() {
     
     // =====================================================================
-    // 1. المفاتيح والإعدادات الأساسية
+    // 1. الإعدادات (المفاتيح يتم سحبها من الـ HTML لكي لا يتم حظرها من GitHub)
     // =====================================================================
-    const OPENROUTER_API_KEY = "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";
-    const OPENROUTER_MODEL = "stepfun/step-3.5-flash:free";
-    const HUGGING_FACE_TOKEN = "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"; 
-    const HUGGING_FACE_MODEL = "google/gemma-2-9b-it:nebius";
-
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
           DEV_FLAG_KEY = "RaSiDevUnlimited_v1",
@@ -151,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 4. بناء سياق الصفحة والاتصال بخوادم الذكاء الاصطناعي
+    // 4. بناء سياق الصفحة والاتصال بخوادم الذكاء الاصطناعي (مع تقرير الأخطاء)
     // =====================================================================
     function getPageContext() {
         let title = document.title || "بدون عنوان";
@@ -174,10 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if(e) chatHistory.push({ role: "user", content: e });
         
-        // أخذ آخر 5 رسائل لتجنب ثقل الطلب على السيرفر
         let finalMessages = chatHistory.slice(-5);
-        
-        // دمج سياق الصفحة في دور "System" ليكون المساعد ملماً بالمقال
         let currentContext = getPageContext();
         let systemPrompt = "أنت مساعد تقني ذكي ولطيف لمدونة siwane.xyz. أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + currentContext;
         
@@ -194,50 +186,69 @@ document.addEventListener("DOMContentLoaded", function() {
         
         let messagesPayload = buildConversationPayload(e);
         let responseContent = "";
+        let errorLog = ""; // تسجيل الأخطاء
+
+        // التأكد من أن المفاتيح موجودة في HTML
+        let orKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
+        let orModel = typeof OPENROUTER_MODEL !== 'undefined' ? OPENROUTER_MODEL : "stepfun/step-3.5-flash:free";
+        let hfKey = typeof HUGGING_FACE_TOKEN !== 'undefined' ? HUGGING_FACE_TOKEN : "";
+        let hfModel = typeof HUGGING_FACE_MODEL !== 'undefined' ? HUGGING_FACE_MODEL : "HuggingFaceH4/zephyr-7b-beta";
 
         try {
+            if(!orKey) throw new Error("مفتاح OpenRouter غير موجود في الـ HTML.");
+            
             // المحاولة الأولى: سيرفر OpenRouter
             let apiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "Authorization": `Bearer ${orKey}`,
                     "Content-Type": "application/json",
                     "HTTP-Referer": window.location.origin || "https://siwane.xyz",
                     "X-Title": "siwane.xyz"
                 },
                 body: JSON.stringify({ 
-                    model: OPENROUTER_MODEL, 
+                    model: orModel, 
                     messages: messagesPayload, 
                     max_tokens: 1000, 
                     temperature: 0.7 
                 })
             });
 
-            if (!apiRes.ok) throw new Error("OpenRouter Failed");
+            if (!apiRes.ok) {
+                const errData = await apiRes.text();
+                throw new Error(`OpenRouter Error (${apiRes.status}): ${errData.substring(0, 60)}`);
+            }
             let data = await apiRes.json();
             responseContent = data?.choices?.[0]?.message?.content;
 
         } catch (err1) {
+            errorLog += err1.message + "<br><br>";
             showStatus("تبديل الخادم...");
             // المحاولة الثانية: سيرفر Hugging Face 
             try {
+                if(!hfKey) throw new Error("مفتاح HuggingFace غير موجود في الـ HTML.");
+                
                 let hfRes = await fetch("https://router.huggingface.co/v1/chat/completions", {
                     method: "POST",
                     headers: { 
-                        "Authorization": `Bearer ${HUGGING_FACE_TOKEN}`, 
+                        "Authorization": `Bearer ${hfKey}`, 
                         "Content-Type": "application/json" 
                     },
                     body: JSON.stringify({ 
-                        model: HUGGING_FACE_MODEL, 
+                        model: hfModel, 
                         messages: messagesPayload, 
                         max_tokens: 1000 
                     })
                 });
 
-                if (!hfRes.ok) throw new Error("Hugging Face Failed");
+                if (!hfRes.ok) {
+                    const errData = await hfRes.text();
+                    throw new Error(`HuggingFace Error (${hfRes.status}): ${errData.substring(0, 60)}`);
+                }
                 let data = await hfRes.json();
                 responseContent = data?.choices?.[0]?.message?.content;
             } catch (err2) {
+                 errorLog += err2.message;
                  responseContent = null;
             }
         }
@@ -253,7 +264,8 @@ document.addEventListener("DOMContentLoaded", function() {
             saveHistory(); showStatus("تم الرد بنجاح!"); ensureFullMessageVisibility();
             return true;
         } else {
-            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444;">✗ عذراً، جميع الخوادم مشغولة حالياً.</div>`;
+            // طباعة تفاصيل الخطأ بدقة داخل الدردشة
+            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ تفاصيل الخطأ:</b><br><br>${errorLog}</div>`;
             if(retryBtn) {
                 retryBtn.style.display = "inline-block";
                 retryBtn.onclick = async function() { 
