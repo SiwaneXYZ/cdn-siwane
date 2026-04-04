@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", function() {
     
     // =====================================================================
-    // 1. الإعدادات والمفاتيح
+    // 1. الإعدادات الأساسية
     // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
-          DEV_FLAG_KEY = "RaSiDevUnlimited_v1",
-          DEFAULT_DAILY_LIMIT = typeof RASI_DAILY_LIMIT !== 'undefined' ? RASI_DAILY_LIMIT : 25;
+          DEV_FLAG_KEY = "RaSiDevUnlimited_v1";
 
     let messagesLoaded = false;
     let headerClickCount = 0, headerClickTimer = null;
@@ -21,41 +20,101 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 2. الحماية المتقدمة (إخفاء النطاق ورسائل الفخ)
+    // 2. الحماية المتقدمة (إخفاء النطاق)
     // =====================================================================
-    
-    // بناء اسم النطاق واسم الدالة من أرقام ASCII (لا يمكن كشفها بالبحث العادي)
-    // الأرقام أدناه تُشكل كلمة: siwane.xyz
     const _0xd = String.fromCharCode(115, 105, 119, 97, 110, 101, 46, 120, 121, 122); 
-    // الأرقام أدناه تُشكل كلمة: renderRichText
     const _0xfn = String.fromCharCode(114, 101, 110, 100, 101, 114, 82, 105, 99, 104, 84, 101, 120, 116);
-
     const hostname = window.location.hostname || "";
     const isValidHost = hostname.indexOf(_0xd) !== -1 || hostname.indexOf('localhost') !== -1 || hostname === '127.0.0.1';
 
-    // دالة فك التشفير المرتبطة بالنطاق (لحماية التنسيق وإرسال البيانات)
     const _0xLock = (b64) => {
         let f = typeof renderRichText === 'function' ? renderRichText.name : "";
         let isValid = isValidHost && (f === _0xfn);
-        
-        // إذا كان الموقع مسروقاً، نخرب الكود المشفر لتعطيل الـ CSS والـ API بصمت
         if (!isValid) b64 = b64.split('').reverse().join(''); 
-        
-        try { return decodeURIComponent(escape(window.atob(b64))); } 
-        catch(e) { return "err_xyz"; }
+        try { return decodeURIComponent(escape(window.atob(b64))); } catch(e) { return "err_xyz"; }
     };
 
-    // إخفاء الزر في تصنيفات معينة (يعمل فقط إذا كان النطاق صحيحاً)
     if (isValidHost && typeof EXCLUDED_CATEGORIES !== 'undefined' && Array.isArray(EXCLUDED_CATEGORIES) && EXCLUDED_CATEGORIES.length > 0) {
         let pageTags = Array.from(document.querySelectorAll('a[rel="tag"]')).map(a => a.textContent.trim());
-        if (pageTags.some(tag => EXCLUDED_CATEGORIES.includes(tag))) {
-            chatBtn.style.display = "none";
-            return; 
+        if (pageTags.some(tag => EXCLUDED_CATEGORIES.includes(tag))) { chatBtn.style.display = "none"; return; }
+    }
+
+    // =====================================================================
+    // 3. نظام الحسابات والحدود الديناميكية (التحديث الجديد)
+    // =====================================================================
+    function getCurrentUserLimit() {
+        try {
+            let data = localStorage.getItem("firebaseUserProfileData");
+            if (!data) return 0; // زائر غير مسجل الدخول
+            
+            let user = JSON.parse(data);
+            
+            // المدير أو المالك (لا محدود)
+            if (user.isAdmin) return Infinity;
+            
+            // حساب مميز أو VIP (25 رسالة)
+            let isPremium = user.isVip || user.accountType === 'premium';
+            if (!isPremium && user.premiumExpiry && user.premiumExpiry.seconds) {
+                if (user.premiumExpiry.seconds * 1000 > Date.now()) isPremium = true;
+            }
+            if (isPremium) return 25;
+            
+            // حساب عادي (12 رسالة)
+            return 12;
+            
+        } catch(e) {
+            return 0; // في حالة وجود خطأ في البيانات
+        }
+    }
+
+    function loadUsage() { 
+        try { 
+            let e = localStorage.getItem(USAGE_KEY); 
+            if (!e) return initUsage(); 
+            let t = JSON.parse(e), n = new Date().toISOString().slice(0, 10); 
+            if (t.date !== n) return initUsage(); 
+            return t; 
+        } catch (s) { return initUsage(); } 
+    }
+    
+    function initUsage() { 
+        let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0 }; 
+        localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; 
+    }
+    
+    function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
+    
+    function remainingMessages() { 
+        let limit = getCurrentUserLimit();
+        let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY); 
+        
+        // إذا كان مديراً في وضع المطور أو الحد الطبيعي له غير محدود
+        if (isDev || limit === Infinity) return Infinity; 
+        
+        let t = loadUsage(); 
+        return Math.max(0, limit - t.count); 
+    }
+
+    function refreshUsageUI() {
+        let remaining = remainingMessages();
+        let remElement = document.getElementById("RaSi-remaining"), remItem = document.getElementById("RaSi-remaining-item");
+        if (chatBtn) {
+            let badge = document.getElementById("RaSi-chat-badge");
+            if (!badge) { badge = document.createElement("div"); badge.id = "RaSi-chat-badge"; badge.className = "RaSi-chat-badge"; chatBtn.appendChild(badge); }
+            let currentUsage = loadUsage().count; badge.textContent = currentUsage === 0 ? "1" : currentUsage;
+        }
+        if(!remElement || !remItem) return;
+        
+        if (remaining === Infinity) {
+            remElement.innerHTML = `<svg class='line' viewBox='0 0 24 24'><path d='M10.18 9.32001C9.35999 8.19001 8.05001 7.45001 6.54001 7.45001C4.03001 7.45001 1.98999 9.49 1.98999 12C1.98999 14.51 4.03001 16.55 6.54001 16.55C8.23001 16.55 9.80001 15.66 10.67 14.21L12 12L13.32 9.78998C14.19 8.33998 15.76 7.45001 17.45 7.45001C19.96 7.45001 22 9.49 22 12C22 14.51 19.96 16.55 17.45 16.55C15.95 16.55 14.64 15.81 13.81 14.68'></path></svg>`;
+            remItem.classList.add("unlimited"); remItem.classList.remove("limited"); remItem.title = "غير محدود";
+        } else {
+            remElement.textContent = remaining; remItem.classList.add("limited"); remItem.classList.remove("unlimited"); remItem.title = `${remaining} رسائل متبقية`;
         }
     }
 
     // =====================================================================
-    // 3. التجاوب الذكي ومعالجة PWA
+    // 4. دوال التجاوب، PWA، والدوال المساعدة الأساسية
     // =====================================================================
     function setupPwaSync() {
         const LOW = "125px", HIGH = "175px"; 
@@ -75,9 +134,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     setupPwaSync();
 
-    // =====================================================================
-    // 4. دوال النظام الأساسية
-    // =====================================================================
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
 
@@ -98,38 +154,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return t;
     }
 
-    function loadUsage() { 
-        try { 
-            let e = localStorage.getItem(USAGE_KEY); 
-            if (!e) return initUsage(); 
-            let t = JSON.parse(e), n = new Date().toISOString().slice(0, 10); 
-            if (t.date !== n) return initUsage(); 
-            if (t.limit !== DEFAULT_DAILY_LIMIT) { t.limit = DEFAULT_DAILY_LIMIT; saveUsage(t); }
-            return t; 
-        } catch (s) { return initUsage(); } 
-    }
-    
-    function initUsage() { let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0, limit: DEFAULT_DAILY_LIMIT }; localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; }
-    function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
-    function remainingMessages() { let e = "1" === localStorage.getItem(DEV_FLAG_KEY); if (e) return Infinity; let t = loadUsage(); return Math.max(0, t.limit - t.count); }
-
-    function refreshUsageUI() {
-        let remaining = remainingMessages();
-        let remElement = document.getElementById("RaSi-remaining"), remItem = document.getElementById("RaSi-remaining-item");
-        if (chatBtn) {
-            let badge = document.getElementById("RaSi-chat-badge");
-            if (!badge) { badge = document.createElement("div"); badge.id = "RaSi-chat-badge"; badge.className = "RaSi-chat-badge"; chatBtn.appendChild(badge); }
-            let currentUsage = loadUsage().count; badge.textContent = currentUsage === 0 ? "1" : currentUsage;
-        }
-        if(!remElement || !remItem) return;
-        if (remaining === Infinity) {
-            remElement.innerHTML = `<svg class='line' viewBox='0 0 24 24'><path d='M10.18 9.32001C9.35999 8.19001 8.05001 7.45001 6.54001 7.45001C4.03001 7.45001 1.98999 9.49 1.98999 12C1.98999 14.51 4.03001 16.55 6.54001 16.55C8.23001 16.55 9.80001 15.66 10.67 14.21L12 12L13.32 9.78998C14.19 8.33998 15.76 7.45001 17.45 7.45001C19.96 7.45001 22 9.49 22 12C22 14.51 19.96 16.55 17.45 16.55C15.95 16.55 14.64 15.81 13.81 14.68'></path></svg>`;
-            remItem.classList.add("unlimited"); remItem.classList.remove("limited"); remItem.title = "وضع غير محدود";
-        } else {
-            remElement.textContent = remaining; remItem.classList.add("limited"); remItem.classList.remove("unlimited"); remItem.title = `${remaining} رسائل متبقية`;
-        }
-    }
-
     function saveHistory() {
         if(!messagesArea) return;
         try {
@@ -148,8 +172,8 @@ document.addEventListener("DOMContentLoaded", function() {
     function showStatus(e, t = 1600) { let n = document.getElementById("RaSi-status"); if(!n) return; n.style.display = "block"; n.textContent = e; t > 0 && setTimeout(() => { n.style.display = "none" }, t); }
 
     function createUserMessage(e) {
-        let t = document.createElement("div"); t.className = _0xLock("UmFTaS1tc2ctdXNlcg=="); // RaSi-msg-user
-        let n = document.createElement("div"); n.className = _0xLock("YnViYmxl"); // bubble
+        let t = document.createElement("div"); t.className = _0xLock("UmFTaS1tc2ctdXNlcg=="); 
+        let n = document.createElement("div"); n.className = _0xLock("YnViYmxl"); 
         n.innerHTML = renderRichText(e); t.appendChild(n);
         let s = document.createElement("div"); s.className = "meta"; s.innerHTML = `<div class="msg-controls"><button class="edit-user" title="تعديل"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
         t.appendChild(s); if(messagesArea) messagesArea.appendChild(t); return t;
@@ -157,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function createAiPlaceholder() {
         let e = document.createElement("div"); e.className = "RaSi-msg-ai";
-        let t = document.createElement("div"); t.className = _0xLock("YnViYmxl"); // bubble
+        let t = document.createElement("div"); t.className = _0xLock("YnViYmxl"); 
         t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div> جاري الكتابة...</div>`; e.appendChild(t);
         let n = document.createElement("div"); n.className = "meta";
         n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button><button class="download-msg" title="تحميل الرد"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button><button class="resend-retry" title="إعادة المحاولة" style="display:none"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button></div>`;
@@ -165,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 5. بناء سياق الصفحة والاتصال بخوادم الذكاء الاصطناعي
+    // 5. بناء سياق الصفحة والاتصال بالذكاء الاصطناعي
     // =====================================================================
     function getPageContext() {
         let title = document.title || "بدون عنوان", bodyElement = document.querySelector('.post-body') || document.querySelector('.entry-content') || document.body;
@@ -210,22 +234,35 @@ document.addEventListener("DOMContentLoaded", function() {
         let placeholder = t || createAiPlaceholder(); 
         let bubbleElement = placeholder.querySelector("." + _0xLock("YnViYmxl")) || placeholder.querySelector(".bubble");
         
-        // رسالة الفخ تظهر عند محاولة السارق إرسال رسالة
         if (!isValidHost) {
             if(bubbleElement) {
                 bubbleElement.innerHTML = `<div style="color:#dc2626; background:#fee2e2; padding:10px; border-radius:8px; border:1px solid #fca5a5;">
                     <b>⚠️ وصول غير مصرح!</b><br>
-                    هذا المساعد الذكي مبرمج ليعمل حصرياً على منصة <a href="https://${_0xd}" target="_blank" style="color:#b91c1c; text-decoration:underline;">${_0xd}</a>.<br>تم إيقاف الاتصال بالخادم حمايةً للموارد.
+                    هذا المساعد الذكي مبرمج ليعمل حصرياً على منصة <a href="https://${_0xd}" target="_blank" style="color:#b91c1c; text-decoration:underline;">${_0xd}</a>.
                 </div>`;
             }
-            let retryBtn = placeholder.querySelector(".resend-retry");
-            if(retryBtn) retryBtn.style.display = "none";
-            ensureFullMessageVisibility();
-            return false;
+            let retryBtn = placeholder.querySelector(".resend-retry"); if(retryBtn) retryBtn.style.display = "none";
+            ensureFullMessageVisibility(); return false;
         }
 
+        // --- التحقق من الحدود الديناميكية قبل الإرسال ---
+        let userLimit = getCurrentUserLimit();
         let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY);
-        if (!isDev) { let usage = loadUsage(); if (usage.count >= usage.limit) return showStatus("تم تجاوز الحد اليومي للرسائل"), false; }
+        
+        if (!isDev && userLimit !== Infinity) {
+            if (userLimit === 0) {
+                showStatus("الرجاء تسجيل الدخول لاستخدام الدردشة!");
+                if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ تنبيه:</b><br>يرجى تسجيل الدخول إلى حسابك للتمكن من التحدث مع المساعد الذكي.</div>`;
+                ensureFullMessageVisibility(); return false;
+            }
+            
+            let usage = loadUsage();
+            if (usage.count >= userLimit) {
+                showStatus("لقد استنفدت رصيدك. قم بالترقية للمزيد!");
+                if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ رصيد الرسائل انتهى!</b><br>لقد استهلكت الحد الأقصى للرسائل المتاحة لحسابك (${userLimit} رسالة).<br>يمكنك الترقية إلى الحساب المميز (Premium) للحصول على المزيد من الرسائل اليومية!</div>`;
+                ensureFullMessageVisibility(); return false;
+            }
+        }
         
         showStatus("جاري إرسال الرسالة...");
         let messagesPayload = buildConversationPayload(e), responseContent = "", errorLog = "";
@@ -238,14 +275,12 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             if(!orKey) throw new Error("مفتاح OpenRouter غير موجود.");
             let apiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${orKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.origin, "X-Title": _0xd },
+                method: "POST", headers: { "Authorization": `Bearer ${orKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.origin, "X-Title": _0xd },
                 body: JSON.stringify({ model: orModel, messages: messagesPayload, max_tokens: 1000, temperature: 0.7 })
             });
 
             if (!apiRes.ok) throw new Error(`API Error (${apiRes.status})`);
-            let data = await apiRes.json();
-            responseContent = data?.choices?.[0]?.message?.content;
+            let data = await apiRes.json(); responseContent = data?.choices?.[0]?.message?.content;
 
         } catch (err1) {
             errorLog += err1.message + "<br>"; showStatus("تبديل الخادم...");
@@ -266,7 +301,12 @@ document.addEventListener("DOMContentLoaded", function() {
         if (responseContent) {
             if(bubbleElement) bubbleElement.innerHTML = renderRichText(responseContent);
             if(retryBtn) retryBtn.style.display = "none";
-            if(!n) { let u = loadUsage(); u.count = (u.count || 0) + 1; saveUsage(u); refreshUsageUI(); }
+            
+            // زيادة العداد فقط إذا لم يكن غير محدود
+            if(!n && userLimit !== Infinity) { 
+                let u = loadUsage(); u.count = (u.count || 0) + 1; saveUsage(u); 
+            }
+            refreshUsageUI();
             saveHistory(); showStatus("تم الرد بنجاح!"); ensureFullMessageVisibility(); return true;
         } else {
             if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ تعذر الاتصال:</b><br>${errorLog}</div>`;
@@ -276,20 +316,16 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 6. أحداث الواجهة الأمامية
+    // 6. أحداث واجهة المستخدم
     // =====================================================================
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
             let t = document.createElement("div"); 
-            // إذا كان مسروقاً قد لا يجد الكلاس، لذا نضيف fallback
             t.className = _0xLock("YnViYmxl") !== "err_xyz" ? _0xLock("YnViYmxl") : "bubble"; 
             
-            if (isValidHost) {
-                t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; 
-            } else {
-                t.innerHTML = `<div style="color:#dc2626;"><b>⚠️ تنبيه الأمان:</b><br>هذا المساعد الذكي مخصص ومتاح حصرياً لمنصة <b>${_0xd}</b> ولن يعمل على هذا الموقع.</div>`;
-            }
+            if (isValidHost) { t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; } 
+            else { t.innerHTML = `<div style="color:#dc2626;"><b>⚠️ تنبيه الأمان:</b><br>هذا المساعد الذكي مخصص ومتاح حصرياً لمنصة <b>${_0xd}</b> ولن يعمل على هذا الموقع.</div>`; }
             
             e.appendChild(t);
             let n = document.createElement("div"); n.className = "meta";
@@ -337,7 +373,36 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     let sendBtn = document.getElementById("RaSi-send");
-    if(sendBtn) { sendBtn.addEventListener("click", async function() { if(!txt) return; let messageText = txt.value.trim(); if(!messageText) return; let isUnlimited = "1" === localStorage.getItem(DEV_FLAG_KEY); if(!isUnlimited) { let usage = loadUsage(); if(usage.count >= usage.limit) { showStatus("تم تجاوز الحد اليومي للرسائل"); return; } } createUserMessage(messageText); txt.value = ""; txt.style.height = "auto"; if(charsUI) charsUI.textContent = `0 `; let aiMessage = createAiPlaceholder(); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 50); saveHistory(); await sendMessage(messageText, aiMessage); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight + 100; }, 100); }); }
-    if(head) { head.addEventListener("click", function() { headerClickCount++; if(headerClickTimer) clearTimeout(headerClickTimer); headerClickTimer = setTimeout(() => { headerClickCount = 0 }, 4000); if (headerClickCount >= 5) { headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY); if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل: غير محدود"); } refreshUsageUI(); } }); }
+    if(sendBtn) { 
+        sendBtn.addEventListener("click", async function() { 
+            if(!txt) return; let messageText = txt.value.trim(); if(!messageText) return; 
+            createUserMessage(messageText); txt.value = ""; txt.style.height = "auto"; if(charsUI) charsUI.textContent = `0 `; 
+            let aiMessage = createAiPlaceholder(); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 50); 
+            saveHistory(); await sendMessage(messageText, aiMessage); 
+            setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight + 100; }, 100); 
+        }); 
+    }
+
+    if(head) { 
+        head.addEventListener("click", function() { 
+            // --- حماية وضع المطور (لا يعمل إلا للمدير) ---
+            try {
+                let data = localStorage.getItem("firebaseUserProfileData");
+                if (!data) return;
+                let user = JSON.parse(data);
+                if (!user.isAdmin) return; // رفض التفعيل لأي شخص غير المدير
+            } catch(e) { return; }
+
+            headerClickCount++; if(headerClickTimer) clearTimeout(headerClickTimer); 
+            headerClickTimer = setTimeout(() => { headerClickCount = 0 }, 4000); 
+            if (headerClickCount >= 5) { 
+                headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY); 
+                if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل (الحد غير محدود للمدير)"); } 
+                else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل"); } 
+                refreshUsageUI(); 
+            } 
+        }); 
+    }
+    
     refreshUsageUI();
 });
