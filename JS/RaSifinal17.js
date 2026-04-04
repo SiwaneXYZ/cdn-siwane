@@ -21,18 +21,21 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 2. التجاوب الذكي والآمن مع زر PWA
+    // 2. التجاوب الذكي والآمن مع زر PWA (المنطق المعكوس)
     // =====================================================================
     function setupPwaSync() {
         const updatePositions = () => {
             const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
-            const isPwaVisible = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none" && getComputedStyle(pwaBtn).visibility !== "hidden";
+            
+            // نتحقق إذا كان الزر غير موجود قطعاً أو مخفي
+            const isPwaNotVisible = !pwaBtn || pwaBtn.hidden || getComputedStyle(pwaBtn).display === "none" || getComputedStyle(pwaBtn).visibility === "hidden";
 
-            const btnBottom = isPwaVisible ? "175px" : "125px";
+            // الافتراضي هو المرتفع (175)، وينزل إلى (125) فقط إذا تأكدنا من عدم وجود زر PWA
+            const btnBottom = isPwaNotVisible ? "125px" : "175px";
             chatBtn.style.setProperty("bottom", btnBottom, "important");
 
             if (window.innerWidth > 767 && container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
-                const containerBottom = isPwaVisible ? "230px" : "180px";
+                const containerBottom = isPwaNotVisible ? "180px" : "230px";
                 container.style.setProperty("bottom", containerBottom, "important");
             }
         };
@@ -188,7 +191,6 @@ document.addEventListener("DOMContentLoaded", function() {
         let responseContent = "";
         let errorLog = ""; // تسجيل الأخطاء
 
-        // التأكد من أن المفاتيح موجودة في HTML
         let orKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
         let orModel = typeof OPENROUTER_MODEL !== 'undefined' ? OPENROUTER_MODEL : "stepfun/step-3.5-flash:free";
         let hfKey = typeof HUGGING_FACE_TOKEN !== 'undefined' ? HUGGING_FACE_TOKEN : "";
@@ -197,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             if(!orKey) throw new Error("مفتاح OpenRouter غير موجود في الـ HTML.");
             
-            // المحاولة الأولى: سيرفر OpenRouter
             let apiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
                 headers: {
@@ -224,7 +225,6 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (err1) {
             errorLog += err1.message + "<br><br>";
             showStatus("تبديل الخادم...");
-            // المحاولة الثانية: سيرفر Hugging Face 
             try {
                 if(!hfKey) throw new Error("مفتاح HuggingFace غير موجود في الـ HTML.");
                 
@@ -264,10 +264,10 @@ document.addEventListener("DOMContentLoaded", function() {
             saveHistory(); showStatus("تم الرد بنجاح!"); ensureFullMessageVisibility();
             return true;
         } else {
-            // طباعة تفاصيل الخطأ بدقة داخل الدردشة
             if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ تفاصيل الخطأ:</b><br><br>${errorLog}</div>`;
             if(retryBtn) {
-                retryBtn.style.display = "inline-block";
+                // التعديل هنا لضمان تمركز الأيقونة
+                retryBtn.style.display = "flex"; 
                 retryBtn.onclick = async function() { 
                     retryBtn.disabled = true; 
                     bubbleElement.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div> إعادة المحاولة...</div>`; 
