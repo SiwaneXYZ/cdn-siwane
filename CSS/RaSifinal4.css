@@ -10,12 +10,12 @@
 body.rasi-no-scroll { overflow: hidden !important; }
 
 /* ==========================================================================
-   2. زر الدردشة العائم ونقطة الإشعار
+   2. زر الدردشة ونقطة الإشعار (تعديل الموضع الذكي)
    ========================================================================== */
 .RaSi-chat-btn { 
     position: fixed; z-index: 3 !important; 
     left: 16px !important; right: auto !important; 
-    bottom: 175px !important; /* 👈 الوضع الافتراضي فوق زر PWA (125px + 50px) */
+    bottom: 175px !important; /* الوضع المرتفع الافتراضي فوق PWA */
     display: flex; align-items: center; justify-content: center; 
     width: 40px !important; height: 40px !important; 
     border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 15px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
@@ -26,43 +26,30 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-chat-btn:not([disabled])::before { content: ''; position: absolute; z-index: -1; inset: 0; background: inherit; border-radius: inherit; animation: 1s cubic-bezier(0, 0, .2, 1) infinite RaSi-chat-ping; }
 .RaSi-svg-btn-n { width: 22px; height: 22px; fill: none; stroke: #fff !important; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 
-/* تصميم نقطة الإشعار الحمراء */
 .RaSi-chat-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: var(--danger, #ef4444);
-    color: #fff;
-    font-size: 10px;
-    font-weight: bold;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--contentB, #fff);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-    z-index: 10;
-    pointer-events: none;
+    position: absolute; top: -4px; right: -4px;
+    background: var(--danger, #ef4444); color: #fff;
+    font-size: 10px; font-weight: bold; min-width: 18px; height: 18px;
+    padding: 0 4px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; border: 2px solid var(--contentB, #fff);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15); z-index: 10; pointer-events: none;
     font-family: Arial, sans-serif;
 }
 
 /* ==========================================================================
-   3. الحاوية الرئيسية للدردشة (الكمبيوتر)
+   3. الحاوية الرئيسية (تعديل الموضع الذكي)
    ========================================================================== */
 #RaSi-chat-container { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     position: fixed; 
-    bottom: 230px; /* 👈 الوضع الافتراضي ليتماشى مع الزر في 175px */
+    bottom: 230px; /* يتوافق مع الزر المرتفع */
     left: 16px; right: auto; 
     width: 380px; max-width: calc(100vw - 32px); height: 70vh; min-height: 450px; max-height: 750px; 
     background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
 }
 
 /* ==========================================================================
-   4. الرأس والإحصائيات
+   4. الرأس والإحصائيات (كامل كما كان)
    ========================================================================== */
 .RaSi-head { background: var(--contentBa, #f4f8ff); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--contentL, #e3e7ef); font-family: var(--fontH); cursor: default; gap: 10px; }
 #RaSi-chat-container .RaSi-head span { font-weight: 600; display: flex; align-items: center; gap: 1px; font-size: 13px; }
@@ -75,6 +62,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 #RaSi-chat-close:hover { background: var(--linkC, #2563eb); }
 #RaSi-chat-close svg { width: 16px !important; height: 16px !important; fill: none !important; stroke: currentColor !important; stroke-width: 2 !important; opacity: 0.8 !important; }
 #RaSi-chat-close:hover svg { stroke: var(--white); }
+
 .RaSi-usage { font-size: 19px; color: var(--notifC, #666); display: flex; gap: 8px; align-items: center; margin-inline-start: 6px; }
 .usage-item { display: flex; align-items: center; gap: 4px; font-size: 10px; background: var(--contentBa, #f4f8ff); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--contentL, #e3e7ef); transition: all 0.3s ease; }
 .usage-item svg { width: 12px; height: 12px; opacity: 0.8; }
@@ -103,15 +91,20 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-msg-ai .bubble b { display: block; margin: 10px 0 5px 0; color: var(--linkC, #2563eb); }
 .RaSi-msg-ai img { max-width: 240px; border-radius: 8px; display: block; margin-top: 6px; box-shadow: 0 1px 6px rgba(0, 0, 0, .06); }
 .RaSi-msg-ai .meta { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+
+/* إصلاح تمركز زر إعادة المحاولة */
 .msg-controls { display: flex; gap: 6px; align-items: center; margin-top: 8px; margin-inline-start: 6px; }
 .msg-controls button { background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--notifC, #666); transition: all 0.3s ease; padding: 0; }
 .msg-controls button:hover { background: var(--linkC, #2563eb); color: var(--white); border-color: var(--linkC, #2563eb); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
-.msg-controls button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+.msg-controls button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; margin: 0 !important; }
+.msg-controls .resend-retry { display: none; align-items: center; justify-content: center; } /* 👈 Flex للتوسيط */
+
 .msg-controls button:active { transform: translateY(0); }
 .copy-reply:active { animation: copySuccess 0.3s ease; }
 .msg-controls .like-btn.liked { background: var(--success, #10b981); border-color: var(--success, #10b981); color: white; }
 .msg-controls .dislike-btn.disliked { background: var(--danger, #ef4444); border-color: var(--danger, #ef4444); color: white; }
 .spinner { width: 20px; height: 20px; border: 3px solid rgba(0, 0, 0, .08); border-top: 3px solid var(--linkC, #2563eb); border-radius: 50%; animation: spin 1s linear infinite; }
+
 #RaSi-chat-container .RaSi-input-wrap { padding: 12px 15px 10px; border-top: 1px solid var(--contentL, #e3e7ef); display: flex; align-items: center; gap: 8px; background: var(--contentBa, #fafcff); }
 #RaSi-input { flex: 1; padding: 10px 12px; border-radius: 12px; border-color: var(--linkC, #2563eb); font-size: 11px; color: var(--bodyC, #222); outline: 0; min-height: 38px; max-height: 80px; transition: border-color .3s ease; background: var(--contentBa, #f4f8ff) !important; }
 #RaSi-send { border: none; background: var(--linkC, #2563eb); color: var(--white); border-radius: 10px; padding: 0 14px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: var(--trans-2); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); cursor: pointer; }
@@ -128,7 +121,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-fullscreen ~ .RaSi-chat-btn { display: none !important; }
 
 /* ==========================================================================
-   7. الهاتف (محمي ومستقر)
+   7. الهاتف (التفاعل مع PWA)
    ========================================================================== */
 @media screen and (max-width: 767px) {
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) {
@@ -139,5 +132,8 @@ body.rasi-no-scroll { overflow: hidden !important; }
     @keyframes popupSlideUp { 0% { transform: translateY(100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-head { border-radius: 20px 20px 0 0 !important; padding: 10px 15px !important; }
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-input-wrap { padding: 10px 15px 15px !important; }
+    
+    /* إخفاء PWA عند فتح الدردشة بالجوال */
+    body:has(div#RaSi-chat-container[style*="display: flex"]) .pwa-button { display: none !important; }
     body:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn, html:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn { display: none !important; }
 }
