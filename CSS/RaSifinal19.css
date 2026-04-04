@@ -15,7 +15,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .RaSi-chat-btn { 
     position: fixed; z-index: 3 !important; 
     left: 16px !important; right: auto !important; 
-    bottom: 175px !important; /* الوضع المرتفع الافتراضي فوق PWA */
+    bottom: 175px !important; 
     display: flex; align-items: center; justify-content: center; 
     width: 40px !important; height: 40px !important; 
     border: none; border-radius: 50%; background: var(--linkC, #2563eb); box-shadow: 0 4px 15px rgba(0,0,0,0.2); visibility: visible; opacity: 1; 
@@ -42,14 +42,14 @@ body.rasi-no-scroll { overflow: hidden !important; }
 #RaSi-chat-container { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important; 
     position: fixed; 
-    bottom: 230px; /* يتوافق مع الزر المرتفع */
+    bottom: 230px; 
     left: 16px; right: auto; 
     width: 380px; max-width: calc(100vw - 32px); height: 70vh; min-height: 450px; max-height: 750px; 
     background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 20px; box-shadow: 0 8px 35px rgba(0, 0, 0, 0.12); z-index: 9999; display: none; flex-direction: column; overflow: hidden; overscroll-behavior: none !important; 
 }
 
 /* ==========================================================================
-   4. الرأس والإحصائيات (كامل كما كان)
+   4. الرأس والإحصائيات
    ========================================================================== */
 .RaSi-head { background: var(--contentBa, #f4f8ff); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--contentL, #e3e7ef); font-family: var(--fontH); cursor: default; gap: 10px; }
 #RaSi-chat-container .RaSi-head span { font-weight: 600; display: flex; align-items: center; gap: 1px; font-size: 13px; }
@@ -79,6 +79,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 #RaSi-messages { flex: 1; overflow-y: auto; padding: 12px 15px !important; display: flex; flex-direction: column; gap: 8px !important; font-size: 11px; min-height: 60px; overscroll-behavior: contain !important; }
 #RaSi-messages::-webkit-scrollbar { height: 7px; width: 6px; }
 #RaSi-messages::-webkit-scrollbar-thumb { background: var(--linkC, #2563eb); border-radius: 8px; }
+
 .RaSi-msg-ai, .RaSi-msg-user { max-width: 95%; margin: 3px 0 !important; animation: messageSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; transform-origin: center bottom; }
 .RaSi-msg-user { align-self: flex-end; }
 .RaSi-msg-ai { align-self: flex-start; }
@@ -97,7 +98,7 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .msg-controls button { background: var(--contentB, #fff); border: 1px solid var(--contentL, #e3e7ef); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--notifC, #666); transition: all 0.3s ease; padding: 0; }
 .msg-controls button:hover { background: var(--linkC, #2563eb); color: var(--white); border-color: var(--linkC, #2563eb); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
 .msg-controls button svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; margin: 0 !important; }
-.msg-controls .resend-retry { display: none; align-items: center; justify-content: center; } /* 👈 Flex للتوسيط */
+.msg-controls .resend-retry { display: none; align-items: center; justify-content: center; }
 
 .msg-controls button:active { transform: translateY(0); }
 .copy-reply:active { animation: copySuccess 0.3s ease; }
@@ -106,7 +107,13 @@ body.rasi-no-scroll { overflow: hidden !important; }
 .spinner { width: 20px; height: 20px; border: 3px solid rgba(0, 0, 0, .08); border-top: 3px solid var(--linkC, #2563eb); border-radius: 50%; animation: spin 1s linear infinite; }
 
 #RaSi-chat-container .RaSi-input-wrap { padding: 12px 15px 10px; border-top: 1px solid var(--contentL, #e3e7ef); display: flex; align-items: center; gap: 8px; background: var(--contentBa, #fafcff); }
-#RaSi-input { flex: 1; padding: 10px 12px; border-radius: 12px; border-color: var(--linkC, #2563eb); font-size: 11px; color: var(--bodyC, #222); outline: 0; min-height: 38px; max-height: 80px; transition: border-color .3s ease; background: var(--contentBa, #f4f8ff) !important; }
+
+/* حقل الإدخال وتخصيص الـ Scrollbar النحيف */
+#RaSi-input { flex: 1; padding: 10px 12px; border-radius: 12px; border-color: var(--linkC, #2563eb); font-size: 11px; color: var(--bodyC, #222); outline: 0; min-height: 38px; max-height: 80px; transition: border-color .3s ease; background: var(--contentBa, #f4f8ff) !important; scrollbar-width: thin !important; scrollbar-color: var(--linkC, #2563eb) transparent !important; }
+#RaSi-input::-webkit-scrollbar { width: 4px !important; }
+#RaSi-input::-webkit-scrollbar-thumb { background-color: var(--linkC, #2563eb) !important; border-radius: 10px !important; }
+#RaSi-input::-webkit-scrollbar-track { background: transparent !important; }
+
 #RaSi-send { border: none; background: var(--linkC, #2563eb); color: var(--white); border-radius: 10px; padding: 0 14px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: var(--trans-2); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); cursor: pointer; }
 #RaSi-send svg, #RaSi-send svg path, #RaSi-send svg polygon, #RaSi-send svg line { color: #fff !important; stroke: white !important; fill: none !important; }
 #RaSi-status { font-size: 9px; color: var(--notifC, #888); padding: 3px 12px; background: var(--notifB, #f7f7f7); border-bottom: 1px solid var(--contentL, #e3e7ef); text-align: center; display: none; }
@@ -133,7 +140,6 @@ body.rasi-no-scroll { overflow: hidden !important; }
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-head { border-radius: 20px 20px 0 0 !important; padding: 10px 15px !important; }
     html body div#RaSi-chat-container:not(.RaSi-fullscreen) .RaSi-input-wrap { padding: 10px 15px 15px !important; }
     
-    /* إخفاء PWA عند فتح الدردشة بالجوال */
     body:has(div#RaSi-chat-container[style*="display: flex"]) .pwa-button { display: none !important; }
     body:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn, html:has(div#RaSi-chat-container[style*="display: flex"]) button#RaSi-chat-btn { display: none !important; }
 }
