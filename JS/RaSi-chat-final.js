@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
-          DEV_FLAG_KEY = "RaSiDevUnlimited_v1";
+          DEV_MODE_KEY = "RaSiDevMode_v1"; // تم تغييره ليدعم حالات متعددة
 
     let messagesLoaded = false;
     let headerClickCount = 0, headerClickTimer = null;
@@ -40,30 +40,37 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 3. نظام الحسابات والحدود الديناميكية (التحديث الجديد)
+    // 3. نظام الحسابات والحدود الديناميكية (مع وضعية اختبار المدير)
     // =====================================================================
     function getCurrentUserLimit() {
         try {
             let data = localStorage.getItem("firebaseUserProfileData");
-            if (!data) return 0; // زائر غير مسجل الدخول
+            let user = data ? JSON.parse(data) : null;
             
-            let user = JSON.parse(data);
-            
-            // المدير أو المالك (لا محدود)
-            if (user.isAdmin) return Infinity;
-            
-            // حساب مميز أو VIP (25 رسالة)
+            // 1. إذا كان المستخدم مديراً، نتحقق مما إذا كان قد فعل "وضعية اختبار"
+            if (user && user.isAdmin) {
+                let devMode = localStorage.getItem(DEV_MODE_KEY);
+                if (devMode === "guest") return 6;
+                if (devMode === "normal") return 12;
+                if (devMode === "premium") return 25;
+                return Infinity; // الوضع الافتراضي للمدير
+            }
+
+            // 2. إذا لم يكن مسجلاً الدخول (زائر)
+            if (!user) return 6;
+
+            // 3. التحقق من الحساب المميز أو الـ VIP
             let isPremium = user.isVip || user.accountType === 'premium';
             if (!isPremium && user.premiumExpiry && user.premiumExpiry.seconds) {
                 if (user.premiumExpiry.seconds * 1000 > Date.now()) isPremium = true;
             }
             if (isPremium) return 25;
             
-            // حساب عادي (12 رسالة)
+            // 4. الحساب العادي
             return 12;
             
         } catch(e) {
-            return 0; // في حالة وجود خطأ في البيانات
+            return 6; // الزائر (في حال حدوث خطأ)
         }
     }
 
@@ -81,40 +88,38 @@ document.addEventListener("DOMContentLoaded", function() {
         let e = new Date().toISOString().slice(0, 10), t = { date: e, count: 0 }; 
         localStorage.setItem(USAGE_KEY, JSON.stringify(t)); return t; 
     }
-    
     function saveUsage(e) { localStorage.setItem(USAGE_KEY, JSON.stringify(e)); }
     
     function remainingMessages() { 
         let limit = getCurrentUserLimit();
-        let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY); 
-        
-        // إذا كان مديراً في وضع المطور أو الحد الطبيعي له غير محدود
-        if (isDev || limit === Infinity) return Infinity; 
-        
+        if (limit === Infinity) return Infinity; 
         let t = loadUsage(); 
         return Math.max(0, limit - t.count); 
     }
 
     function refreshUsageUI() {
         let remaining = remainingMessages();
+        let limit = getCurrentUserLimit();
         let remElement = document.getElementById("RaSi-remaining"), remItem = document.getElementById("RaSi-remaining-item");
+        
         if (chatBtn) {
             let badge = document.getElementById("RaSi-chat-badge");
             if (!badge) { badge = document.createElement("div"); badge.id = "RaSi-chat-badge"; badge.className = "RaSi-chat-badge"; chatBtn.appendChild(badge); }
             let currentUsage = loadUsage().count; badge.textContent = currentUsage === 0 ? "1" : currentUsage;
         }
+        
         if(!remElement || !remItem) return;
         
         if (remaining === Infinity) {
             remElement.innerHTML = `<svg class='line' viewBox='0 0 24 24'><path d='M10.18 9.32001C9.35999 8.19001 8.05001 7.45001 6.54001 7.45001C4.03001 7.45001 1.98999 9.49 1.98999 12C1.98999 14.51 4.03001 16.55 6.54001 16.55C8.23001 16.55 9.80001 15.66 10.67 14.21L12 12L13.32 9.78998C14.19 8.33998 15.76 7.45001 17.45 7.45001C19.96 7.45001 22 9.49 22 12C22 14.51 19.96 16.55 17.45 16.55C15.95 16.55 14.64 15.81 13.81 14.68'></path></svg>`;
             remItem.classList.add("unlimited"); remItem.classList.remove("limited"); remItem.title = "غير محدود";
         } else {
-            remElement.textContent = remaining; remItem.classList.add("limited"); remItem.classList.remove("unlimited"); remItem.title = `${remaining} رسائل متبقية`;
+            remElement.textContent = remaining; remItem.classList.add("limited"); remItem.classList.remove("unlimited"); remItem.title = `${remaining} من ${limit} رسائل متبقية`;
         }
     }
 
     // =====================================================================
-    // 4. دوال التجاوب، PWA، والدوال المساعدة الأساسية
+    // 4. التجاوب الذكي ومعالجة PWA
     // =====================================================================
     function setupPwaSync() {
         const LOW = "125px", HIGH = "175px"; 
@@ -245,21 +250,25 @@ document.addEventListener("DOMContentLoaded", function() {
             ensureFullMessageVisibility(); return false;
         }
 
-        // --- التحقق من الحدود الديناميكية قبل الإرسال ---
         let userLimit = getCurrentUserLimit();
-        let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY);
         
-        if (!isDev && userLimit !== Infinity) {
-            if (userLimit === 0) {
-                showStatus("الرجاء تسجيل الدخول لاستخدام الدردشة!");
-                if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ تنبيه:</b><br>يرجى تسجيل الدخول إلى حسابك للتمكن من التحدث مع المساعد الذكي.</div>`;
-                ensureFullMessageVisibility(); return false;
-            }
-            
+        if (userLimit !== Infinity) {
             let usage = loadUsage();
             if (usage.count >= userLimit) {
-                showStatus("لقد استنفدت رصيدك. قم بالترقية للمزيد!");
-                if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ رصيد الرسائل انتهى!</b><br>لقد استهلكت الحد الأقصى للرسائل المتاحة لحسابك (${userLimit} رسالة).<br>يمكنك الترقية إلى الحساب المميز (Premium) للحصول على المزيد من الرسائل اليومية!</div>`;
+                let data = localStorage.getItem("firebaseUserProfileData");
+                let devMode = localStorage.getItem(DEV_MODE_KEY);
+                let msgHTML = "";
+
+                if (!data || devMode === "guest") {
+                    showStatus("الرجاء تسجيل الدخول للمزيد!");
+                    msgHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ رصيد الزوار انتهى!</b><br>لقد استهلكت الرسائل التجريبية (6 رسائل).<br>يرجى تسجيل الدخول للحصول على 12 رسالة يومياً، أو الترقية للمزيد!</div>`;
+                } else {
+                    showStatus("لقد استنفدت رصيدك. قم بالترقية للمزيد!");
+                    msgHTML = `<div style="color:#b45309; background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fde68a;"><b>⚠️ رصيد الرسائل انتهى!</b><br>لقد استهلكت الحد الأقصى لحسابك (${userLimit} رسالة).<br>يمكنك الترقية إلى الحساب المميز للحصول على 25 رسالة يومياً!</div>`;
+                }
+
+                if(bubbleElement) bubbleElement.innerHTML = msgHTML;
+                let retryBtn = placeholder.querySelector(".resend-retry"); if(retryBtn) retryBtn.style.display = "none";
                 ensureFullMessageVisibility(); return false;
             }
         }
@@ -302,7 +311,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if(bubbleElement) bubbleElement.innerHTML = renderRichText(responseContent);
             if(retryBtn) retryBtn.style.display = "none";
             
-            // زيادة العداد فقط إذا لم يكن غير محدود
             if(!n && userLimit !== Infinity) { 
                 let u = loadUsage(); u.count = (u.count || 0) + 1; saveUsage(u); 
             }
@@ -385,20 +393,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if(head) { 
         head.addEventListener("click", function() { 
-            // --- حماية وضع المطور (لا يعمل إلا للمدير) ---
+            // حماية وضع المطور (لا يعمل إلا للمدير)
             try {
                 let data = localStorage.getItem("firebaseUserProfileData");
                 if (!data) return;
                 let user = JSON.parse(data);
-                if (!user.isAdmin) return; // رفض التفعيل لأي شخص غير المدير
+                if (!user.isAdmin) return; 
             } catch(e) { return; }
 
-            headerClickCount++; if(headerClickTimer) clearTimeout(headerClickTimer); 
+            headerClickCount++; 
+            if(headerClickTimer) clearTimeout(headerClickTimer); 
             headerClickTimer = setTimeout(() => { headerClickCount = 0 }, 4000); 
+            
             if (headerClickCount >= 5) { 
-                headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY); 
-                if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل (الحد غير محدود للمدير)"); } 
-                else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل"); } 
+                headerClickCount = 0; 
+                
+                // دورة الاختبار للمدير
+                let modes = ["admin", "guest", "normal", "premium"];
+                let currentMode = localStorage.getItem(DEV_MODE_KEY) || "admin";
+                let nextIndex = (modes.indexOf(currentMode) + 1) % modes.length;
+                let nextMode = modes[nextIndex];
+                
+                localStorage.setItem(DEV_MODE_KEY, nextMode);
+                
+                let statusMsg = "";
+                if(nextMode === "admin") statusMsg = "وضع المدير: غير محدود";
+                if(nextMode === "guest") statusMsg = "وضع الاختبار: زائر (6)";
+                if(nextMode === "normal") statusMsg = "وضع الاختبار: عادي (12)";
+                if(nextMode === "premium") statusMsg = "وضع الاختبار: مميز (25)";
+                
+                showStatus(statusMsg, 2000);
                 refreshUsageUI(); 
             } 
         }); 
