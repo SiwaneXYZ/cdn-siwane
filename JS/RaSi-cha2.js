@@ -21,21 +21,28 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 2. الحماية العميقة (الارتباط بنطاق الموقع ووظائف السكريبت)
+    // 2. الحماية العميقة (القفل الديناميكي بالنطاق)
     // =====================================================================
     
-    // هذه الدالة تبدو بريئة لكنها قلب الحماية. تقوم بفك تشفير النصوص الأساسية
-    // باستخدام اسم النطاق واسم دالة renderRichText كمفتاح تشفير مدمج.
-    const _0xZ = (a) => {
-        let h = (window.location.hostname || "").replace('www.', '');
-        if(h === 'localhost' || h === '127.0.0.1') h = 'siwane.xyz'; // لكي يعمل معك في بيئة التطوير
-        // إذا تم مسح أو تغيير دالة renderRichText، سيتدمر المفتاح
-        let fn = (typeof renderRichText === 'function') ? renderRichText.name : "err";
-        let k = h + "_" + fn; // النتيجة المفترضة: siwane.xyz_renderRichText
-        return a.map((c, i) => String.fromCharCode(c ^ k.charCodeAt(i % k.length))).join('');
+    // دالة الفخ: تفك التشفير فقط إذا كان النطاق والدالة الأساسية سليمين
+    const _0xLock = (b64) => {
+        let h = window.location.hostname || "";
+        let f = typeof renderRichText === 'function' ? renderRichText.name : "";
+        
+        // التحقق من أن النطاق يحتوي على siwane.xyz وأن الدالة موجودة
+        let isValid = (h.indexOf('siwane.xyz') !== -1 || h.indexOf('localhost') !== -1 || h === '127.0.0.1') && (f === 'renderRichText');
+        
+        // إذا سُرق الكود لموقع آخر، نقوم بتخريب النص المشفر ليعطي أسماء كلاسات خاطئة تماماً
+        if (!isValid) b64 = b64.split('').reverse().join(''); 
+        
+        try { 
+            return decodeURIComponent(escape(window.atob(b64))); 
+        } catch(e) { 
+            return "err_xyz"; // في حال فشل الفك بسبب التخريب
+        }
     };
 
-    // التحقق الظاهري لإخفاء الزر والتصنيفات (إذا حذفه السارق، سيقع في الفخ الأعمق تحت)
+    // التحقق الظاهري لإخفاء الزر في تصنيفات معينة
     if (typeof EXCLUDED_CATEGORIES !== 'undefined' && Array.isArray(EXCLUDED_CATEGORIES) && EXCLUDED_CATEGORIES.length > 0) {
         let pageTags = Array.from(document.querySelectorAll('a[rel="tag"]')).map(a => a.textContent.trim());
         if (pageTags.some(tag => EXCLUDED_CATEGORIES.includes(tag))) {
@@ -71,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
 
+    // هذه هي الدالة المرتبطة بمفتاح التشفير، لا يجب تغيير اسمها أبداً
     function renderRichText(e) {
         let t = escapeHtml(e);
         t = t.replace(/^#{1,6}\s+(.*)$/gm, (e, t) => `<b style="display:block; margin:15px 0 8px 0; color:var(--linkC, #2563eb);">${t.trim()}</b>`);
@@ -123,41 +131,39 @@ document.addEventListener("DOMContentLoaded", function() {
     function saveHistory() {
         if(!messagesArea) return;
         try {
-            // هنا الفخ الأول: الكلمات "role", "user", "assistant", "bubble", "RaSi-msg-user" مشفرة
             let e = [...messagesArea.children],
                 t = e.map(e => {
                     let obj = {};
-                    obj[_0xR([1, 6, 11, 4])] = e.classList.contains(_0xR([33, 12, 36, 8, 67, 8, 77, 31, 76, 15, 28, 19, 15])) ? _0xR([6, 10, 18, 19]) : _0xR([26, 10, 4, 8, 29, 17, 79, 30, 9]);
-                    let bCls = "." + _0xR([17, 16, 21, 3, 6, 0]);
+                    obj[_0xLock("cm9sZQ==")] = e.classList.contains(_0xLock("UmFTaS1tc2ctdXNlcg==")) ? _0xLock("dXNlcg==") : _0xLock("YXNzaXN0YW50");
+                    let bCls = "." + _0xLock("YnViYmxl");
                     obj.html = e.querySelector(bCls) ? e.querySelector(bCls).innerHTML : e.innerHTML;
                     return obj;
                 });
             localStorage.setItem(HISTORY_KEY, JSON.stringify(t));
         } catch (n) {}
     }
-    
-    // دالة مساعدة لفك التشفير داخل الكود بشكل مبهم
-    const _0xR = _0xZ;
 
     function showStatus(e, t = 1600) { let n = document.getElementById("RaSi-status"); if(!n) return; n.style.display = "block"; n.textContent = e; t > 0 && setTimeout(() => { n.style.display = "none" }, t); }
 
     function createUserMessage(e) {
-        let t = document.createElement("div"); t.className = _0xR([33, 12, 36, 8, 67, 8, 77, 31, 76, 15, 28, 19, 15]); // RaSi-msg-user
-        let n = document.createElement("div"); n.className = _0xR([17, 16, 21, 3, 6, 0]); n.innerHTML = renderRichText(e); t.appendChild(n); // bubble
+        let t = document.createElement("div"); t.className = _0xLock("UmFTaS1tc2ctdXNlcg=="); // RaSi-msg-user
+        let n = document.createElement("div"); n.className = _0xLock("YnViYmxl"); // bubble
+        n.innerHTML = renderRichText(e); t.appendChild(n);
         let s = document.createElement("div"); s.className = "meta"; s.innerHTML = `<div class="msg-controls"><button class="edit-user" title="تعديل"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button></div>`;
         t.appendChild(s); if(messagesArea) messagesArea.appendChild(t); return t;
     }
 
     function createAiPlaceholder() {
         let e = document.createElement("div"); e.className = "RaSi-msg-ai";
-        let t = document.createElement("div"); t.className = _0xR([17, 16, 21, 3, 6, 0]); t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div> جاري الكتابة...</div>`; e.appendChild(t);
+        let t = document.createElement("div"); t.className = _0xLock("YnViYmxl"); // bubble
+        t.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner" aria-hidden="true"></div> جاري الكتابة...</div>`; e.appendChild(t);
         let n = document.createElement("div"); n.className = "meta";
         n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button><button class="download-msg" title="تحميل الرد"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button><button class="resend-retry" title="إعادة المحاولة" style="display:none"><svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></button></div>`;
         e.appendChild(n); if(messagesArea) messagesArea.appendChild(e); setTimeout(() => { ensureFullMessageVisibility(); }, 100); return e;
     }
 
     // =====================================================================
-    // 5. بناء سياق الصفحة والاتصال
+    // 5. بناء سياق الصفحة والاتصال بخوادم الذكاء الاصطناعي
     // =====================================================================
     function getPageContext() {
         let title = document.title || "بدون عنوان", bodyElement = document.querySelector('.post-body') || document.querySelector('.entry-content') || document.body;
@@ -170,22 +176,21 @@ document.addEventListener("DOMContentLoaded", function() {
         let htmlMessages = [...messagesArea.children];
         let chatHistory = [];
         
-        // الفخ الثاني والأقوى: بناء Payload للـ API مرتبط حصرياً بالنطاق
         htmlMessages.forEach(el => {
-            let isUser = el.classList.contains(_0xR([33, 12, 36, 8, 67, 8, 77, 31, 76, 15, 28, 19, 15]));
-            let bubble = el.querySelector("." + _0xR([17, 16, 21, 3, 6, 0])); 
+            let isUser = el.classList.contains(_0xLock("UmFTaS1tc2ctdXNlcg=="));
+            let bubble = el.querySelector("." + _0xLock("YnViYmxl")); 
             if (!bubble) return;
             let textContent = bubble.innerText || bubble.textContent || "";
             let obj = {};
-            obj[_0xR([1, 6, 11, 4])] = isUser ? _0xR([6, 10, 18, 19]) : _0xR([26, 10, 4, 8, 29, 17, 79, 30, 9]); 
-            obj[_0xR([16, 6, 25, 21, 11, 11, 90])] = textContent;
+            obj[_0xLock("cm9sZQ==")] = isUser ? _0xLock("dXNlcg==") : _0xLock("YXNzaXN0YW50"); 
+            obj[_0xLock("Y29udGVudA==")] = textContent;
             chatHistory.push(obj);
         });
         
         if(e) {
             let uObj = {};
-            uObj[_0xR([1, 6, 11, 4])] = _0xR([6, 10, 18, 19]); 
-            uObj[_0xR([16, 6, 25, 21, 11, 11, 90])] = e;
+            uObj[_0xLock("cm9sZQ==")] = _0xLock("dXNlcg=="); 
+            uObj[_0xLock("Y29udGVudA==")] = e;
             chatHistory.push(uObj);
         }
         
@@ -193,8 +198,8 @@ document.addEventListener("DOMContentLoaded", function() {
         let systemPrompt = "أنت مساعد تقني ذكي ولطيف لمدونة siwane.xyz. أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + getPageContext();
         
         let sysObj = {};
-        sysObj[_0xR([1, 6, 11, 4])] = _0xR([0, 16, 4, 21, 11, 8]); // role: "system"
-        sysObj[_0xR([16, 6, 25, 21, 11, 11, 90])] = systemPrompt; // content
+        sysObj[_0xLock("cm9sZQ==")] = _0xLock("c3lzdGVt"); 
+        sysObj[_0xLock("Y29udGVudA==")] = systemPrompt; 
         finalMessages.unshift(sysObj);
         
         return finalMessages;
@@ -238,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function() {
             } catch (err2) { errorLog += err2.message; responseContent = null; }
         }
 
-        let bubbleElement = placeholder.querySelector("." + _0xR([17, 16, 21, 3, 6, 0]));
+        let bubbleElement = placeholder.querySelector("." + _0xLock("YnViYmxl"));
         let retryBtn = placeholder.querySelector(".resend-retry");
 
         if (responseContent) {
@@ -259,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
-            let t = document.createElement("div"); t.className = _0xR([17, 16, 21, 3, 6, 0]); t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; e.appendChild(t);
+            let t = document.createElement("div"); t.className = _0xLock("YnViYmxl"); t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; e.appendChild(t);
             let n = document.createElement("div"); n.className = "meta";
             n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button></div>`;
             e.appendChild(n); if(messagesArea) messagesArea.appendChild(e); messagesLoaded = true;
@@ -267,7 +272,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function adjustForKeyboard() { /* ... الكود نفسه الخاص بتجاوب لوحة المفاتيح ... */
+    function adjustForKeyboard() { 
         if (!container || container.style.display !== "flex") return;
         if (window.visualViewport) { let vv = window.visualViewport; if (window.innerWidth <= 767) { if (!container.classList.contains("RaSi-fullscreen")) { container.style.removeProperty("height"); container.style.removeProperty("top"); let offsetBottom = window.innerHeight - (vv.offsetTop + vv.height); container.style.setProperty("bottom", Math.max(0, offsetBottom) + "px", "important"); } else { container.style.setProperty("bottom", "auto", "important"); container.style.setProperty("top", vv.offsetTop + "px", "important"); container.style.setProperty("height", vv.height + "px", "important"); } } else { let keyboardHeight = window.innerHeight - vv.height; if (keyboardHeight > 150) { container.style.setProperty("bottom", "10px", "important"); if(chatBtn) chatBtn.style.setProperty("bottom", "10px", "important"); } else { if(typeof window.RaSiSyncPwaPositions === "function") { window.RaSiSyncPwaPositions(); } } } }
     }
@@ -290,16 +295,16 @@ document.addEventListener("DOMContentLoaded", function() {
     if(messagesArea) {
         messagesArea.addEventListener('click', function(e) {
             let target = e.target.closest('button'); if (!target) return;
-            const messageElement = target.closest('.RaSi-msg-ai, .' + _0xR([33, 12, 36, 8, 67, 8, 77, 31, 76, 15, 28, 19, 15])); if (!messageElement) return;
+            const messageElement = target.closest('.RaSi-msg-ai, .' + _0xLock("UmFTaS1tc2ctdXNlcg==")); if (!messageElement) return;
             
             if (target.classList.contains('copy-reply')) {
-                const text = messageElement.querySelector('.' + _0xR([17, 16, 21, 3, 6, 0])).innerText || ''; navigator.clipboard.writeText(text).then(() => { showStatus('تم نسخ الرد!'); const originalBg = target.style.background; const originalColor = target.style.color; target.style.background = 'var(--success, #10b981)'; target.style.color = 'white'; setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000); }).catch(() => showStatus('فشل في النسخ'));
+                const text = messageElement.querySelector('.' + _0xLock("YnViYmxl")).innerText || ''; navigator.clipboard.writeText(text).then(() => { showStatus('تم نسخ الرد!'); const originalBg = target.style.background; const originalColor = target.style.color; target.style.background = 'var(--success, #10b981)'; target.style.color = 'white'; setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000); }).catch(() => showStatus('فشل في النسخ'));
             } else if (target.classList.contains('edit-user')) {
-                const text = messageElement.querySelector('.' + _0xR([17, 16, 21, 3, 6, 0])).innerText || ''; if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); } showStatus('تم تحميل النص للتعديل');
+                const text = messageElement.querySelector('.' + _0xLock("YnViYmxl")).innerText || ''; if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); } showStatus('تم تحميل النص للتعديل');
             } else if (target.classList.contains('like-btn') || target.classList.contains('dislike-btn')) {
                 const likeBtn = messageElement.querySelector('.like-btn'), dislikeBtn = messageElement.querySelector('.dislike-btn'); if (target.classList.contains('like-btn')) { likeBtn.classList.toggle('liked'); dislikeBtn.classList.remove('disliked'); showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب'); } else { dislikeBtn.classList.toggle('disliked'); likeBtn.classList.remove('liked'); showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء'); }
             } else if (target.classList.contains('download-msg')) {
-                const text = messageElement.querySelector('.' + _0xR([17, 16, 21, 3, 6, 0])).innerText || '', blob = new Blob([text], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = `رد-الدردشة-${new Date().toLocaleDateString('ar-SA')}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus('تم تحميل الرد');
+                const text = messageElement.querySelector('.' + _0xLock("YnViYmxl")).innerText || '', blob = new Blob([text], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = `رد-الدردشة-${new Date().toLocaleDateString('ar-SA')}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus('تم تحميل الرد');
             }
         });
     }
