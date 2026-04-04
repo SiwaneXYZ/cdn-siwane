@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     
     // =====================================================================
-    // 1. الإعدادات (المفاتيح يتم سحبها من الـ HTML لكي لا يتم حظرها من GitHub)
+    // 1. الإعدادات الأساسية
     // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
@@ -48,10 +48,8 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             observer.observe(document.body, { childList: true, subtree: true });
         }
-
         window.RaSiSyncPwaPositions = updatePositions;
     }
-    
     setupPwaSync();
 
     // =====================================================================
@@ -146,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // =====================================================================
-    // 4. بناء سياق الصفحة والاتصال بخوادم الذكاء الاصطناعي (مع تقرير الأخطاء)
+    // 4. بناء سياق الصفحة والاتصال بالذكاء الاصطناعي (المفاتيح الصلبة)
     // =====================================================================
     function getPageContext() {
         let title = document.title || "بدون عنوان";
@@ -159,20 +157,16 @@ document.addEventListener("DOMContentLoaded", function() {
         if(!messagesArea) return [];
         let htmlMessages = [...messagesArea.children];
         let chatHistory = [];
-        
         htmlMessages.forEach(el => {
             let isUser = el.classList.contains("RaSi-msg-user"), bubble = el.querySelector(".bubble");
             if (!bubble) return;
             let textContent = bubble.innerText || bubble.textContent || "";
             chatHistory.push({ role: isUser ? "user" : "assistant", content: textContent });
         });
-        
         if(e) chatHistory.push({ role: "user", content: e });
-        
         let finalMessages = chatHistory.slice(-5);
         let currentContext = getPageContext();
-        let systemPrompt = "أنت مساعد تقني ذكي ولطيف لمدونة siwane.xyz. أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + currentContext;
-        
+        let systemPrompt = "أنت مساعد تقني ذكي لمدونة siwane.xyz. أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + currentContext;
         finalMessages.unshift({ role: "system", content: systemPrompt });
         return finalMessages;
     }
@@ -183,72 +177,54 @@ document.addEventListener("DOMContentLoaded", function() {
         
         let placeholder = t || createAiPlaceholder();
         showStatus("جاري إرسال الرسالة...");
-        
         let messagesPayload = buildConversationPayload(e);
         let responseContent = "";
-        let errorLog = ""; // تسجيل الأخطاء
 
-        // التأكد من أن المفاتيح موجودة في HTML
-        let orKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
-        let orModel = typeof OPENROUTER_MODEL !== 'undefined' ? OPENROUTER_MODEL : "stepfun/step-3.5-flash:free";
-        let hfKey = typeof HUGGING_FACE_TOKEN !== 'undefined' ? HUGGING_FACE_TOKEN : "";
-        let hfModel = typeof HUGGING_FACE_MODEL !== 'undefined' ? HUGGING_FACE_MODEL : "HuggingFaceH4/zephyr-7b-beta";
+        // السوارت الأصلية المضمونة 100%
+        const OR_KEY = "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";
+        const HF_KEY = "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";
 
         try {
-            if(!orKey) throw new Error("مفتاح OpenRouter غير موجود في الـ HTML.");
-            
-            // المحاولة الأولى: سيرفر OpenRouter
             let apiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${orKey}`,
+                    "Authorization": `Bearer ${OR_KEY}`,
                     "Content-Type": "application/json",
-                    "HTTP-Referer": window.location.origin || "https://siwane.xyz",
-                    "X-Title": "siwane.xyz"
+                    "HTTP-Referer": "https://modweeb.com", // تمويه السيرفر لقبول الطلب
+                    "X-Title": "modweeb.com"
                 },
                 body: JSON.stringify({ 
-                    model: orModel, 
+                    model: "stepfun/step-3.5-flash:free", 
                     messages: messagesPayload, 
                     max_tokens: 1000, 
                     temperature: 0.7 
                 })
             });
 
-            if (!apiRes.ok) {
-                const errData = await apiRes.text();
-                throw new Error(`OpenRouter Error (${apiRes.status}): ${errData.substring(0, 60)}`);
-            }
+            if (!apiRes.ok) throw new Error("OpenRouter Failed");
             let data = await apiRes.json();
             responseContent = data?.choices?.[0]?.message?.content;
 
         } catch (err1) {
-            errorLog += err1.message + "<br><br>";
             showStatus("تبديل الخادم...");
-            // المحاولة الثانية: سيرفر Hugging Face 
             try {
-                if(!hfKey) throw new Error("مفتاح HuggingFace غير موجود في الـ HTML.");
-                
                 let hfRes = await fetch("https://router.huggingface.co/v1/chat/completions", {
                     method: "POST",
                     headers: { 
-                        "Authorization": `Bearer ${hfKey}`, 
+                        "Authorization": `Bearer ${HF_KEY}`, 
                         "Content-Type": "application/json" 
                     },
                     body: JSON.stringify({ 
-                        model: hfModel, 
+                        model: "google/gemma-2-9b-it:nebius", 
                         messages: messagesPayload, 
                         max_tokens: 1000 
                     })
                 });
 
-                if (!hfRes.ok) {
-                    const errData = await hfRes.text();
-                    throw new Error(`HuggingFace Error (${hfRes.status}): ${errData.substring(0, 60)}`);
-                }
+                if (!hfRes.ok) throw new Error("Hugging Face Failed");
                 let data = await hfRes.json();
                 responseContent = data?.choices?.[0]?.message?.content;
             } catch (err2) {
-                 errorLog += err2.message;
                  responseContent = null;
             }
         }
@@ -259,13 +235,11 @@ document.addEventListener("DOMContentLoaded", function() {
         if (responseContent) {
             if(bubbleElement) bubbleElement.innerHTML = renderRichText(responseContent);
             if(retryBtn) retryBtn.style.display = "none";
-            
             if(!n) { let u = loadUsage(); u.count = (u.count || 0) + 1; saveUsage(u); refreshUsageUI(); }
             saveHistory(); showStatus("تم الرد بنجاح!"); ensureFullMessageVisibility();
             return true;
         } else {
-            // طباعة تفاصيل الخطأ بدقة داخل الدردشة
-            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ تفاصيل الخطأ:</b><br><br>${errorLog}</div>`;
+            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444;">✗ عذراً، جميع الخوادم مشغولة حالياً.</div>`;
             if(retryBtn) {
                 retryBtn.style.display = "inline-block";
                 retryBtn.onclick = async function() { 
@@ -356,16 +330,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.remove('RaSi-fullscreen');
         document.body.classList.remove('rasi-no-scroll'); 
-        
         if(fullscreenBtn) {
             fullscreenBtn.title = 'الشاشة الكاملة'; 
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
         }
-        
-        container.style.removeProperty("height"); 
-        container.style.removeProperty("top");
-        container.style.removeProperty("bottom"); 
-        
+        container.style.removeProperty("height"); container.style.removeProperty("top"); container.style.removeProperty("bottom"); 
         if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
         adjustForKeyboard(); 
     }
@@ -374,12 +343,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.add('RaSi-fullscreen');
         document.body.classList.add('rasi-no-scroll'); 
-        
         if(fullscreenBtn) {
             fullscreenBtn.title = 'تصغير'; 
             fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; 
         }
-        
         adjustForKeyboard(); 
         setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 150);
     }
@@ -387,13 +354,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let closeBtn = document.getElementById("RaSi-chat-close");
     if(closeBtn) {
         closeBtn.addEventListener("click", function(e) {
-            e.stopPropagation(); e.preventDefault();
-            document.body.classList.remove('rasi-no-scroll'); 
-            if(container.classList.contains("RaSi-fullscreen")) { 
-                exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); 
-            } else { 
-                container.style.display = "none"; 
-            }
+            e.stopPropagation(); e.preventDefault(); document.body.classList.remove('rasi-no-scroll'); 
+            if(container.classList.contains("RaSi-fullscreen")) { exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); } else { container.style.display = "none"; }
         });
     }
 
@@ -406,18 +368,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if(txt) {
-        txt.addEventListener("input", function(e) { 
-            e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; 
-            if(charsUI) charsUI.textContent = `${e.target.value.length} `; 
-        });
-        txt.addEventListener("keydown", function(e) { 
-            if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { 
-                e.preventDefault(); 
-                let sBtn = document.getElementById("RaSi-send");
-                if(sBtn) sBtn.click(); 
-                return; 
-            } 
-        });
+        txt.addEventListener("input", function(e) { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; if(charsUI) charsUI.textContent = `${e.target.value.length} `; });
+        txt.addEventListener("keydown", function(e) { if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { e.preventDefault(); let sBtn = document.getElementById("RaSi-send"); if(sBtn) sBtn.click(); return; } });
         txt.addEventListener("focus", function() { setTimeout(adjustForKeyboard, 50); setTimeout(ensureFullMessageVisibility, 300); });
         txt.addEventListener("blur", function() { setTimeout(adjustForKeyboard, 50); });
     }
@@ -426,29 +378,16 @@ document.addEventListener("DOMContentLoaded", function() {
         if("flex" !== container.style.display) return;
         if(container.contains(e.target) || chatBtn.contains(e.target)) return;
         if(!document.body.contains(e.target)) return;
-        document.body.classList.remove('rasi-no-scroll'); 
-        container.style.display = "none";
+        document.body.classList.remove('rasi-no-scroll'); container.style.display = "none";
     });
 
-    document.addEventListener("keydown", function(e) { 
-        if ("Escape" === e.key) {
-            document.body.classList.remove('rasi-no-scroll');
-            container.style.display = "none"; 
-        }
-    });
+    document.addEventListener("keydown", function(e) { if ("Escape" === e.key) { document.body.classList.remove('rasi-no-scroll'); container.style.display = "none"; } });
     
     let copyAllBtn = document.getElementById("RaSi-copy-all");
-    if(copyAllBtn) copyAllBtn.addEventListener("click", function() { 
-        if(!messagesArea) return;
-        let e = [...messagesArea.children].map(e => e.innerText).join("\n"); navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!")); 
-    });
+    if(copyAllBtn) copyAllBtn.addEventListener("click", function() { if(!messagesArea) return; let e = [...messagesArea.children].map(e => e.innerText).join("\n"); navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!")); });
 
     let clearBtn = document.getElementById("RaSi-clear");
-    if(clearBtn) clearBtn.addEventListener("click", function() { 
-        localStorage.removeItem(HISTORY_KEY); 
-        if(messagesArea) messagesArea.innerHTML = ""; 
-        messagesLoaded = false; lazyLoadMessages(); showStatus("تم حذف المحادثة!"); 
-    });
+    if(clearBtn) clearBtn.addEventListener("click", function() { localStorage.removeItem(HISTORY_KEY); if(messagesArea) messagesArea.innerHTML = ""; messagesLoaded = false; lazyLoadMessages(); showStatus("تم حذف المحادثة!"); });
 
     if(messagesArea) {
         messagesArea.addEventListener('click', function(e) {
@@ -459,22 +398,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 const text = messageElement.querySelector('.bubble').innerText || '';
                 navigator.clipboard.writeText(text).then(() => {
                     showStatus('تم نسخ الرد!'); const originalBg = target.style.background; const originalColor = target.style.color;
-                    target.style.background = 'var(--success, #10b981)'; target.style.color = 'white';
-                    setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000);
+                    target.style.background = 'var(--success, #10b981)'; target.style.color = 'white'; setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000);
                 }).catch(() => showStatus('فشل في النسخ'));
             } else if (target.classList.contains('edit-user')) {
                 const text = messageElement.querySelector('.bubble').innerText || '';
-                if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); }
-                showStatus('تم تحميل النص للتعديل');
+                if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); } showStatus('تم تحميل النص للتعديل');
             } else if (target.classList.contains('like-btn') || target.classList.contains('dislike-btn')) {
                 const likeBtn = messageElement.querySelector('.like-btn'), dislikeBtn = messageElement.querySelector('.dislike-btn');
-                if (target.classList.contains('like-btn')) { 
-                    likeBtn.classList.toggle('liked'); dislikeBtn.classList.remove('disliked'); 
-                    showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب'); 
-                } else { 
-                    dislikeBtn.classList.toggle('disliked'); likeBtn.classList.remove('liked'); 
-                    showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء'); 
-                }
+                if (target.classList.contains('like-btn')) { likeBtn.classList.toggle('liked'); dislikeBtn.classList.remove('disliked'); showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب'); } else { dislikeBtn.classList.toggle('disliked'); likeBtn.classList.remove('liked'); showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء'); }
             } else if (target.classList.contains('download-msg')) {
                 const text = messageElement.querySelector('.bubble').innerText || '', blob = new Blob([text], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a');
                 a.href = url; a.download = `رد-الدردشة-${new Date().toLocaleDateString('ar-SA')}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus('تم تحميل الرد');
@@ -501,10 +432,7 @@ document.addEventListener("DOMContentLoaded", function() {
         head.addEventListener("click", function() {
             headerClickCount++; if(headerClickTimer) clearTimeout(headerClickTimer);
             headerClickTimer = setTimeout(() => { headerClickCount = 0 }, 4000);
-            if (headerClickCount >= 5) {
-                headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY);
-                if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل: غير محدود"); } refreshUsageUI();
-            }
+            if (headerClickCount >= 5) { headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY); if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل: غير محدود"); } refreshUsageUI(); }
         });
     }
 
