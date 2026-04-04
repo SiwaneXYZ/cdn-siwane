@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
-          DEV_MODE_KEY = "RaSiDevMode_v1"; // تم تغييره ليدعم حالات متعددة
+          DEV_MODE_KEY = "RaSiDevMode_v1";
 
     let messagesLoaded = false;
     let headerClickCount = 0, headerClickTimer = null;
@@ -34,10 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try { return decodeURIComponent(escape(window.atob(b64))); } catch(e) { return "err_xyz"; }
     };
 
-    if (isValidHost && typeof EXCLUDED_CATEGORIES !== 'undefined' && Array.isArray(EXCLUDED_CATEGORIES) && EXCLUDED_CATEGORIES.length > 0) {
-        let pageTags = Array.from(document.querySelectorAll('a[rel="tag"]')).map(a => a.textContent.trim());
-        if (pageTags.some(tag => EXCLUDED_CATEGORIES.includes(tag))) { chatBtn.style.display = "none"; return; }
-    }
+    // تمت إزالة كود EXCLUDED_CATEGORIES من هنا لمنع التعارض
 
     // =====================================================================
     // 3. نظام الحسابات والحدود الديناميكية (مع وضعية اختبار المدير)
@@ -47,30 +44,26 @@ document.addEventListener("DOMContentLoaded", function() {
             let data = localStorage.getItem("firebaseUserProfileData");
             let user = data ? JSON.parse(data) : null;
             
-            // 1. إذا كان المستخدم مديراً، نتحقق مما إذا كان قد فعل "وضعية اختبار"
             if (user && user.isAdmin) {
                 let devMode = localStorage.getItem(DEV_MODE_KEY);
                 if (devMode === "guest") return 6;
                 if (devMode === "normal") return 12;
                 if (devMode === "premium") return 25;
-                return Infinity; // الوضع الافتراضي للمدير
+                return Infinity;
             }
 
-            // 2. إذا لم يكن مسجلاً الدخول (زائر)
             if (!user) return 6;
 
-            // 3. التحقق من الحساب المميز أو الـ VIP
             let isPremium = user.isVip || user.accountType === 'premium';
             if (!isPremium && user.premiumExpiry && user.premiumExpiry.seconds) {
                 if (user.premiumExpiry.seconds * 1000 > Date.now()) isPremium = true;
             }
             if (isPremium) return 25;
             
-            // 4. الحساب العادي
             return 12;
             
         } catch(e) {
-            return 6; // الزائر (في حال حدوث خطأ)
+            return 6;
         }
     }
 
@@ -393,7 +386,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if(head) { 
         head.addEventListener("click", function() { 
-            // حماية وضع المطور (لا يعمل إلا للمدير)
             try {
                 let data = localStorage.getItem("firebaseUserProfileData");
                 if (!data) return;
@@ -408,7 +400,6 @@ document.addEventListener("DOMContentLoaded", function() {
             if (headerClickCount >= 5) { 
                 headerClickCount = 0; 
                 
-                // دورة الاختبار للمدير
                 let modes = ["admin", "guest", "normal", "premium"];
                 let currentMode = localStorage.getItem(DEV_MODE_KEY) || "admin";
                 let nextIndex = (modes.indexOf(currentMode) + 1) % modes.length;
