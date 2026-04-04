@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     
     // =====================================================================
-    // 1. الإعدادات (المفاتيح يتم سحبها من الـ HTML لكي لا يتم حظرها من GitHub)
+    // 1. الإعدادات والمفاتيح
     // =====================================================================
     const USAGE_KEY = "RaSiChatUsage_v1",
           HISTORY_KEY = "RaSiChatHistory_v1",
@@ -21,44 +21,42 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 2. التجاوب الذكي والآمن مع زر PWA (مبني على 125px)
+    // 2. التجاوب الذكي والمعكوس مع زر PWA (سكريبت Fineshop)
     // =====================================================================
     function setupPwaSync() {
-        // الحساب الدقيق للمسافات
-        const BTN_HIGH = "175px"; // (PWA Bottom 125 + PWA Height 40 + Gap 10)
-        const BTN_LOW = "125px";  // يأخذ مكان زر PWA إذا لم يكن موجوداً
-        
-        const CONTAINER_HIGH = "230px"; // (Btn High 175 + Btn Height 40 + Gap 15)
-        const CONTAINER_LOW = "180px";  // (Btn Low 125 + Btn Height 40 + Gap 15)
+        const LOW = "125px";  // المكان المنخفض (مكان PWA)
+        const HIGH = "175px"; // المكان المرتفع (فوق PWA)
 
         const updatePositions = () => {
-            const pwaBtn = document.getElementById("app_install_button") || document.querySelector(".pwa-button");
+            // البحث عن زر PWA الذي ينشئه السكريبت الآخر
+            const pwaBtn = document.querySelector(".pwa-button");
             
-            // نتحقق إذا كان زر PWA مخفياً أو غير موجود قطعاً
-            const isPwaNotVisible = !pwaBtn || pwaBtn.hidden || getComputedStyle(pwaBtn).display === "none" || getComputedStyle(pwaBtn).visibility === "hidden";
+            // التحقق من حالة الزر: هل هو موجود وغير مخفي بـ [hidden]؟
+            const isPwaActive = pwaBtn && !pwaBtn.hidden && getComputedStyle(pwaBtn).display !== "none";
 
-            // إذا لم يكن PWA موجوداً، ينزل الدردشة للأسفل. وإلا يبقى في الأعلى.
-            const btnBottom = isPwaNotVisible ? BTN_LOW : BTN_HIGH;
-            chatBtn.style.setProperty("bottom", btnBottom, "important");
+            // المنطق المعكوس: إذا كان PWA نشطاً اصعد، وإلا انزل
+            const btnPos = isPwaActive ? HIGH : LOW;
+            chatBtn.style.setProperty("bottom", btnPos, "important");
 
             if (window.innerWidth > 767 && container && container.style.display === "flex" && !container.classList.contains("RaSi-fullscreen")) {
-                const containerBottom = isPwaNotVisible ? CONTAINER_LOW : CONTAINER_HIGH;
-                container.style.setProperty("bottom", containerBottom, "important");
+                const containerPos = isPwaActive ? "230px" : "180px";
+                container.style.setProperty("bottom", containerPos, "important");
             }
         };
 
+        // تشغيل فوري
         updatePositions();
-        window.addEventListener("resize", updatePositions);
 
+        // مراقبة دقيقة للـ DOM لاكتشاف لحظة إضافة الزر أو تغيير خاصية hidden
         const observer = new MutationObserver(() => updatePositions());
-        if (document.getElementById("app_install_button")) {
-            observer.observe(document.getElementById("app_install_button"), { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
-        } else if (document.querySelector(".pwa-button")) {
-            observer.observe(document.querySelector(".pwa-button"), { attributes: true, attributeFilter: ['hidden', 'class', 'style'] });
-        } else {
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true, 
+            attributeFilter: ['hidden', 'style', 'class'] 
+        });
 
+        window.addEventListener("resize", updatePositions);
         window.RaSiSyncPwaPositions = updatePositions;
     }
     
@@ -222,7 +220,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 })
             });
 
-            if (!apiRes.ok) throw new Error(`OpenRouter Error (${apiRes.status})`);
+            if (!apiRes.ok) {
+                const errData = await apiRes.text();
+                throw new Error(`OpenRouter Error (${apiRes.status}): ${errData.substring(0, 40)}`);
+            }
             let data = await apiRes.json();
             responseContent = data?.choices?.[0]?.message?.content;
 
@@ -245,7 +246,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     })
                 });
 
-                if (!hfRes.ok) throw new Error(`HuggingFace Error (${hfRes.status})`);
+                if (!hfRes.ok) {
+                    const errData = await hfRes.text();
+                    throw new Error(`HuggingFace Error (${hfRes.status}): ${errData.substring(0, 40)}`);
+                }
                 let data = await hfRes.json();
                 responseContent = data?.choices?.[0]?.message?.content;
             } catch (err2) {
@@ -265,12 +269,12 @@ document.addEventListener("DOMContentLoaded", function() {
             saveHistory(); showStatus("تم الرد بنجاح!"); ensureFullMessageVisibility();
             return true;
         } else {
-            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ خطأ:</b><br>${errorLog}</div>`;
+            if(bubbleElement) bubbleElement.innerHTML = `<div style="color:#ef4444; font-family:monospace; font-size:10px; direction:ltr; text-align:left;"><b>⚠️ تفاصيل الخطأ:</b><br>${errorLog}</div>`;
             if(retryBtn) {
-                retryBtn.style.display = "flex"; 
+                retryBtn.style.display = "flex"; // تم التعديل لضمان التوسيط
                 retryBtn.onclick = async function() { 
                     retryBtn.disabled = true; 
-                    bubbleElement.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div> إعاد...</div>`; 
+                    bubbleElement.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><div class="spinner"></div> جاري الإعادة...</div>`; 
                     await sendMessage(e, placeholder, true); 
                     retryBtn.disabled = false; 
                 };
@@ -286,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
-            let t = document.createElement("div"); t.className = "bubble"; t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال.`; e.appendChild(t);
+            let t = document.createElement("div"); t.className = "bubble"; t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; e.appendChild(t);
             let n = document.createElement("div"); n.className = "meta";
             n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button></div>`;
             e.appendChild(n); 
@@ -356,8 +360,13 @@ document.addEventListener("DOMContentLoaded", function() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.remove('RaSi-fullscreen');
         document.body.classList.remove('rasi-no-scroll'); 
-        if(fullscreenBtn) { fullscreenBtn.title = 'الشاشة الكاملة'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; }
-        container.style.removeProperty("height"); container.style.removeProperty("top"); container.style.removeProperty("bottom"); 
+        if(fullscreenBtn) {
+            fullscreenBtn.title = 'الشاشة الكاملة'; 
+            fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`; 
+        }
+        container.style.removeProperty("height"); 
+        container.style.removeProperty("top");
+        container.style.removeProperty("bottom"); 
         if(typeof window.RaSiSyncPwaPositions === "function") window.RaSiSyncPwaPositions();
         adjustForKeyboard(); 
     }
@@ -366,8 +375,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const fullscreenBtn = document.getElementById('RaSi-fullscreen'); 
         container.classList.add('RaSi-fullscreen');
         document.body.classList.add('rasi-no-scroll'); 
-        if(fullscreenBtn) { fullscreenBtn.title = 'تصغير'; fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; }
-        adjustForKeyboard(); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 150);
+        if(fullscreenBtn) {
+            fullscreenBtn.title = 'تصغير'; 
+            fullscreenBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`; 
+        }
+        adjustForKeyboard(); 
+        setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 150);
     }
 
     let closeBtn = document.getElementById("RaSi-chat-close");
@@ -375,7 +388,11 @@ document.addEventListener("DOMContentLoaded", function() {
         closeBtn.addEventListener("click", function(e) {
             e.stopPropagation(); e.preventDefault();
             document.body.classList.remove('rasi-no-scroll'); 
-            if(container.classList.contains("RaSi-fullscreen")) { exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); } else { container.style.display = "none"; }
+            if(container.classList.contains("RaSi-fullscreen")) { 
+                exitFullscreenMode(); setTimeout(() => { container.style.display = "none"; }, 100); 
+            } else { 
+                container.style.display = "none"; 
+            }
         });
     }
 
@@ -388,8 +405,18 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if(txt) {
-        txt.addEventListener("input", function(e) { e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; if(charsUI) charsUI.textContent = `${e.target.value.length} `; });
-        txt.addEventListener("keydown", function(e) { if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { e.preventDefault(); let sBtn = document.getElementById("RaSi-send"); if(sBtn) sBtn.click(); return; } });
+        txt.addEventListener("input", function(e) { 
+            e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 62) + "px"; 
+            if(charsUI) charsUI.textContent = `${e.target.value.length} `; 
+        });
+        txt.addEventListener("keydown", function(e) { 
+            if (("Enter" === e.key && !e.shiftKey) || ((e.ctrlKey || e.metaKey) && "Enter" === e.key)) { 
+                e.preventDefault(); 
+                let sBtn = document.getElementById("RaSi-send");
+                if(sBtn) sBtn.click(); 
+                return; 
+            } 
+        });
         txt.addEventListener("focus", function() { setTimeout(adjustForKeyboard, 50); setTimeout(ensureFullMessageVisibility, 300); });
         txt.addEventListener("blur", function() { setTimeout(adjustForKeyboard, 50); });
     }
@@ -398,31 +425,58 @@ document.addEventListener("DOMContentLoaded", function() {
         if("flex" !== container.style.display) return;
         if(container.contains(e.target) || chatBtn.contains(e.target)) return;
         if(!document.body.contains(e.target)) return;
-        document.body.classList.remove('rasi-no-scroll'); container.style.display = "none";
+        document.body.classList.remove('rasi-no-scroll'); 
+        container.style.display = "none";
     });
 
-    document.addEventListener("keydown", function(e) { if ("Escape" === e.key) { document.body.classList.remove('rasi-no-scroll'); container.style.display = "none"; } });
+    document.addEventListener("keydown", function(e) { 
+        if ("Escape" === e.key) {
+            document.body.classList.remove('rasi-no-scroll');
+            container.style.display = "none"; 
+        }
+    });
     
     let copyAllBtn = document.getElementById("RaSi-copy-all");
-    if(copyAllBtn) copyAllBtn.addEventListener("click", function() { if(!messagesArea) return; let e = [...messagesArea.children].map(e => e.innerText).join("\n"); navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!")); });
+    if(copyAllBtn) copyAllBtn.addEventListener("click", function() { 
+        if(!messagesArea) return;
+        let e = [...messagesArea.children].map(e => e.innerText).join("\n"); navigator.clipboard.writeText(e).then(() => showStatus("تم نسخ المحادثة!")); 
+    });
 
     let clearBtn = document.getElementById("RaSi-clear");
-    if(clearBtn) clearBtn.addEventListener("click", function() { localStorage.removeItem(HISTORY_KEY); if(messagesArea) messagesArea.innerHTML = ""; messagesLoaded = false; lazyLoadMessages(); showStatus("تم حذف المحادثة!"); });
+    if(clearBtn) clearBtn.addEventListener("click", function() { 
+        localStorage.removeItem(HISTORY_KEY); 
+        if(messagesArea) messagesArea.innerHTML = ""; 
+        messagesLoaded = false; lazyLoadMessages(); showStatus("تم حذف المحادثة!"); 
+    });
 
     if(messagesArea) {
         messagesArea.addEventListener('click', function(e) {
             let target = e.target.closest('button'); if (!target) return;
             const messageElement = target.closest('.RaSi-msg-ai, .RaSi-msg-user'); if (!messageElement) return;
+            
             if (target.classList.contains('copy-reply')) {
                 const text = messageElement.querySelector('.bubble').innerText || '';
-                navigator.clipboard.writeText(text).then(() => { showStatus('تم نسخ الرد!'); const originalBg = target.style.background; const originalColor = target.style.color; target.style.background = 'var(--success, #10b981)'; target.style.color = 'white'; setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000); }).catch(() => showStatus('فشل في النسخ'));
+                navigator.clipboard.writeText(text).then(() => {
+                    showStatus('تم نسخ الرد!'); const originalBg = target.style.background; const originalColor = target.style.color;
+                    target.style.background = 'var(--success, #10b981)'; target.style.color = 'white';
+                    setTimeout(() => { target.style.background = originalBg; target.style.color = originalColor; }, 1000);
+                }).catch(() => showStatus('فشل في النسخ'));
             } else if (target.classList.contains('edit-user')) {
-                const text = messageElement.querySelector('.bubble').innerText || ''; if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); } showStatus('تم تحميل النص للتعديل');
+                const text = messageElement.querySelector('.bubble').innerText || '';
+                if(txt) { txt.value = text; txt.focus(); txt.dispatchEvent(new Event('input')); }
+                showStatus('تم تحميل النص للتعديل');
             } else if (target.classList.contains('like-btn') || target.classList.contains('dislike-btn')) {
                 const likeBtn = messageElement.querySelector('.like-btn'), dislikeBtn = messageElement.querySelector('.dislike-btn');
-                if (target.classList.contains('like-btn')) { likeBtn.classList.toggle('liked'); dislikeBtn.classList.remove('disliked'); showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب'); } else { dislikeBtn.classList.toggle('disliked'); likeBtn.classList.remove('liked'); showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء'); }
+                if (target.classList.contains('like-btn')) { 
+                    likeBtn.classList.toggle('liked'); dislikeBtn.classList.remove('disliked'); 
+                    showStatus(likeBtn.classList.contains('liked') ? 'تم تسجيل الإعجاب' : 'تم إلغاء الإعجاب'); 
+                } else { 
+                    dislikeBtn.classList.toggle('disliked'); likeBtn.classList.remove('liked'); 
+                    showStatus(dislikeBtn.classList.contains('disliked') ? 'تم تسجيل عدم الإعجاب' : 'تم الإلغاء'); 
+                }
             } else if (target.classList.contains('download-msg')) {
-                const text = messageElement.querySelector('.bubble').innerText || '', blob = new Blob([text], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = `رد-${new Date().toLocaleDateString('ar-SA')}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus('تم تحميل الرد');
+                const text = messageElement.querySelector('.bubble').innerText || '', blob = new Blob([text], { type: 'text/plain;charset=utf-8' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+                a.href = url; a.download = `رد-الدردشة-${new Date().toLocaleDateString('ar-SA')}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus('تم تحميل الرد');
             }
         });
     }
@@ -430,12 +484,15 @@ document.addEventListener("DOMContentLoaded", function() {
     let sendBtn = document.getElementById("RaSi-send");
     if(sendBtn) {
         sendBtn.addEventListener("click", async function() {
-            if(!txt) return; let messageText = txt.value.trim(); if(!messageText) return;
+            if(!txt) return;
+            let messageText = txt.value.trim(); if(!messageText) return;
             let isUnlimited = "1" === localStorage.getItem(DEV_FLAG_KEY);
             if(!isUnlimited) { let usage = loadUsage(); if(usage.count >= usage.limit) { showStatus("تم تجاوز الحد اليومي للرسائل"); return; } }
             createUserMessage(messageText); txt.value = ""; txt.style.height = "auto"; if(charsUI) charsUI.textContent = `0 `;
-            let aiMessage = createAiPlaceholder(); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 50);
-            saveHistory(); await sendMessage(messageText, aiMessage); setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight + 100; }, 100);
+            let aiMessage = createAiPlaceholder();
+            setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight; }, 50);
+            saveHistory(); await sendMessage(messageText, aiMessage);
+            setTimeout(() => { if(messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight + 100; }, 100);
         });
     }
 
@@ -443,7 +500,10 @@ document.addEventListener("DOMContentLoaded", function() {
         head.addEventListener("click", function() {
             headerClickCount++; if(headerClickTimer) clearTimeout(headerClickTimer);
             headerClickTimer = setTimeout(() => { headerClickCount = 0 }, 4000);
-            if (headerClickCount >= 5) { headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY); if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("مفعل: غير محدود"); } refreshUsageUI(); }
+            if (headerClickCount >= 5) {
+                headerClickCount = 0; let t = "1" === localStorage.getItem(DEV_FLAG_KEY);
+                if (t) { localStorage.removeItem(DEV_FLAG_KEY); showStatus("وضع المطور معطل"); } else { localStorage.setItem(DEV_FLAG_KEY, "1"); showStatus("وضع المطور مفعل: غير محدود"); } refreshUsageUI();
+            }
         });
     }
 
