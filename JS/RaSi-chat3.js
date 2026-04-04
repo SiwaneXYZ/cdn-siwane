@@ -21,29 +21,32 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!chatBtn || !container) return;
 
     // =====================================================================
-    // 2. الحماية العميقة (القفل الديناميكي بالنطاق)
+    // 2. الحماية المتقدمة (إخفاء النطاق ورسائل الفخ)
     // =====================================================================
     
-    // دالة الفخ: تفك التشفير فقط إذا كان النطاق والدالة الأساسية سليمين
+    // بناء اسم النطاق واسم الدالة من أرقام ASCII (لا يمكن كشفها بالبحث العادي)
+    // الأرقام أدناه تُشكل كلمة: siwane.xyz
+    const _0xd = String.fromCharCode(115, 105, 119, 97, 110, 101, 46, 120, 121, 122); 
+    // الأرقام أدناه تُشكل كلمة: renderRichText
+    const _0xfn = String.fromCharCode(114, 101, 110, 100, 101, 114, 82, 105, 99, 104, 84, 101, 120, 116);
+
+    const hostname = window.location.hostname || "";
+    const isValidHost = hostname.indexOf(_0xd) !== -1 || hostname.indexOf('localhost') !== -1 || hostname === '127.0.0.1';
+
+    // دالة فك التشفير المرتبطة بالنطاق (لحماية التنسيق وإرسال البيانات)
     const _0xLock = (b64) => {
-        let h = window.location.hostname || "";
         let f = typeof renderRichText === 'function' ? renderRichText.name : "";
+        let isValid = isValidHost && (f === _0xfn);
         
-        // التحقق من أن النطاق يحتوي على siwane.xyz وأن الدالة موجودة
-        let isValid = (h.indexOf('siwane.xyz') !== -1 || h.indexOf('localhost') !== -1 || h === '127.0.0.1') && (f === 'renderRichText');
-        
-        // إذا سُرق الكود لموقع آخر، نقوم بتخريب النص المشفر ليعطي أسماء كلاسات خاطئة تماماً
+        // إذا كان الموقع مسروقاً، نخرب الكود المشفر لتعطيل الـ CSS والـ API بصمت
         if (!isValid) b64 = b64.split('').reverse().join(''); 
         
-        try { 
-            return decodeURIComponent(escape(window.atob(b64))); 
-        } catch(e) { 
-            return "err_xyz"; // في حال فشل الفك بسبب التخريب
-        }
+        try { return decodeURIComponent(escape(window.atob(b64))); } 
+        catch(e) { return "err_xyz"; }
     };
 
-    // التحقق الظاهري لإخفاء الزر في تصنيفات معينة
-    if (typeof EXCLUDED_CATEGORIES !== 'undefined' && Array.isArray(EXCLUDED_CATEGORIES) && EXCLUDED_CATEGORIES.length > 0) {
+    // إخفاء الزر في تصنيفات معينة (يعمل فقط إذا كان النطاق صحيحاً)
+    if (isValidHost && typeof EXCLUDED_CATEGORIES !== 'undefined' && Array.isArray(EXCLUDED_CATEGORIES) && EXCLUDED_CATEGORIES.length > 0) {
         let pageTags = Array.from(document.querySelectorAll('a[rel="tag"]')).map(a => a.textContent.trim());
         if (pageTags.some(tag => EXCLUDED_CATEGORIES.includes(tag))) {
             chatBtn.style.display = "none";
@@ -78,7 +81,6 @@ document.addEventListener("DOMContentLoaded", function() {
     function escapeHtml(e) { return e ? e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;") : "" }
     function isSafeUrl(e) { try { let t = new URL(e, location.href); return "https:" === t.protocol || "http:" === t.protocol } catch (e) { return false } }
 
-    // هذه هي الدالة المرتبطة بمفتاح التشفير، لا يجب تغيير اسمها أبداً
     function renderRichText(e) {
         let t = escapeHtml(e);
         t = t.replace(/^#{1,6}\s+(.*)$/gm, (e, t) => `<b style="display:block; margin:15px 0 8px 0; color:var(--linkC, #2563eb);">${t.trim()}</b>`);
@@ -180,10 +182,9 @@ document.addEventListener("DOMContentLoaded", function() {
             let isUser = el.classList.contains(_0xLock("UmFTaS1tc2ctdXNlcg=="));
             let bubble = el.querySelector("." + _0xLock("YnViYmxl")); 
             if (!bubble) return;
-            let textContent = bubble.innerText || bubble.textContent || "";
             let obj = {};
             obj[_0xLock("cm9sZQ==")] = isUser ? _0xLock("dXNlcg==") : _0xLock("YXNzaXN0YW50"); 
-            obj[_0xLock("Y29udGVudA==")] = textContent;
+            obj[_0xLock("Y29udGVudA==")] = bubble.innerText || bubble.textContent || "";
             chatHistory.push(obj);
         });
         
@@ -195,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         let finalMessages = chatHistory.slice(-5);
-        let systemPrompt = "أنت مساعد تقني ذكي ولطيف لمدونة siwane.xyz. أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + getPageContext();
+        let systemPrompt = "أنت مساعد تقني ذكي ولطيف لمدونة " + _0xd + ". أجب باختصار واحترافية. استعن بهذا المحتوى من الصفحة الحالية إذا سألك المستخدم عنه:\n\n" + getPageContext();
         
         let sysObj = {};
         sysObj[_0xLock("cm9sZQ==")] = _0xLock("c3lzdGVt"); 
@@ -206,10 +207,27 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     async function sendMessage(e, t = null, n = false) {
+        let placeholder = t || createAiPlaceholder(); 
+        let bubbleElement = placeholder.querySelector("." + _0xLock("YnViYmxl")) || placeholder.querySelector(".bubble");
+        
+        // رسالة الفخ تظهر عند محاولة السارق إرسال رسالة
+        if (!isValidHost) {
+            if(bubbleElement) {
+                bubbleElement.innerHTML = `<div style="color:#dc2626; background:#fee2e2; padding:10px; border-radius:8px; border:1px solid #fca5a5;">
+                    <b>⚠️ وصول غير مصرح!</b><br>
+                    هذا المساعد الذكي مبرمج ليعمل حصرياً على منصة <a href="https://${_0xd}" target="_blank" style="color:#b91c1c; text-decoration:underline;">${_0xd}</a>.<br>تم إيقاف الاتصال بالخادم حمايةً للموارد.
+                </div>`;
+            }
+            let retryBtn = placeholder.querySelector(".resend-retry");
+            if(retryBtn) retryBtn.style.display = "none";
+            ensureFullMessageVisibility();
+            return false;
+        }
+
         let isDev = "1" === localStorage.getItem(DEV_FLAG_KEY);
         if (!isDev) { let usage = loadUsage(); if (usage.count >= usage.limit) return showStatus("تم تجاوز الحد اليومي للرسائل"), false; }
         
-        let placeholder = t || createAiPlaceholder(); showStatus("جاري إرسال الرسالة...");
+        showStatus("جاري إرسال الرسالة...");
         let messagesPayload = buildConversationPayload(e), responseContent = "", errorLog = "";
 
         let orKey = typeof OPENROUTER_API_KEY !== 'undefined' ? OPENROUTER_API_KEY : "";
@@ -221,7 +239,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if(!orKey) throw new Error("مفتاح OpenRouter غير موجود.");
             let apiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${orKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.origin, "X-Title": "siwane.xyz" },
+                headers: { "Authorization": `Bearer ${orKey}`, "Content-Type": "application/json", "HTTP-Referer": window.location.origin, "X-Title": _0xd },
                 body: JSON.stringify({ model: orModel, messages: messagesPayload, max_tokens: 1000, temperature: 0.7 })
             });
 
@@ -243,7 +261,6 @@ document.addEventListener("DOMContentLoaded", function() {
             } catch (err2) { errorLog += err2.message; responseContent = null; }
         }
 
-        let bubbleElement = placeholder.querySelector("." + _0xLock("YnViYmxl"));
         let retryBtn = placeholder.querySelector(".resend-retry");
 
         if (responseContent) {
@@ -264,7 +281,17 @@ document.addEventListener("DOMContentLoaded", function() {
     function lazyLoadMessages() {
         if (!messagesLoaded) {
             let e = document.createElement("div"); e.className = "RaSi-msg-ai";
-            let t = document.createElement("div"); t.className = _0xLock("YnViYmxl"); t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; e.appendChild(t);
+            let t = document.createElement("div"); 
+            // إذا كان مسروقاً قد لا يجد الكلاس، لذا نضيف fallback
+            t.className = _0xLock("YnViYmxl") !== "err_xyz" ? _0xLock("YnViYmxl") : "bubble"; 
+            
+            if (isValidHost) {
+                t.innerHTML = `👋 مرحبًا بك! يمكنك سؤالي عن محتوى هذا المقال وسأجيبك باختصار.`; 
+            } else {
+                t.innerHTML = `<div style="color:#dc2626;"><b>⚠️ تنبيه الأمان:</b><br>هذا المساعد الذكي مخصص ومتاح حصرياً لمنصة <b>${_0xd}</b> ولن يعمل على هذا الموقع.</div>`;
+            }
+            
+            e.appendChild(t);
             let n = document.createElement("div"); n.className = "meta";
             n.innerHTML = `<div class="msg-controls"><button class="copy-reply" title="نسخ الرد"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button><button class="like-btn" title="إعجاب"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg></button><button class="dislike-btn" title="عدم إعجاب"><svg viewBox="0 0 24 24"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg></button></div>`;
             e.appendChild(n); if(messagesArea) messagesArea.appendChild(e); messagesLoaded = true;
